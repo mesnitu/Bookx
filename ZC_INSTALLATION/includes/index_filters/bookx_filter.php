@@ -19,7 +19,7 @@
  */
 
 /**
- * index filter for the book x product type
+ * index filter for the bookx product type
  * show the products of a specified bookx attribute
  */
 

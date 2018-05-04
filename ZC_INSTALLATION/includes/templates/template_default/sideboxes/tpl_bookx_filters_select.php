@@ -154,8 +154,8 @@
   if ($show_link_genres_list && !$show_genre_filter) {
       $content .= '<div class="bookx_filter_sidebox_link"><a href="' . zen_href_link(FILENAME_BOOKX_GENRES_LIST) . '">' . LABEL_LIST_ALL_GENRES . '</a></div>';
   }
-  
-  if (ALLOW_PRODUCT_BOOKX_FILTER_MULTIPLE && 1 < $active_bx_filter_ids['active_filter_count']) {
+  // for multiple filter select it resets if value is one also
+  if (ALLOW_PRODUCT_BOOKX_FILTER_MULTIPLE && 1 <= $active_bx_filter_ids['active_filter_count']) {
       $content .= '<div class="bookx_filter_sidebox_link"><a href="' . zen_href_link(FILENAME_DEFAULT) . '">' . BOOKX_LINK_TEXT_RESET_ALL_FILTERS . '</a></div>';
   }
 
