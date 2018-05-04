@@ -112,7 +112,7 @@ if (bookx_get_show_product_switch ( 'author_type', 'SHOW_', '_FILTER' )) {
         if (!$active_bx_filter_ids['author_type_id']) {
             $bookx_author_types_array [] = array (
                 'id' => '',
-                'text' => PULL_DOWN_ALL
+                'text' => PULL_DOWN_ALL_AUTHOR_TYPES
             );
         } else {
             $bookx_author_types_array [] = array (
