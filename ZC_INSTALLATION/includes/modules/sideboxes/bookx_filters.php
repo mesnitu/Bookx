@@ -54,8 +54,28 @@ $show_link_series_list = false;
 
 $active_bx_filter_ids = bookx_get_active_filter_ids();
 
-$extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
+/** Feature for multiple filters
+ * 
+ * This stops the propagation of urls and prevents displaying irrelevant results
+ * when the results are only 1. ie: Author as only one publisher. No need to navidate to publisher to see the same book, etc.
+ * 
+ * This could be extended on sidebox template to only show the select form if there is something to show.
+ */
 
+$cacheit = false; // add query option to use cache if zc cache is enable
+
+if ($active_bx_filter_ids['active_filter_count'] == 0) { // no need to cache every query, but the main one
+    $cacheit = true;
+}
+// @TODO this goes to some configuration, or get the value from some configuration already present 
+$show_only_stocked = true;
+
+if ($show_only_stocked == true) {
+        $only_stocked = "AND p.products_status !=0 ";
+}
+
+
+$extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
 if(!defined('BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN')) {
 	//@todo: remove this once db installation is finalised
@@ -81,11 +101,11 @@ if (bookx_get_show_product_switch ( 'author_type', 'SHOW_', '_FILTER' )) {
                                 . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('author_type'))
     		                   .' ORDER by bat.type_sort_order, batd.type_description';
 
-    $bookx_author_types = $db->Execute ( $bookx_filter_values_query );
-
-    if ($bookx_author_types->RecordCount () > 0) {
+    $bookx_author_types = $db->Execute ($bookx_filter_values_query);
+    
+    if ($bookx_author_types->RecordCount() > 0) {
         $author_type_filter_select_disabled = '';
-        $number_of_rows = $bookx_author_types->RecordCount () + 1;
+        $number_of_rows = $bookx_author_types->RecordCount() + 1;
 
         // Display a list
         $bookx_author_types_array = array ();
@@ -101,7 +121,7 @@ if (bookx_get_show_product_switch ( 'author_type', 'SHOW_', '_FILTER' )) {
             );
         }
 
-        while ( ! $bookx_author_types->EOF ) {
+        while (!$bookx_author_types->EOF ) {
             $bookx_author_type_name = ((strlen ( $bookx_author_types->fields ['type_description'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_author_types->fields ['type_description'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_author_types->fields ['type_description']);
             $bookx_author_types_array [] = array (
                 'id' => $bookx_author_types->fields ['bookx_author_type_id'],
@@ -132,48 +152,56 @@ if (bookx_get_show_product_switch ( 'author', 'SHOW_', '_FILTER' )) {
 	    $author_type_filter_extra_where = ' AND batp.bookx_author_type_id ="' . $active_bx_filter_ids['author_type_id'] . '" '; 
 	}
 	
-	$bookx_filter_values_query = 'SELECT DISTINCT ba.bookx_author_id, ba.author_name
-		                          FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba 
-		                          LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' batp ON batp.bookx_author_id = ba.bookx_author_id '	                           
-		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = batp.products_id ' : '')
+	$bookx_filter_values_query = 'SELECT DISTINCT ba.bookx_author_id, ba.author_name, p.products_status                         							FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba 
+		                        LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' batp ON batp.bookx_author_id = ba.bookx_author_id 
+                                LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = batp.products_id '
+              
+		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = batp.products_id ' : '') 
+                                  
 		                        . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('author', 'author_type'))
-                                . ' WHERE 1 ' . $author_type_filter_extra_where . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('author', 'author_type'))
+                                . ' WHERE batp.products_id = p.products_id ' . $only_stocked  . $author_type_filter_extra_where . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('author', 'author_type'))
 		                       .' ORDER by ba.author_sort_order, ba.author_name';
-
-	$bookx_authors = $db->Execute ( $bookx_filter_values_query );
-
-	if ($bookx_authors->RecordCount () > 0) {
-	    $author_filter_select_disabled = '';
-		$number_of_rows = $bookx_authors->RecordCount () + 1;
-
-		// Display a list
-		$bookx_authors_array = array ();
-		if (!$active_bx_filter_ids['author_id']) {
-			$bookx_authors_array [] = array (
+  
+	$bookx_authors = $db->Execute($bookx_filter_values_query , false, $cacheit, 3000);
+  
+        $bookx_authors_array = array ();
+        if ($bookx_authors->RecordCount() == 1) { // no need to generate another link
+           
+        	$author_filter_select_disabled = ' disabled';
+        
+            $bookx_authors_array [] = array (
+					'id' => $bookx_authors->fields ['bookx_author_id'],
+					'text' => $bookx_authors->fields ['author_name']
+			);    
+        } elseif ($bookx_authors->RecordCount() > 1) {
+        
+	    	$author_filter_select_disabled = '';
+			$number_of_rows = $bookx_authors->RecordCount() + 1;
+			// Display a list
+			if (!$active_bx_filter_ids['author_id']) {
+				$bookx_authors_array [] = array (
 					'id' => '',
 					'text' => PULL_DOWN_ALL_AUTHORS
 			);
-		} else {
-			$bookx_authors_array [] = array (
+			} else {
+				$bookx_authors_array [] = array (
 					'id' => '',
 					'text' => PULL_DOWN_BOOKX_RESET
-			);
-		}
-
-		if ($show_link_author_list) {
-			$bookx_authors_array[] =  array(
+				);
+			}
+			if ($show_link_author_list) {
+				$bookx_authors_array[] =  array(
 											'id' => 'all',
 											'text' => LABEL_LIST_ALL_AUTHORS
 											);
-		}
+			}
 
-		while ( ! $bookx_authors->EOF ) {
-			$bookx_author_name = ((strlen ( $bookx_authors->fields ['author_name'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_authors->fields ['author_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_authors->fields ['author_name']);
-			$bookx_authors_array [] = array (
+			while (!$bookx_authors->EOF ) {
+            	$bookx_author_name = ((strlen ( $bookx_authors->fields ['author_name'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_authors->fields ['author_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_authors->fields ['author_name']);
+				$bookx_authors_array [] = array (
 					'id' => $bookx_authors->fields ['bookx_author_id'],
 					'text' => $bookx_author_name
-			);
-
+			);  
 			$bookx_authors->MoveNext ();
 		}
 	} else {
@@ -182,56 +210,68 @@ if (bookx_get_show_product_switch ( 'author', 'SHOW_', '_FILTER' )) {
 	}
 }
 
-
-
 if (bookx_get_show_product_switch ( 'publisher_list', 'SHOW_', '_LINK' )) {
     $show_link_publisher_list = true;
 }
 
 if (bookx_get_show_product_switch ( 'publisher', 'SHOW_', '_FILTER' )) {
 	$show_publisher_filter = true;
+    $bookx_publishers_array = array ();
 
-	$bookx_filter_values_query = 'SELECT DISTINCT bp.bookx_publisher_id, bp.publisher_name
-		                          FROM ' . TABLE_PRODUCT_BOOKX_PUBLISHERS . ' bp '
+	$bookx_filter_values_query = 'SELECT DISTINCT bp.bookx_publisher_id, bp.publisher_name, bep.bookx_publisher_id as publisher_books
+		                        FROM ' . TABLE_PRODUCT_BOOKX_PUBLISHERS . ' bp 
+								LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' bep ON bp.bookx_publisher_id = bep.bookx_publisher_id 
+                                LEFT JOIN '.TABLE_PRODUCTS.' p on bep.products_id = p.products_id  '
 		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_publisher_id = bp.bookx_publisher_id ' : '')
 		                        . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('publisher'))
-                              . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('publisher'))
-		                      . ' ORDER by bp.publisher_sort_order, bp.publisher_name';
-
-	$bookx_publishers = $db->Execute ( $bookx_filter_values_query );
-
-	if ($bookx_publishers->RecordCount () > 0) {
-	    $publisher_filter_select_disabled = '';
-		$number_of_rows = $bookx_publishers->RecordCount () + 1;
-
-		// Display a list
-		$bookx_publishers_array = array ();
-		if (! $active_bx_filter_ids['publisher_id']) {
-			$bookx_publishers_array [] = array (
-					'id' => '',
-					'text' => PULL_DOWN_ALL_PUBLISHERS
+                              . ' WHERE bep.products_id = p.products_id ' . $only_stocked . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('publisher'))
+							  . ' ORDER by bp.publisher_sort_order, bp.publisher_name'; 
+							  
+	$bookx_publishers = $db->Execute($bookx_filter_values_query, false, $cacheit, 3000);
+	
+    if ($bookx_publishers->RecordCount() == 1) { // no need to generate another link
+        $publisher_filter_select_disabled = ' disabled';
+        $bookx_publishers_array [] = array (
+			'id' => $bookx_publishers->fields['bookx_publisher_id'],
+			'text' => $bookx_publishers->fields['publisher_name']
 			);
+
+    } elseif ($bookx_publishers->RecordCount() > 1 ) {
+        
+	    $publisher_filter_select_disabled = '';
+        // Display a list
+        $number_of_rows = $bookx_publishers->RecordCount() + 1;  
+        
+        if (!$active_bx_filter_ids['publisher_id']) {
+			$bookx_publishers_array [] = array (
+				'id' => '',
+				'text' => PULL_DOWN_ALL_PUBLISHERS
+				);
 		} else {
 			$bookx_publishers_array [] = array (
-					'id' => '',
-					'text' => PULL_DOWN_BOOKX_RESET
+				'id' => '',
+				'text' => PULL_DOWN_BOOKX_RESET
 			);
 		}
 		
-		if ($show_link_publisher_list) {
+        if ($show_link_publisher_list) {
 		    $bookx_publishers_array[] =  array(
 		        'id' => 'all',
 		        'text' => LABEL_LIST_ALL_PUBLISHERS
 		    );
 		}
+ 
+		while (!$bookx_publishers->EOF ) {
+			
+			if ($bookx_publishers->fields ['publisher_books'] !='') {
 
-		while ( ! $bookx_publishers->EOF ) {
-			$bookx_publisher_name = ((strlen ( $bookx_publishers->fields ['publisher_name'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_publishers->fields ['publisher_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_publishers->fields ['publisher_name']);
-			$bookx_publishers_array [] = array (
-					'id' => $bookx_publishers->fields ['bookx_publisher_id'],
+				$bookx_publisher_name = ((strlen ( $bookx_publishers->fields ['publisher_name'] ) > (int) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_publishers->fields ['publisher_name'], 0, (int) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_publishers->fields ['publisher_name']);
+			
+				$bookx_publishers_array [] = array (
+					'id' => $bookx_publishers->fields['bookx_publisher_id'],
 					'text' => $bookx_publisher_name
 			);
-
+            }
 			$bookx_publishers->MoveNext ();
 		}
 	} else {
@@ -240,7 +280,6 @@ if (bookx_get_show_product_switch ( 'publisher', 'SHOW_', '_FILTER' )) {
 	}
 }
 
-
 if (bookx_get_show_product_switch ( 'imprint_list', 'SHOW_', '_LINK' )) {
     $show_link_imprint_list = true;
 }
@@ -248,6 +287,7 @@ if (bookx_get_show_product_switch ( 'imprint_list', 'SHOW_', '_LINK' )) {
 if (bookx_get_show_product_switch ( 'imprint', 'SHOW_', '_FILTER' )) {
 	$show_imprint_filter = true;
 	
+    
 	$bookx_filter_values_query = 'SELECT DISTINCT bi.bookx_imprint_id, bi.imprint_name
 		                          FROM ' . TABLE_PRODUCT_BOOKX_IMPRINTS . ' bi '
 		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_imprint_id = bi.bookx_imprint_id ' : '')
@@ -256,17 +296,17 @@ if (bookx_get_show_product_switch ( 'imprint', 'SHOW_', '_FILTER' )) {
 		                       .' ORDER by bi.imprint_sort_order, bi.imprint_name ';
 
 	$bookx_imprint = $db->Execute ( $bookx_filter_values_query );
-
-	if ($bookx_imprint->RecordCount () > 0) {
+	
+	if ($bookx_imprint->RecordCount() > 0) {
 	    $imprint_filter_select_disabled = '';
-		$number_of_rows = $bookx_imprint->RecordCount () + 1;
+		$number_of_rows = $bookx_imprint->RecordCount() + 1;
 
 		// Display a list
 		$bookx_imprints_array = array ();
 		if (! $active_bx_filter_ids['imprint_id']) {
 			$bookx_imprints_array [] = array (
 					'id' => '',
-					'text' => PULL_DOWN_ALL_IMPRINTS
+					'text' => PULL_DOWN_ALL
 			);
 		} else {
 			$bookx_imprints_array [] = array (
@@ -304,32 +344,44 @@ if (bookx_get_show_product_switch ( 'series_list', 'SHOW_', '_LINK' )) {
 
 if (bookx_get_show_product_switch ( 'series', 'SHOW_', '_FILTER' )) {
 	$show_series_filter = true;
-	
-	$bookx_filter_values_query = 'SELECT DISTINCT bs.bookx_series_id, bsd.series_name
-		                          FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' bs
-		                          LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' bsd ON bs.bookx_series_id = bsd.bookx_series_id AND bsd.languages_id = "' . (int)$_SESSION['languages_id'] . '"'
+    
+    
+    $bookx_filter_values_query = 'SELECT DISTINCT bs.bookx_series_id, bsd.series_name, bxe.bookx_series_id as series_books, p.products_status
+		                        FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' bs
+                                LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' bxe ON bs.bookx_series_id = bxe.bookx_series_id   
+		                        LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' bsd ON bs.bookx_series_id = bsd.bookx_series_id AND bsd.languages_id = "' . (int)$_SESSION['languages_id'] . '"
+                                LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = bxe.products_id '
 		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_series_id = bs.bookx_series_id ' : '')
 		                        . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('series'))
-                              . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('series'))
-		                      . ' ORDER by bs.series_sort_order, bsd.series_name';
+                              	. ' WHERE  1 ' . $only_stocked . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('series'))
+		                      	. ' ORDER by bs.series_sort_order, bsd.series_name';
 
-	$bookx_series = $db->Execute ( $bookx_filter_values_query );
+	$bookx_series = $db->Execute ($bookx_filter_values_query, false, $cacheit, 3000);
+       
+	if ($bookx_series->RecordCount() == 1 ) {
 
-	if ($bookx_series->RecordCount () > 0) {
-	    $series_filter_select_disabled = '';
-		$number_of_rows = $bookx_series->RecordCount () + 1;
-
-		// Display a list
-		$bookx_series_array = array ();
-		if (! $active_bx_filter_ids['series_id']) {
+	    $series_filter_select_disabled = ' disabled';
+            $bookx_series_array = array ( array (
+					'id' => $bookx_series->fields ['bookx_series_id'],
+					'text' => $bookx_series->fields ['series_name']
+			));
+                
+        } elseif ($bookx_series->RecordCount() > 1) {
+        	$series_filter_select_disabled = '';
+    
+			$number_of_rows = $bookx_series->RecordCount() + 1;
+			// Display a list
+			$bookx_series_array = array();
+       
+			if (!$active_bx_filter_ids['series_id']) {
 			$bookx_series_array [] = array (
-					'id' => '',
-					'text' => PULL_DOWN_ALL_SERIES
+				'id' => '',
+				'text' => PULL_DOWN_ALL_SERIES
 			);
-		} else {
-			$bookx_series_array [] = array (
-					'id' => '',
-					'text' => PULL_DOWN_BOOKX_RESET
+			} else {
+				$bookx_series_array [] = array (
+				'id' => '',
+				'text' => PULL_DOWN_BOOKX_RESET
 			);
 		}
 
@@ -339,22 +391,26 @@ if (bookx_get_show_product_switch ( 'series', 'SHOW_', '_FILTER' )) {
 					'text' => LABEL_LIST_ALL_SERIES
 			);
 		}
-
-		while ( ! $bookx_series->EOF ) {
-			$bookx_series_name = ((strlen ( $bookx_series->fields ['series_name'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_series->fields ['series_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_series->fields ['series_name']);
+ 
+		while (!$bookx_series->EOF ) {
+               
+                $bookx_series_name = ((strlen($bookx_series->fields ['series_name']) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_series->fields ['series_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_series->fields ['series_name']);
 			$bookx_series_array [] = array (
 					'id' => $bookx_series->fields ['bookx_series_id'],
 					'text' => $bookx_series_name
 			);
-
+			
 			$bookx_series->MoveNext ();
 		}
 	} else {
-		$bookx_series_array = array(array ('id' => '', 'text' => PULL_DOWN_TEXT_NO_SERIES_TO_DISPLAY));
-		$show_link_series_list = false;
-	}
+        
+		$bookx_series_array = array(array(
+									'id' => '', 
+                                    'text' => PULL_DOWN_TEXT_NO_SERIES_TO_DISPLAY)
+                                    	);
+		$show_link_series_list = false;    
+    }
 }
-
 
 if (bookx_get_show_product_switch ( 'genres_list', 'SHOW_', '_LINK' )) {
     $show_link_genres_list = true;
@@ -363,23 +419,39 @@ if (bookx_get_show_product_switch ( 'genres_list', 'SHOW_', '_LINK' )) {
 if (bookx_get_show_product_switch ( 'genre', 'SHOW_', '_FILTER' )) {
 	$show_genre_filter = true;
 	
-	$bookx_filter_values_query = 'SELECT DISTINCT bg.bookx_genre_id, bgd.genre_description AS genre_name
+	$bookx_filter_values_query = 'SELECT DISTINCT bg.bookx_genre_id, bgd.genre_description AS genre_name, p.products_status
 		                          FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg
-		                          LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON bg.bookx_genre_id = bgd.bookx_genre_id AND bgd.languages_id = "' . (int)$_SESSION['languages_id'] . '"'
-		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' bgtp ON bgtp.bookx_genre_id = bg.bookx_genre_id ' . $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = bgtp.products_id ' : '')
+		                          LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON bg.bookx_genre_id = bgd.bookx_genre_id AND bgd.languages_id = "' . (int)$_SESSION['languages_id'] . '"
+                                   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' bgtp ON bgtp.bookx_genre_id = bg.bookx_genre_id
+                                   LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = bgtp.products_id '
+		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? ' ' . $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = bgtp.products_id ' : '')
 		                        . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('genre'))
-                                . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('genre'))
+                                . ' WHERE 1 ' . $only_stocked . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('genre'))
 		                       .' ORDER by bg.genre_sort_order, bgd.genre_description';
+    
 
-	$bookx_genres = $db->Execute ( $bookx_filter_values_query );
+   
+	$bookx_genres = $db->Execute ( $bookx_filter_values_query, false, $cacheit, 3000);
+       
+   
+	if ($bookx_genres->RecordCount() == 1) {
+        
+	    $genre_filter_select_disabled = ' disabled';
+            
+            $bookx_genres_array = array(array (
+                'id' => $bookx_genres->fields ['bookx_genre_id'],
+                'text' => $bookx_genres->fields ['genre_name']
+                ));
+        }
+		
+       elseif ($bookx_genres->RecordCount() > 1) {
 
-	if ($bookx_genres->RecordCount () > 0) {
-	    $genre_filter_select_disabled = '';
-		$number_of_rows = $bookx_genres->RecordCount () + 1;
+        $number_of_rows = $bookx_genres->RecordCount() + 1;
 
+        $genre_filter_select_disabled = '';
 		// Display a list
 		$bookx_genres_array = array ();
-		if (! $active_bx_filter_ids['genre_id']) {
+		if (!$active_bx_filter_ids['genre_id']) {
 			$bookx_genres_array [] = array (
 					'id' => '',
 					'text' => PULL_DOWN_ALL_GENRES
@@ -398,7 +470,7 @@ if (bookx_get_show_product_switch ( 'genre', 'SHOW_', '_FILTER' )) {
 		    );
 		}
 
-		while ( ! $bookx_genres->EOF ) {
+		while (!$bookx_genres->EOF) {
 			$bookx_genre_name = ((strlen ( $bookx_genres->fields ['genre_name'] ) > ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN) ? substr ( $bookx_genres->fields ['genre_name'], 0, ( int ) BOOKX_MAX_DISPLAY_FILTER_DROPDOWN_LEN ) . '..' : $bookx_genres->fields ['genre_name']);
 			$bookx_genres_array [] = array (
 					'id' => $bookx_genres->fields ['bookx_genre_id'],
@@ -415,6 +487,6 @@ if (bookx_get_show_product_switch ( 'genre', 'SHOW_', '_FILTER' )) {
 
 require($template->get_template_dir('tpl_bookx_filters_select.php',DIR_WS_TEMPLATE, $current_page_base,'sideboxes'). '/tpl_bookx_filters_select.php');
 
-$title = '<label>' . BOX_HEADING_BOOKX_FILTERS . '</label>';
+$title =  BOX_HEADING_BOOKX_FILTERS ;
 $title_link = false;
 require($template->get_template_dir($column_box_default, DIR_WS_TEMPLATE, $current_page_base,'common') . '/' . $column_box_default);
