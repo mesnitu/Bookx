@@ -1037,7 +1037,7 @@ EOT;
 	                 author_image VARCHAR(64) DEFAULT NULL,
 	               	 author_image_copyright VARCHAR(64) DEFAULT NULL,
 	               	 author_default_type int(11) DEFAULT '0',
-	                 author_sort_order int(11) int(11) DEFAULT '0',
+	                 author_sort_order int(11) DEFAULT '0',
 	               	 author_url VARCHAR(255) DEFAULT NULL,
 	               	 date_added datetime DEFAULT NULL,
 	               	 last_modified datetime DEFAULT NULL,
