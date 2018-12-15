@@ -3,15 +3,15 @@
 windows() { [[ -n "$WINDIR" ]]; }
 
 # version BookX 0.9.5 BETA
-src_dir=/FULL_PATH_TO_YOUR_BOOKX_INSTALLATION/bookX/ZC_INSTALLATION
-dst_dir=/FULL_PATH_TO_YOUR_ZENCART_INSTALLATION/zen-cart
-admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
-tpl_dir_name=NAME_OF_YOUR_TEMPLATE
+#src_dir=/FULL_PATH_TO_YOUR_BOOKX_INSTALLATION/bookX/ZC_INSTALLATION
+#dst_dir=/FULL_PATH_TO_YOUR_ZENCART_INSTALLATION/zen-cart
+#admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
+#tpl_dir_name=NAME_OF_YOUR_TEMPLATE
 
-#src_dir="c:\xampp\htdocs\vhosts\zenbookx.local\bookx-zc155f\ZC_INSTALLATION"
-#dst_dir="c:\xampp\htdocs\vhosts\zenbookx.local"
-#admin_dir_name="zenadmin"
-#tpl_dir_name="responsive_classic"
+src_dir="c:\xampp\htdocs\vhosts\zenbookx.local\bookx-zc155f\ZC_INSTALLATION"
+dst_dir="c:\xampp\htdocs\vhosts\zenbookx.local"
+admin_dir_name="zenadmin"
+tpl_dir_name="responsive_classic"
 
 admin_path=${dst_dir}\\${admin_dir_name}
 echo $admin_path
@@ -71,7 +71,7 @@ admin_files=(
 
 #files in catalog
 catalog_files=(
-    includes/auto_loaders/config.bookx
+    includes/auto_loaders/config.bookx.php
     includes/classes/observers/class.bookx_observers.php
     includes/extra_configures/bookx_defines_and_configures.php
     includes/extra_datafiles/bookx_type_database_names.php
