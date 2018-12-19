@@ -21,29 +21,36 @@
 
 class bookxAdminObserver extends base {
 
-	function bookxAdminObserver() {
-	   	global $zco_notifier;
+  function bookxAdminObserver() {
+    global $zco_notifier;
 
-	   	$zco_notifier->attach($this, array('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT'
-	   									  /*,
-	   									   'NOTIFIER_CART_ADD_CART_END'
-	   									   */
-	   									  )
-	   						  );
+    $zco_notifier->attach(
+            $this, array('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT'/* ,
+          'NOTIFIER_CART_ADD_CART_END' */
+        , 'NOTIFY_BEGIN_ADMIN_PRODUCTS'
+            )
+    );
+  }
 
-   }
+  function update(&$callingClass, $notifier, &$paramsArray) {
+    switch ($notifier) {
+      case 'NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT':
+        $this->insert_bookx_into_category_listing_query($callingClass, $notifier, $paramsArray);
+        break;
+      case 'NOTIFY_BEGIN_ADMIN_PRODUCTS':
+        $this->bookx_notify_begin_admin_products($callingClass, $notifier, $paramsArray);
+        break;
+    }
+  }
 
-	function update(&$callingClass, $notifier, &$paramsArray) {
-		switch ($notifier) {
-			case 'NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT':
-				$this->insert_bookx_into_category_listing_query($callingClass, $notifier, $paramsArray);
-			break;
-
-
-		}
-	}
-
-	/**
+  function bookx_notify_begin_admin_products(&$class, $eventID, $paramsArray) {
+    global $type_handler;
+    // @TODO: this is just a quick fix to have language files in collect_info. Not sure yet how zc is pulling lang files
+    if ($type_handler == 'product_bookx.php') {
+      require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . FILENAME_BOOKX_PRODUCT . '.php');
+    }
+  }
+  /**
 	 * Thsi will alter the category listing query so it lists some BookX-specific attributes, such as subtitle and ISBN
 	 */
 
