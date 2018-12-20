@@ -55,22 +55,11 @@ while (!$config->EOF) {
 }
 
 /* @var $db queryFactory */
-$parameters = array('products_name' => '',
+$parameters = array(
+    'products_name' => '',
     'products_description' => '',
     'products_url' => '',
     'products_id' => '',
-    'products_subtitle' => '',
-    'bookx_publisher_id' => '',
-    'bookx_series_id' => '',
-    'bookx_imprint_id' => '',
-    'bookx_binding_id' => '',
-    'bookx_condition_id' => '',
-    'publishing_date' => '',
-    'pages' => '',
-    'volume' => '',
-    'size' => '',
-    'isbn' => '',
-    'isbn_display' => '',
     'products_quantity' => '0',
     'products_model' => '',
     'products_image' => '',
@@ -96,21 +85,27 @@ $parameters = array('products_name' => '',
     'products_discount_type' => '0',
     'products_discount_type_from' => '0',
     'products_price_sorter' => '0',
-    'master_categories_id' => ''
+    'master_categories_id' => '',
+    'products_subtitle' => '',
+    'bookx_publisher_id' => '',
+    'bookx_series_id' => '',
+    'bookx_imprint_id' => '',
+    'bookx_binding_id' => '',
+    'bookx_condition_id' => '',
+    'publishing_date' => '',
+    'pages' => '',
+    'volume' => '',
+    'size' => '',
+    'isbn' => '',
+    'isbn_display' => '',
 );
 
 $pInfo = new objectInfo($parameters);
 
-if (isset($_GET['pID']) && !empty($_GET['pID'])) {
-  $pID = (int) $_GET['pID'];
-} else {
-  $pID = null;
-}
-
 $product_assigned_authors = array();
 $product_assigned_genres = array();
 
-if ($pID && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
+if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
   $sql = 'SELECT pd.products_name, pd.products_description, pd.products_url,
                   p.products_id, p.products_quantity, p.products_model, p.manufacturers_id,
                   p.products_image, p.products_price, p.products_virtual, p.products_weight,
@@ -137,7 +132,7 @@ if ($pID && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
                           WHERE p.products_id = "' . $pID . '"';
   $product = $db->Execute($sql);
 
-  $pInfo->objectInfo($product->fields);
+  $pInfo->updateObjectInfo($product->fields);
 
   $assigned_authors = $db->Execute('SELECT * FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' WHERE products_id = ' . $pID);
 
@@ -154,7 +149,7 @@ if ($pID && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
     $assigned_genres->MoveNext();
   }
 } elseif (zen_not_null($_POST)) {
-  $pInfo->objectInfo($_POST);
+  $pInfo->updateObjectInfo($_POST);
   $products_name = isset($_POST['products_name']) ? $_POST['products_name'] : '';
   $products_description = isset($_POST['products_description']) ? $_POST['products_description'] : '';
   $products_url = isset($_POST['products_url']) ? $_POST['products_url'] : '';
@@ -191,13 +186,18 @@ $incl_dir->close();
   $pub_date_month_has_no_day = 'false';
   } */
 
-$authors_array = array(array('id' => '', 'text' => TEXT_NONE));
+$authors_array = array(
+    array('id' => '', 
+          'text' => TEXT_NONE)
+    );
 $authors = $db->Execute('SELECT bookx_author_id, author_name, author_default_type
                          FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' order by author_sort_order, author_name');
 while (!$authors->EOF) {
-  $authors_array[] = array('id' => $authors->fields['bookx_author_id'],
+  $authors_array[] = array(
+      'id' => $authors->fields['bookx_author_id'],
       'text' => $authors->fields['author_name'],
-      'default_type' => $authors->fields['author_default_type']);
+      'default_type' => $authors->fields['author_default_type']
+  );
   $authors->MoveNext();
 }
 
@@ -285,13 +285,17 @@ while (!$condition->EOF) {
   $condition->MoveNext();
 }
 
-$manufacturers_array = array(array('id' => '', 'text' => TEXT_NONE));
-$manufacturers = $db->Execute("select manufacturers_id, manufacturers_name
-                               from " . TABLE_MANUFACTURERS . " order by manufacturers_name");
-while (!$manufacturers->EOF) {
-  $manufacturers_array[] = array('id' => $manufacturers->fields['manufacturers_id'],
-      'text' => $manufacturers->fields['manufacturers_name']);
-  $manufacturers->MoveNext();
+$manufacturers_array = array(array(
+    'id' => '',
+    'text' => TEXT_NONE));
+$manufacturers = $db->Execute("SELECT manufacturers_id, manufacturers_name
+                               FROM " . TABLE_MANUFACTURERS . "
+                               ORDER BY manufacturers_name");
+foreach ($manufacturers as $manufacturer) {
+  $manufacturers_array[] = array(
+    'id' => $manufacturer['manufacturers_id'],
+    'text' => $manufacturer['manufacturers_name']
+  );
 }
 
 $tax_class_array = array(array(
@@ -308,27 +312,14 @@ foreach ($tax_class as $item) {
 
 $languages = zen_get_languages();
 
-if (!isset($pInfo->products_status))
-  $pInfo->products_status = '1';
-switch ($pInfo->products_status) {
-  case '0': $in_status = false;
-    $out_status = true;
-    break;
-  case '1':
-  default: $in_status = true;
-    $out_status = false;
-    break;
-}
 // set to out of stock if categories_status is off and new product or existing products_status is off
-if (zen_get_categories_status($current_category_id) == '0' and $pInfo->products_status != '1') {
+if (zen_get_categories_status($current_category_id) == 0 && $pInfo->products_status != 1) {
   $pInfo->products_status = 0;
-  $in_status = false;
-  $out_status = true;
 }
 
 // Virtual Products
-//@TODO check this line 
 if (!isset($pInfo->products_virtual))
+  //@TODO check this line 
   $pInfo->products_virtual = DEFAULT_PRODUCT_MUSIC_PRODUCTS_VIRTUAL;
 switch ($pInfo->products_virtual) {
   case '0': $is_virtual = false;
@@ -440,19 +431,13 @@ $off_image_delete = true;
     .bookx-data {
         background-color: #ffdb94;
     }
-
     .bookx_article_status_explain {
-        margin-left: 15px;
+        padding: 1rem;
         font-weight: bold;
     }
     -->
 </style>
-<script type="text/javascript" src="includes/javascript/spiffyCal/spiffyCal_v2_1.js"></script>
-    <script type="text/javascript"><!--
-      var dateAvailable = new ctlSpiffyCalendarBox("dateAvailable", "new_product", "products_date_available", "btnDate1", "<?php echo $pInfo->products_date_available; ?>", scBTNMODE_CUSTOMBLU      E);
-      var datePublished = new ctlSpiffyCalendarBox("datePublished", "new_product", "publishing_date", "btnDate2", "<?php echo $pInfo->publishing_date; ?>", scBTNMODE_CUSTOMBLUE);
 
-//--></script>
 <script type="text/javascript">
   var tax_rates = new Array();
             <?php
@@ -494,9 +479,8 @@ $off_image_delete = true;
       var netValue = document.forms["new_product"].products_price_gross.value;
 
       if (taxRate > 0) {
-          netValue = netValue / ((taxRate /            100) + 1            );
+          netValue = netValue / ((taxRate / 100) + 1);
             }
-
             document.forms["new_product"].products_price.value = doRound(netValue, 4);
   }
 
@@ -549,7 +533,7 @@ $off_image_delete = true;
       document.getElementById("author_pulldowns").appendChild(authorLabel);
       document.getElementById("author_pulldowns").appendChild(newAuthorSelect);
 
-            <?php if (1 < count($author_types_array)) { //**** don't even include this code if there are zero author typed defined'?>
+      <?php if (1 < count($author_types_array)) { //**** don't even include this code if there are zero author typed defined'?>
         var newAuthorTypeSelect = document.getElementById("blank_bookx_author_type_id").cloneNode(true);
 
         if (newAuthorTypeSelect.options.length > 1) {
@@ -593,19 +577,13 @@ $off_image_delete = true;
       var isbnOrig = document.forms["new_product"].isbn.value;
       if (isbnOrig != "") {
           var isbnTXT = isbnOrig;
-
           while (isbnTXT.lastIndexOf("-") > 0) {
               isbnTXT = isbnTXT.replace(/-/, "");
           }
-
           isbnTXT = isbnTXT.substring(0, 13);
-
           document.forms["new_product"].isbn.value = isbnTXT;
-
           var checkDigit = isbnTXT.charAt(12);
-
           checkDigit = parseInt(checkDigit);
-
           var calculatedCheckDigit = 10 - ((parseInt(isbnTXT.charAt(0)) + parseInt(isbnTXT.charAt(1)) * 3 + parseInt(isbnTXT.charAt(2)) + parseInt(isbnTXT.charAt(3)) * 3 + parseInt(isbnTXT.charAt(4)) + parseInt(isbnTXT.charAt(5)) * 3 + parseInt(isbnTXT.charAt(6)) + parseInt(isbnTXT.charAt(7)) * 3 + parseInt(isbnTXT.charAt(8)) + parseInt(isbnTXT.charAt(9)) * 3 + parseInt(isbnTXT.charAt(10)) + parseInt(isbnTXT.charAt(11)) * 3) % 10);
 
           if (calculatedCheckDigit == "10") {
@@ -613,7 +591,7 @@ $off_image_delete = true;
           }
 
           if (calculatedCheckDigit != checkDigit) {
-              alert(<?php echo '"' . sprintf(TEXT_JAVASCRIPT_ISBN_WRONG_CHECKDIGIT, ' + isbnTXT + ', '+ calculatedCheckDigit +') . '"'; ?>);
+              document.getElementById("isbn_display").innerHTML = <?php echo '"<span class=\"alert\">' . sprintf(TEXT_JAVASCRIPT_ISBN_WRONG_CHECKDIGIT, ' + isbnTXT + ', '+ calculatedCheckDigit +') . '</span>"'; ?>;
           }
 
           if (13 == isbnTXT.length) {
@@ -705,6 +683,9 @@ $off_image_delete = true;
       return [year, month, day].join('-');
   }
 
+function log(log) {
+  console.log('log-> ' + log);
+}
 
   function determineBookxProductStatusMessage() {
       var statusMessage = '';
@@ -814,16 +795,15 @@ $off_image_delete = true;
     });
       $("input[name='publishing_date']").change(function (e) {
       determineBookxProductStatusMessage()
-    });
+      });
       $("input[name='products_status']").change(function (e) {
       determineBookxProductStatusMessage()});
             $("input[name='products_quantity']").change(function (e) {
       determineBookxProductStatusMessage()
     });
   });
-
-
 </script>
+            
     <div class="container-fluid">
                 <?php
                 echo zen_draw_form('new_product', FILENAME_PRODUCT, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ( (isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
@@ -834,6 +814,7 @@ $off_image_delete = true;
 
             <h3 class="col-sm-11"><?php echo sprintf(TEXT_NEW_PRODUCT, zen_output_generated_category_path($current_category_id)); ?></h3>
             <div class="col-sm-1"><?php echo zen_info_image($cInfo->categories_image, $cInfo->categories_name, HEADING_IMAGE_WIDTH, HEADING_IMAGE_HEIGHT); ?></div>
+            <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
             <div>
                 <span class="floatButton text-right">
                     <button type="submit" class="btn btn-primary"><?php echo IMAGE_PREVIEW; ?></button>&nbsp;&nbsp;<a href="<?php echo zen_href_link(FILENAME_CATEGORY_PRODUCT_LISTING, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ( (isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : '')); ?>" class="btn btn-default" role="button"><?php echo IMAGE_CANCEL; ?></a>
@@ -878,11 +859,7 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                     echo zen_draw_hidden_field('products_discount_type_from', $pInfo->products_discount_type_from);
                     echo zen_draw_hidden_field('products_price_sorter', $pInfo->products_price_sorter);
                     ?>
-            <div class="col-sm-12 text-center">
-<?php
-echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_STATUS_INFO_OFF : '') . ($out_status == true ? ' ' . TEXT_PRODUCTS_STATUS_INFO_OFF : '');
-?>
-            </div>
+  <div class="col-sm-12 text-center"><?php echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_STATUS_INFO_OFF : '') . ($out_status == true ? ' ' . TEXT_PRODUCTS_STATUS_INFO_OFF : ''); ?></div>
             <div class="form-group">
                         <?php echo zen_draw_label(TEXT_PRODUCTS_STATUS, 'products_status', 'class="col-sm-3 control-label"'); ?>
                 <div class="col-sm-9 col-md-6">
@@ -892,7 +869,7 @@ echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_S
             </div>
             <div class="form-group">
 <?php echo zen_draw_label(TEXT_PRODUCTS_DATE_AVAILABLE, 'products_date_available', 'class="col-sm-3 control-label"'); ?>
-                <div class="col-sm-9 col-md-6">
+                <div id="date_available_field" class="col-sm-9 col-md-6">
                     <div class="date input-group" id="datepicker">
                         <span class="input-group-addon datepicker_icon">
                             <i class="fa fa-calendar fa-lg"></i>
@@ -931,8 +908,48 @@ echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_S
                             ?>
                 </div>
             </div>
-            <!-- Starts Bookx Data -->  
-            <div class="bookx-data">
+            <!-- Starts Bookx Data -->
+            <div class="bookx-data well">
+                
+                <div id="bookxProductStatusDisplay" class="well well-sm col-md-6 col-md-offset-3">
+                    <?php
+                    /* $bookx_new_product_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
+                      $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
+
+                      switch (true) {
+                      case (empty($pInfo->products_status)):
+                      echo '<span class="alert">' . TEXT_PRODUCT_STATUS_NOT_DISPLAYED_DUE_TO_PRODUCT_STATUS . '</span>';
+                      break;
+
+                      case (0 == $pInfo->products_quantity && !empty($pInfo->publishing_date) && $pInfo->pub_date_diff >= -intval($bookx_upcoming_products_look_ahead_number_of_days)):
+                      echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_UPCOMING, $bookx_upcoming_products_look_ahead_number_of_days) . '</span>';
+                      break;
+
+                      case (0 == $pInfo->products_quantity && !empty($pInfo->products_date_available) && $pInfo->products_date_available > date('Y-m-d')):
+                      echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_UPCOMING_WITH_DATE_AVAILABLE) . '</span>';
+                      break;
+
+                      case (0 < $pInfo->products_quantity && !empty($pInfo->publishing_date) && 0 < $pInfo->pub_date_diff && abs($pInfo->pub_date_diff) <= intval($bookx_new_product_look_back_number_of_days)):
+                      echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_NEW, $bookx_new_product_look_back_number_of_days) . '</span>';
+                      break;
+
+                      case (0 == $pInfo->products_quantity && empty($pInfo->date_available) && (empty($pInfo->publishing_date) || (!empty($pInfo->publishing_date) && 0 < $pInfo->pub_date_diff && abs($pInfo->pub_date_diff) > intval($bookx_new_product_look_back_number_of_days) ))):
+                      echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_CONSIDERED_OUT_OF_PRINT . '</span>';
+                      break;
+
+                      case (0 < $pInfo->products_quantity):
+                      echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_CONSIDERED_REGULAR_IN_STOCK . '</span>';
+                      break;
+
+                      default:
+                      echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_DEFAULT_CASE . '</span>';
+                      break;
+                      } */
+                    ?>
+                </div>
+                
+                <div class="clearfix"></div>
+                
                 <!-- *** Field "Subtitle" starts here *** -->
                 <div class="form-group">
                             <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_SUBTITLE, 'products_subtitle', 'class="col-sm-3 control-label"'); ?>
@@ -1033,38 +1050,50 @@ echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_S
                       </div>
                   </div>
 <?php } // end if loop  ?>
+                
+      
 
                 <!-- *** Field "Publishing Date" starts here *** -->
                 <div class="form-group">
                     <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_PUBLISHING_DATE . '<small>(YYYY-MM-DD)</small>', 'publishing_date', 'class="col-sm-3 control-label"'); ?>
+      
                     <div class="col-sm-9 col-md-6">
-                        <div class="date input-group" id="datepicker">
+                        <div class="date input-group">
                             <span class="input-group-addon datepicker_icon">
                                 <i class="fa fa-calendar fa-lg"></i>
                             </span>
-                <?php echo zen_draw_input_field('products_date_available', $pInfo->publishing_date, 'class="form-control"'); ?>
-                                 <!-- <script type="text/javascript">
-                                            datePublished.writeControl();
-                                            datePublished.dateFormat="yyyy-MM-dd";
-                                            var textInput = document.getElementsByName("publishing_date")[0];
-                                            if(textInput.addEventListener){
-                                                textInput.addEventListener("change", previewDisplayDate, false);
-                                            } else if(textInput.attachEvent){
-                                                textInput.attachEvent("change", previewDisplayDate);
-                                            }
-                                    </script> //-->
-                <?php
-                $bookx_np_number_of_days_edit_url = '<a href="' . zen_href_link(FILENAME_CONFIGURATION, 'gID=' . $boox_configuration_group_id . '&cID=' . $boox_configuration_pubdate_look_back_id) . '" target="_admin_blank">' . TEXT_PRODUCTS_BOOKX_NEW_PRODUCTS_LOOK_BACKWARD_SETTING_LINK . '</a>';
-                ?>
-
+                <?php echo zen_draw_input_field('publishing_date', $pInfo->publishing_date, 'id="datepicker1" class="form-control"'); ?>
+                            
+                        </div>
+                        <div class="input-group">
+                            <?php echo zen_draw_label('Format Options', 'format_date', 'class="control-label"'); ?>
+                       
+                            <select id="format_date" class="form-control">
+    <option value="yy-mm-dd">ISO 8601 - yy-mm-dd</option>
+    <option value="yy-MM">Short - yy</option>
+    <option value="DD, d MM, yy">Full - DD, d MM, yy</option>
+    <option value="&apos;day&apos; d &apos;of&apos; MM &apos;in the year&apos; yy">With text - 'day' d 'of' MM 'in the year' yy</option>
+  </select>
                         </div>
                         <span class="help-block publishing_date_display">
                 <?php
-                echo TEXT_PRODUCTS_BOOKX_ISBN_DISPLAY . TEXT_PRODUCTS_BOOKX_USE_PARTIAL_PUBLISHING_DATE . '<br />' . sprintf(TEXT_PRODUCTS_BOOKX_INFO_PUBLISHING_DATE_INFLUENCES_NEW_PRODUCT_DISPLAY, $bookx_new_product_look_back_number_of_days, $bookx_np_number_of_days_edit_url);
+                
+                $bookx_np_number_of_days_edit_url = '<a href="' . zen_href_link(FILENAME_CONFIGURATION, 'gID=' . $boox_configuration_group_id . '&cID=' . $boox_configuration_pubdate_look_back_id) . '" target="_admin_blank">' . TEXT_PRODUCTS_BOOKX_NEW_PRODUCTS_LOOK_BACKWARD_SETTING_LINK . '</a>';
+            	echo '&nbsp; ' . TEXT_PRODUCTS_BOOKX_ISBN_DISPLAY . ' <span id="publishing_date_display"></span><br />' . zen_draw_separator('pixel_trans.gif', '24', '15') . '&nbsp;' . TEXT_PRODUCTS_BOOKX_USE_PARTIAL_PUBLISHING_DATE . '<br />'. sprintf(TEXT_PRODUCTS_BOOKX_INFO_PUBLISHING_DATE_INFLUENCES_NEW_PRODUCT_DISPLAY, $bookx_new_product_look_back_number_of_days, $bookx_np_number_of_days_edit_url); 
                 ?>
                         </span>
                     </div>
                 </div>
+                <script>
+  $( function() {
+    $("#datepicker1").datepicker({
+      showButtonPanel: true
+    });
+    $("#format_date").on( "change", function() {
+      $("#datepicker1").datepicker("option", "dateFormat", $(this).val());
+    });
+  } );
+  </script>
                 <!-- *** Field "Publishing Date" ends here *** -->
 
                 <!-- *** Field "ISBN" starts here *** -->
@@ -1210,7 +1239,6 @@ echo (zen_get_categories_status($current_category_id) == '0' ? TEXT_CATEGORIES_S
             <script>
               updateGross();
             </script>
-
             <div class="form-group">
                             <?php echo zen_draw_label(TEXT_PRODUCTS_VIRTUAL, 'products_virtual', 'class="col-sm-3 control-label"'); ?>
                 <div class="col-sm-9 col-md-6">
@@ -1281,7 +1309,7 @@ for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
             </div>
             <div class="form-group">
                 <?php echo zen_draw_label(TEXT_PRODUCTS_QUANTITY, 'products_quantity', 'class="col-sm-3 control-label"'); ?>
-                <div class="col-sm-9 col-md-6">
+                <div id="product_quantity_field" class="col-sm-9 col-md-6">
 <?php echo zen_draw_input_field('products_quantity', $pInfo->products_quantity, 'class="form-control"'); ?>
                 </div>
             </div>
@@ -1378,41 +1406,4 @@ echo ((isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['searc
             </div>
 <?php echo '</form>'; ?>
 </div>
-
-<?php
-/* $bookx_new_product_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
-  $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
-
-  switch (true) {
-  case (empty($pInfo->products_status)):
-  echo '<span class="alert">' . TEXT_PRODUCT_STATUS_NOT_DISPLAYED_DUE_TO_PRODUCT_STATUS . '</span>';
-  break;
-
-  case (0 == $pInfo->products_quantity && !empty($pInfo->publishing_date) && $pInfo->pub_date_diff >= -intval($bookx_upcoming_products_look_ahead_number_of_days)):
-  echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_UPCOMING, $bookx_upcoming_products_look_ahead_number_of_days) . '</span>';
-  break;
-
-  case (0 == $pInfo->products_quantity && !empty($pInfo->products_date_available) && $pInfo->products_date_available > date('Y-m-d')):
-  echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_UPCOMING_WITH_DATE_AVAILABLE) . '</span>';
-  break;
-
-  case (0 < $pInfo->products_quantity && !empty($pInfo->publishing_date) && 0 < $pInfo->pub_date_diff && abs($pInfo->pub_date_diff) <= intval($bookx_new_product_look_back_number_of_days)):
-  echo '<span class="bookx_article_status_explain">' . sprintf(TEXT_PRODUCT_STATUS_DISPLAYED_AS_NEW, $bookx_new_product_look_back_number_of_days) . '</span>';
-  break;
-
-  case (0 == $pInfo->products_quantity && empty($pInfo->date_available) && (empty($pInfo->publishing_date) || (!empty($pInfo->publishing_date) && 0 < $pInfo->pub_date_diff && abs($pInfo->pub_date_diff) > intval($bookx_new_product_look_back_number_of_days) ))):
-  echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_CONSIDERED_OUT_OF_PRINT . '</span>';
-  break;
-
-  case (0 < $pInfo->products_quantity):
-  echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_CONSIDERED_REGULAR_IN_STOCK . '</span>';
-  break;
-
-  default:
-  echo '<span class="bookx_article_status_explain">' . TEXT_PRODUCT_STATUS_DEFAULT_CASE . '</span>';
-  break;
-  } */
-?>
-<script type="text/javascript">dateAvailable.writeControl();
-  dateAvailable.dateFormat = "yyyy-MM-dd";</script>
         

@@ -28,6 +28,7 @@ if (zen_not_null($_POST)) {
   $products_name = $_POST['products_name'];
   $products_description = $_POST['products_description'];
   $products_url = $_POST['products_url'];
+  
 
   //**** BookX data which is not language specific
   $tmp_value = (isset($_POST['bookx_publisher_id']) ? zen_db_prepare_input($_POST['bookx_publisher_id']) : null);
