@@ -127,14 +127,14 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
                           p.products_discount_type, p.products_discount_type_from,
                           p.products_price_sorter, p.master_categories_id
                           FROM ' . TABLE_PRODUCTS . ' p
-                          LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON p.products_id = pd.products_id AND pd.language_id = "' . (int) $_SESSION['languages_id'] . '"
+                          LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON p.products_id = pd.products_id AND pd.language_id = "' . (int)$_SESSION['languages_id'] . '"
                           LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON p.products_id = be.products_id
-                          WHERE p.products_id = "' . $pID . '"';
+                          WHERE p.products_id = "' . (int)$_GET['pID'] . '"';
   $product = $db->Execute($sql);
 
   $pInfo->updateObjectInfo($product->fields);
 
-  $assigned_authors = $db->Execute('SELECT * FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' WHERE products_id = ' . $pID);
+  $assigned_authors = $db->Execute("SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . " WHERE products_id = '" . (int)$_GET['pID'] . "'");
 
 
   while (!$assigned_authors->EOF) {
@@ -142,7 +142,7 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
     $assigned_authors->MoveNext();
   }
 
-  $assigned_genres = $db->Execute('SELECT * FROM ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' WHERE products_id = ' . $pID);
+  $assigned_genres = $db->Execute("SELECT * FROM " . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . " WHERE products_id = '" . (int)$_GET['pID'] ."'");
 
   while (!$assigned_genres->EOF) {
     $product_assigned_genres[] = array('primary_id' => $assigned_genres->fields['primary_id'], 'bookx_genre_id' => $assigned_genres->fields['bookx_genre_id']);
