@@ -17,7 +17,6 @@
  * @version BookX V 0.9.4-revision8 BETA
  * @version $Id: delete_product_confirm.php 2016-02-02 philou $
  */
-
   if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
   }
@@ -36,10 +35,12 @@
     $product_id = zen_db_prepare_input($_POST['products_id']);
     $product_categories = $_POST['product_categories'];
     $do_delete_flag = true;
-    if (!isset($delete_linked)) $delete_linked = 'true';
+  if (!isset($delete_linked)) {
+    $delete_linked = 'true';
   }
+}
 
-  if (zen_not_null($cascaded_prod_id_for_delete) && zen_not_null($cascaded_prod_cat_for_delete) ) {
+if (!empty($cascaded_prod_id_for_delete) && !empty($cascaded_prod_cat_for_delete)) {
     $product_id = $cascaded_prod_id_for_delete;
     $product_categories = $cascaded_prod_cat_for_delete;
     $do_delete_flag = true;
@@ -48,10 +49,13 @@
 
   if ($do_delete_flag) {
     //--------------PRODUCT_TYPE_SPECIFIC_INSTRUCTIONS_GO__BELOW_HERE--------------------------------------------------------
-
+    
   	bookx_delete_bookx_specific_product_entries($product_id);
   	
   	// addition for extra product fields
+    /**
+     * @todo maybe this could go to bookx delete function. 
+     */
   	if (defined('TABLE_PRODUCT_EXTRA_FIELDS')) {
   	      $db->Execute("delete from " . TABLE_PRODUCT_EXTRA_FIELDS . "
                     where products_id = '" . (int)$product_id . "'");
@@ -65,7 +69,7 @@
     // now do regular non-type-specific delete:
 
     // remove product from all its categories:
-    for ($k=0, $m=sizeof($product_categories); $k<$m; $k++) {
+    for ($k = 0, $m = sizeof($product_categories); $k < $m; $k++) {
       $db->Execute("delete from " . TABLE_PRODUCTS_TO_CATEGORIES . "
                     where products_id = '" . (int)$product_id . "'
                     and categories_id = '" . (int)$product_categories[$k] . "'");
@@ -76,14 +80,13 @@
                                       from " . TABLE_PRODUCTS_TO_CATEGORIES . "
                                       where products_id = '" . (int)$product_id . "'");
     // echo 'count of category links for this product=' . $count_categories->fields['total'] . '<br />';
-
     // if not linked to any categories, do delete:
     if ($count_categories->fields['total'] == '0') {
       zen_remove_product($product_id, $delete_linked);
     }
-
   } // endif $do_delete_flag
-
   // if this is a single-product delete, redirect to categories page
   // if not, then this file was called by the cascading delete initiated by the category-delete process
-  if ($action == 'delete_product_confirm') zen_redirect(zen_href_link(FILENAME_CATEGORIES, 'cPath=' . $cPath));
+if ($action == 'delete_product_confirm') {
+  zen_redirect(zen_href_link(FILENAME_CATEGORY_PRODUCT_LISTING, 'cPath=' . $cPath));
+}
