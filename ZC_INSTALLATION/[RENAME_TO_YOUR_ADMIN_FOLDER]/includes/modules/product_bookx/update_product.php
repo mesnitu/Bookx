@@ -23,6 +23,7 @@
   if (isset($_GET['pID'])) {
   $products_id = zen_db_prepare_input($_GET['pID']);
 }
+
   if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     $action = 'new_product';
 } elseif ($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name'] . $_POST['products_description'] != '') {
@@ -40,7 +41,7 @@
     'products_status' => (int)$_POST['products_status'],
     'products_virtual' => (int)$_POST['products_virtual'],
     'products_tax_class_id' => (int)$_POST['products_tax_class_id'],
-//    'manufacturers_id' => (int)$_POST['manufacturers_id'],
+    'manufacturers_id' => (int)$_POST['manufacturers_id'],
     'products_quantity_order_min' => convertToFloat($_POST['products_quantity_order_min']) == 0 ? 1 : convertToFloat($_POST['products_quantity_order_min']),
     'products_quantity_order_units' => convertToFloat($_POST['products_quantity_order_units']) == 0 ? 1 : convertToFloat($_POST['products_quantity_order_units']),
     'products_priced_by_attribute' => (int)$_POST['products_priced_by_attribute'],
