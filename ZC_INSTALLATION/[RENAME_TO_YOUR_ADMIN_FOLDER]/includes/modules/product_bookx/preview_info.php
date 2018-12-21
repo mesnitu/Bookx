@@ -313,6 +313,7 @@ $form_action = (isset($_GET['pID'])) ? 'update_product' : 'insert_product';
             echo zen_draw_hidden_field('products_name[' . $languages[$i]['id'] . ']', htmlspecialchars(stripslashes($products_name[$languages[$i]['id']]), ENT_COMPAT, CHARSET, TRUE));
             echo zen_draw_hidden_field('products_description[' . $languages[$i]['id'] . ']', htmlspecialchars(stripslashes($products_description[$languages[$i]['id']]), ENT_COMPAT, CHARSET, TRUE));
             echo zen_draw_hidden_field('products_url[' . $languages[$i]['id'] . ']', htmlspecialchars(stripslashes($products_url[$languages[$i]['id']]), ENT_COMPAT, CHARSET, TRUE));
+            echo zen_draw_hidden_field('products_subtitle[' . $languages[$i]['id'] . ']', htmlspecialchars(stripslashes($products_subtitle[$languages[$i]['id']]), ENT_COMPAT, CHARSET, TRUE));
           }
           echo zen_draw_hidden_field('products_image', stripslashes($products_image_name));
           echo ( (isset($_GET['search']) && !empty($_GET['search'])) ? zen_draw_hidden_field('search', $_GET['search']) : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? zen_draw_hidden_field('search', $_POST['search']) : '');
