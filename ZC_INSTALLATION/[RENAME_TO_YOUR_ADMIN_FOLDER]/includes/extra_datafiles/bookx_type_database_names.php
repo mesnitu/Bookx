@@ -46,4 +46,11 @@ define('TABLE_PRODUCT_BOOKX_PUBLISHERS', DB_PREFIX . 'product_bookx_publishers')
 define('TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION', DB_PREFIX . 'product_bookx_publishers_description');
 define('TABLE_PRODUCT_BOOKX_SERIES', DB_PREFIX . 'product_bookx_series');
 define('TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION', DB_PREFIX . 'product_bookx_series_description');
-?>
+
+
+/**
+ * @since version bookx v096 
+ * 
+ */
+define('TABLE_PRODUCT_BOOKX_FAMILIES', DB_PREFIX . 'product_bookx_families');
+define('TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS', DB_PREFIX . 'product_bookx_families_to_products');

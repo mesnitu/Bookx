@@ -1894,6 +1894,11 @@ EOT;
 		    DELETE FROM {$const['TABLE_CONFIGURATION']} WHERE configuration_group_id = {$cf_gid} AND configuration_group_id != 0;
 EOT;
     	$db->Execute($sql);
+        
+        $sql = <<<EOT
+		    DELETE FROM {$const['TABLE_CONFIGURATION']} WHERE configuration_key = 'BOOKX_VERSION';
+EOT;
+    	$db->Execute($sql);
 
     	if(defined('TABLE_CONFIGURATION_LANGUAGE')) {    	     
         	$sql = "DELETE FROM {$const['TABLE_CONFIGURATION_LANGUAGE']} WHERE configuration_key LIKE '%BOOKX%'";
@@ -2097,5 +2102,117 @@ EOT;
      }
      break;
 }
+
+/*
+ * @ todo This is a temporary db update, to use 0 as default db values in id's a sort orders.
+ * This will probably reduce the verification code on NULL or '0' or empty. 
+ * On mysql 5.7 the bookx fields ids are inserted as '0', to insert then as NULL other verifications had to be made.
+ * This is set to update if zencart is 1.5.6.
+ * This update will go somewhere else. 
+ *
+ */
+if ($const['PROJECT_VERSION_MINOR'] == "5.6") {
+
+  if ('install' == $bookx_install) {
+    /**
+     * Checks the shops default encoding by ZC installation 
+     */
+    $default_encoding = $const['DB_CHARSET'];
+    $db_enconding = 'CHARACTER SET = utf8mb4, ';
+
+    $db->Execute("CREATE TABLE " . TABLE_PRODUCT_BOOKX_FAMILIES . " (
+        bookx_family_id int(11) NOT NULL,
+        bookx_family_name varchar(64) NOT NULL,
+        bookx_family_discount float NOT NULL DEFAULT '0',
+        bookx_family_stock_online tinyint(1) NOT NULL DEFAULT '0',
+        PRIMARY KEY (bookx_family_id),
+        UNIQUE KEY bookx_family_name (bookx_family_name),
+        KEY idx_family_id (bookx_family_id, bookx_family_name) USING BTREE) 
+        ENGINE=InnoDB DEFAULT CHARSET=" . $default_encoding . ";");
+
+    $db->Execute("CREATE TABLE " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " (
+        primary_id int(11) NOT NULL AUTO_INCREMENT,
+        products_id int(11) NOT NULL,
+        bookx_family_id int(11) NOT NULL,
+        PRIMARY KEY (primary_id),
+        UNIQUE KEY products_id (products_id),
+        KEY bookx_family_id (bookx_family_id) USING BTREE,
+        CONSTRAINT fk_bxt_families_id FOREIGN KEY (bookx_family_id) REFERENCES product_bookx_families (bookx_family_id) ON DELETE CASCADE ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_encoding . ";");
+
+    // @todo remove this. Just for development purposes. Change $default_encoding '' to make alteration
+    $default_encoding = '';
+
+    if ($default_encoding !== 'utf8mb4') {
+      /**
+       * ZC 156 changed the default installation db CHARACTER to utf8mb4.
+       * 
+       * Not sure about the implications, so a option will later be added to install ( or update) to choose,
+       * for now it's hardcoded to true
+       */
+      $alter_enconding = true;
+    }
+
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES']} " . $db_enconding . "
+    CHANGE COLUMN type_sort_order type_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING']} " . $db_enconding . " CHANGE COLUMN binding_sort_order binding_sort_order INT(11) NULL DEFAULT '0'");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS']} " . $db_enconding . "  CHANGE COLUMN condition_sort_order condition_sort_order INT(11) NULL DEFAULT '0'");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA']} " . $db_enconding . "  CHANGE COLUMN bookx_publisher_id bookx_publisher_id INT(11) NULL DEFAULT '0' ,
+    CHANGE COLUMN bookx_series_id bookx_series_id INT(11) NULL DEFAULT '0' ,
+    CHANGE COLUMN bookx_imprint_id bookx_imprint_id INT(11) NULL DEFAULT '0' ,
+    CHANGE COLUMN bookx_binding_id bookx_binding_id INT(11) NULL DEFAULT '0' ,
+    CHANGE COLUMN bookx_printing_id bookx_printing_id INT(11) NULL DEFAULT '0' ,
+    CHANGE COLUMN bookx_condition_id bookx_condition_id INT(11) NULL DEFAULT '0'");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION']} " . $db_enconding . " CHANGE COLUMN products_subtitle products_subtitle VARCHAR(128) NULL DEFAULT NULL;");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES']} " . $db_enconding . " CHANGE COLUMN genre_sort_order genre_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS']} " . $db_enconding . " CHANGE COLUMN imprint_sort_order imprint_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING']} " . $db_enconding . " CHANGE COLUMN printing_sort_order printing_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS']} " . $db_enconding . " CHANGE COLUMN publisher_sort_order publisher_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES']} " . $db_enconding . " CHANGE COLUMN series_sort_order series_sort_order INT(11) NULL DEFAULT '0';");
+    $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION']} " . $db_enconding . " CHANGE COLUMN publisher_url publisher_url VARCHAR(191) NULL DEFAULT NULL;");
+
+
+    if ($alter_enconding == true) {
+
+      $db_enconding = str_replace(',', '', $db_enconding);
+
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION']} " . $db_enconding . ";");
+      $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION']} " . $db_enconding . ";");
+    }
+	
+	/**
+		 * Change Bookx version to 096
+		 */
+		$version = "0.9.6";
+		$db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} (
+		configuration_title, configuration_key, configuration_value, configuration_description, 
+		configuration_group_id, sort_order, last_modified, date_added, use_function, set_function
+		)
+    	VALUES (
+		'BookX Version', 'BOOKX_VERSION', '" . $version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL
+		 );");
+
+
+		/**
+		 * @todo change, add or remove this message
+		 */
+		$messageStack->add('Bookx Updated message to version ' .$version, 'success');
+	}
+  
+	if ('uninstall' == $bookx_install) {
+    $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . ";");
+    $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_FAMILIES . ";");
+  }
+}
+
 
 
