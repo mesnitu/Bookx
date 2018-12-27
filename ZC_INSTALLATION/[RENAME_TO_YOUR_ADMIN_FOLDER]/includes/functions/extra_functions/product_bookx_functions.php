@@ -443,3 +443,7 @@ function bookx_get_products_subtitle($products_id, $language_id) {
 
   	return $image;
   }
+  
+  function bkx_tpl_bold ($str) {
+      return '<strong>' . $str . '</strong>';
+  }
