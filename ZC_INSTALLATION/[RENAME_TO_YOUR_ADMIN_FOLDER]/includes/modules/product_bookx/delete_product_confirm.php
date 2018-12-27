@@ -53,9 +53,6 @@ if (!empty($cascaded_prod_id_for_delete) && !empty($cascaded_prod_cat_for_delete
   	bookx_delete_bookx_specific_product_entries($product_id);
   	
   	// addition for extra product fields
-    /**
-     * @todo maybe this could go to bookx delete function. 
-     */
   	if (defined('TABLE_PRODUCT_EXTRA_FIELDS')) {
   	      $db->Execute("delete from " . TABLE_PRODUCT_EXTRA_FIELDS . "
                     where products_id = '" . (int)$product_id . "'");

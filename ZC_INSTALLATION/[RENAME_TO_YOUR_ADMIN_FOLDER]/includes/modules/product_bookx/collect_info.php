@@ -20,7 +20,7 @@
 if (!defined('IS_ADMIN_FLAG')) {
   die('Illegal Access');
 }
-
+//pr($_GET, "COLLECT");
 $sql = 'SELECT configuration_group_id FROM ' . TABLE_CONFIGURATION_GROUP . ' WHERE configuration_group_title = "BookX";';
 
 $config_groups = $db->Execute($sql);
@@ -106,6 +106,7 @@ $product_assigned_authors = array();
 $product_assigned_genres = array();
 
 if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
+  
   $sql = 'SELECT pd.products_name, pd.products_description, pd.products_url,
                   p.products_id, p.products_quantity, p.products_model, p.manufacturers_id,
                   p.products_image, p.products_price, p.products_virtual, p.products_weight,
@@ -133,7 +134,7 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
   $product = $db->Execute($sql);
 
   $pInfo->updateObjectInfo($product->fields);
-
+  //pr($pInfo);
   $assigned_authors = $db->Execute("SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . " WHERE products_id = '" . (int)$_GET['pID'] . "'");
 
 
@@ -149,7 +150,9 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
     $assigned_genres->MoveNext();
   }
 } elseif (zen_not_null($_POST)) {
+  //pr($_POST, "not empty post");
   $pInfo->updateObjectInfo($_POST);
+  
   $products_name = isset($_POST['products_name']) ? $_POST['products_name'] : '';
   $products_description = isset($_POST['products_description']) ? $_POST['products_description'] : '';
   $products_url = isset($_POST['products_url']) ? $_POST['products_url'] : '';
@@ -162,12 +165,16 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
       $product_assigned_genres[] = array('primary_id' => '', 'bookx_genre_id' => $genre_id);
     }
   }
-
+    
   if (isset($_POST['bookx_author_id']) && is_array($_POST['bookx_author_id']) && !empty($_POST['bookx_author_id'])) {
     $bookx_author_ids = $_POST['bookx_author_id'];
     foreach ($bookx_author_ids as $key => $author_id) {
       $bookx_author_type_id = (isset($_POST['bookx_author_type_id']) && is_array($_POST['bookx_author_type_id']) && !empty($_POST['bookx_author_type_id']) ? $_POST['bookx_author_type_id'][$key] : '');
-      $product_assigned_authors[] = array('primary_id' => '', 'bookx_author_id' => $author_id, 'bookx_author_type_id' => $bookx_author_type_id);
+      $product_assigned_authors[] = array(
+          'primary_id' => '', 
+          'bookx_author_id' => $author_id, 
+          'bookx_author_type_id' => $bookx_author_type_id
+          );
     }
   }
 }
@@ -191,8 +198,9 @@ $authors_array = array(
           'text' => TEXT_NONE)
     );
 $authors = $db->Execute('SELECT bookx_author_id, author_name, author_default_type
-                         FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' order by author_sort_order, author_name');
+                         FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' order by author_name');
 while (!$authors->EOF) {
+  
   $authors_array[] = array(
       'id' => $authors->fields['bookx_author_id'],
       'text' => $authors->fields['author_name'],
@@ -333,6 +341,7 @@ switch ($pInfo->products_virtual) {
 }
 // Always Free Shipping
 if (!isset($pInfo->product_is_always_free_shipping))
+  //@TODO check this line
   $pInfo->product_is_always_free_shipping = DEFAULT_PRODUCT_MUSIC_PRODUCTS_IS_ALWAYS_FREE_SHIPPING;
 switch ($pInfo->product_is_always_free_shipping) {
   case '0': $is_product_is_always_free_shipping = false;
@@ -424,10 +433,10 @@ $off_overwrite = false;
 // set image delete
 $on_image_delete = false;
 $off_image_delete = true;
+
 ?>
-<link rel="stylesheet" type="text/css" href="includes/javascript/spiffyCal/spiffyCal_v2_1.css">
+
 <style>
-    <!--
     .bookx-data {
         background-color: #ffdb94;
     }
@@ -435,10 +444,16 @@ $off_image_delete = true;
         padding: 1rem;
         font-weight: bold;
     }
-    -->
+    #author_pulldowns select, #genre_pulldowns select {
+        margin-bottom: 1rem;
+    }
+    .no-paddind {
+        padding:0; 
+    }
 </style>
 
 <script type="text/javascript">
+  
   var tax_rates = new Array();
             <?php
             for ($i = 0, $n = sizeof($tax_class_array); $i < $n; $i++) {
@@ -484,72 +499,95 @@ $off_image_delete = true;
             document.forms["new_product"].products_price.value = doRound(netValue, 4);
   }
 
-  var authorDefaulTypes = {
-            <?php
-            $divider = '';
-            foreach ($authors_array as $author) {
-              if (array_key_exists('default_type', $author)) {
-                echo $divider, $author['id'] . ': ' . ($author['default_type'] ? $author['default_type'] : 'null');
-                if ('' == $divider)
-                  $divider = ',';
-              }
-            }
-            ?>
-  };
+var authorDefaulTypes = {
+<?php $divider = '';
+	foreach ($authors_array as $author) {
+		if (array_key_exists('default_type', $author)) {
+			echo  $divider, $author['id'] . ': ' . ($author['default_type'] ? $author['default_type'] : 'null');
+			if ('' == $divider) $divider = ',';
+		}
+	}?>
+}
+console.log(authorDefaulTypes);
+function setAuthorDefaultType(authorSelect) {
+    
+    var authorSelectId = authorSelect.getAttribute("id");
+    var authorTypeSelectId = "selecttype" + authorSelectId.substring(6);
+    var authorId = authorSelect.options[authorSelect.selectedIndex].value;
+  
+	if (authorId in authorDefaulTypes) {
+      
+		var authorTypeSelect = document.getElementById(authorTypeSelectId);
+		var opts = authorTypeSelect.options.length;
+    
+		for (var i=0; i<opts; i++){     
+		    if (authorTypeSelect.options[i].value == authorDefaulTypes[authorId]){   
+		    	authorTypeSelect.options[i].selected = true;
+		        break;
+		    }
+		}
+	}
+}
 
-  function setAuthorDefaultType(authorSelect) {
-      var authorSelectId = authorSelect.getAttribute("id");
-      var authorTypeSelectId = "selecttype" + authorSelectId.substring(6);
-      var authorId = authorSelect.options[authorSelect.selectedIndex].value;
-      if (authorId in authorDefaulTypes) {
-          var authorTypeSelect = document.getElementById(authorTypeSelectId);
-          var opts = authorTypeSelect.options.length;
-          for (var i = 0; i < opts; i++) {
-              if (authorTypeSelect.options[i].value == authorDefaulTypes[authorId]) {
-                  authorTypeSelect.options[i].selected = true;
-                  break;
-              }
-          }
-      }
-  }
+var authorCounter = null;
+function addAuthorPulldown(counter) {
+	if (null != authorCounter) {
+		counter = authorCounter+1;
+	}
 
-  var authorCounter = null;
-  function addAuthorPulldown(counter) {
-      if (null != authorCounter) {
-          counter = authorCounter + 1;
-      }
+	if (0 == counter) {
+		counter = 1;
+	}
+	var br = document.createElement("div");
+  br.setAttribute("class", "clearfix");
+  // to float the select form
+  var container = document.createElement("DIV");
+  container.setAttribute("id", "container-"+counter);
+  container.setAttribute("class", "col-sm-8 no-paddind");
+  
+  var container1 = document.createElement("DIV");
+  container1.setAttribute("id", "container1-"+counter);
+  container1.setAttribute("class", "col-sm-4");
+  
+  var newAuthorSelect = document.getElementById("blank_bookx_author_id").cloneNode(true);
+	newAuthorSelect.setAttribute("name", "bookx_author_id["+counter+"]");
+	newAuthorSelect.setAttribute("id", "select"+counter);
+  newAuthorSelect.setAttribute("class", "form-control");
+  
+	var authorLabel = document.createElement("LABEL");
+  var author_label_text = document.createTextNode(<?php echo '"' . TEXT_PRODUCTS_BOOKX_AUTHOR . ' "'; ?>);
+  authorLabel.appendChild(author_label_text);
+  authorLabel.setAttribute("for", "select"+counter);
+  
+  document.getElementById("author_pulldowns").appendChild(container);
+	document.getElementById("container-"+counter).appendChild(authorLabel);
+	document.getElementById("container-"+counter).appendChild(newAuthorSelect);
 
-      if (0 == counter) {
-          counter = 1;
-      }
-      var br = document.createElement("br");
+	<?php if (1 < count($author_types_array)) { 
+    //**** don't even include this code if there are zero author typed defined'?>
+	var newAuthorTypeSelect = document.getElementById("blank_bookx_author_type_id").cloneNode(true);
 
-      var authorLabel = document.createTextNode(<?php echo '"' . TEXT_PRODUCTS_BOOKX_AUTHOR . ' "'; ?>);
-      var newAuthorSelect = document.getElementById("blank_bookx_author_id").cloneNode(true);
+	if (newAuthorTypeSelect.options.length > 1) {
+  
+    newAuthorTypeSelect.setAttribute("name", "bookx_author_type_id["+counter+"]");
+		newAuthorTypeSelect.setAttribute("id", "selecttype"+counter);
+    newAuthorTypeSelect.setAttribute("class", "form-control col-sm-3");
+  
+    var authorTypeLabel = document.createElement("LABEL");
+    var authorType_label_text = document.createTextNode(<?php echo '"' . TEXT_PRODUCTS_BOOKX_AUTHOR_TYPE . ' "'; ?>);
+    authorTypeLabel.setAttribute("for", "selecttype"+counter);
+    authorTypeLabel.appendChild(authorType_label_text);
 
-      newAuthorSelect.setAttribute("name", "bookx_author_id[" + counter + "]");
-      newAuthorSelect.setAttribute("id", "select" + counter);
+		document.getElementById("author_pulldowns").appendChild(container1);
+    document.getElementById("container1-"+counter).appendChild(authorTypeLabel);
+		document.getElementById("container1-"+counter).appendChild(newAuthorTypeSelect);
+	}
+	<?php }?>
+	document.getElementById("author_pulldowns").appendChild(br);
 
-      document.getElementById("author_pulldowns").appendChild(authorLabel);
-      document.getElementById("author_pulldowns").appendChild(newAuthorSelect);
-
-      <?php if (1 < count($author_types_array)) { //**** don't even include this code if there are zero author typed defined'?>
-        var newAuthorTypeSelect = document.getElementById("blank_bookx_author_type_id").cloneNode(true);
-
-        if (newAuthorTypeSelect.options.length > 1) {
-            var authorTypeLabel = document.createTextNode(<?php echo '"  ' . TEXT_PRODUCTS_BOOKX_AUTHOR_TYPE . ' "'; ?>);
-            newAuthorTypeSelect.setAttribute("name", "bookx_author_type_id[" + counter + "]");
-            newAuthorTypeSelect.setAttribute("id", "selecttype" + counter);
-
-            document.getElementById("author_pulldowns").appendChild(authorTypeLabel);
-            document.getElementById("author_pulldowns").appendChild(newAuthorTypeSelect);
-        }
-            <?php } ?>
-      document.getElementById("author_pulldowns").appendChild(br);
-
-      authorCounter = counter;
-  }
-
+	authorCounter = counter;
+}
+  
   var genreCounter = null;
   function addGenrePulldown(counter) {
       if (null != genreCounter) {
@@ -559,16 +597,14 @@ $off_image_delete = true;
       if (0 == counter) {
           counter = 1;
       }
-      var br = document.createElement("br");
-
+      
       var newGenreSelect = document.getElementById("blank_bookx_genre_id").cloneNode(true);
 
       newGenreSelect.setAttribute("name", "bookx_genre_id[" + counter + "]");
       newGenreSelect.setAttribute("id", "select" + counter);
+      newGenreSelect.setAttribute("class", "form-control");
 
       document.getElementById("genre_pulldowns").appendChild(newGenreSelect);
-
-      document.getElementById("genre_pulldowns").appendChild(br);
 
       genreCounter = counter;
   }
@@ -600,7 +636,7 @@ $off_image_delete = true;
           }
       }
   }
-
+  /*
   var localeMonthNames = new Array();
   localeMonthNames[0] = "<?php echo strftime('%B', mktime(0, 0, 0, 1, 1)); ?>";
   localeMonthNames[1] = "<?php echo strftime('%B', mktime(0, 0, 0, 2, 1)); ?>";
@@ -615,36 +651,43 @@ $off_image_delete = true;
   localeMonthNames[10] = "<?php echo strftime('%B', mktime(0, 0, 0, 11, 1)); ?>";
   localeMonthNames[11] = "<?php echo strftime('%B', mktime(0, 0, 0, 12, 1)); ?>";
 
-
+  
   function previewDisplayDate() {
-      var dateDisplayString = '';
-      var dateFormatShort = '<?php echo DATE_FORMAT_SHORT; ?>';
-      var dateFormatMonthAndYear = '<?php echo DATE_FORMAT_MONTH_AND_YEAR; ?>';
+    var dateDisplayString = '';
+    var dateFormatShort = '<?php echo DATE_FORMAT_SHORT; ?>';
+    var dateFormatMonthAndYear = '<?php echo DATE_FORMAT_MONTH_AND_YEAR; ?>';
 
-      var dateString = document.forms["new_product"].publishing_date.value;
-      var yearString = dateString.substring(0, 4);
-      var monthString = dateString.substring(5, 7);
-      var dayString = dateString.substring(8, 10);
+    var dateString = document.forms["new_product"].publishing_date.value;
+    var yearString = dateString.substring(0, 4);
+    var monthString = dateString.substring(5, 7);
+    var dayString = dateString.substring(8, 10);
 
-      var parsedDate = new Date(yearString, monthString, dayString);
+    var parsedDate = new Date(yearString, monthString, dayString);
 
-      switch (true) {
-          case ('00' == monthString):
-              dateDisplayString = yearString;
-              break;
+    switch (true) {
+        case ('00' == monthString):
+            dateDisplayString = yearString;
+            break;
 
-          case ('00' == dayString):
-              var mo = localeMonthNames[parsedDate.getMonth()];
-              dateDisplayString = dateFormatMonthAndYear.replace('%Y', yearString).replace('%M', localeMonthNames[parsedDate.getMonth()]);
-              break;
+        case ('00' == dayString):
+            var mo = localeMonthNames[parsedDate.getMonth()];
+            dateDisplayString = dateFormatMonthAndYear.replace('%Y', yearString).replace('%M', localeMonthNames[parsedDate.getMonth()]);
+            break;
 
-          default:
-              dateDisplayString = dateFormatShort.replace('%Y', yearString).replace('%m', monthString).replace('%d', dayString);
-              break;
-      }
-      document.getElementById("publishing_date_display").innerHTML = dateDisplayString;
-  }
-
+        default:
+            dateDisplayString = dateFormatShort.replace('%Y', yearString).replace('%m', monthString).replace('%d', dayString);
+            break;
+    }
+    document.getElementById("publishing_date_display").innerHTML = dateDisplayString;
+}
+*/
+ /*
+ function previewDisplayDate() {
+   
+   var dateDisplayString = document.forms["new_product"].publishing_date.value;
+     document.getElementById("publishing_date_display").innerHTML = dateDisplayString;
+ }
+ */
   Date.daysBetween = function (date1, date2) {
       //Get 1 day in milliseconds
       var one_day = 1000 * 60 * 60 * 24;
@@ -689,7 +732,7 @@ function log(log) {
 
   function determineBookxProductStatusMessage() {
       var statusMessage = '';
-
+      
       var lookBackNoOfDays = <?php echo BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS; ?>;
       var lookAheadNoOfDays = <?php echo BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS; ?>;
 
@@ -786,27 +829,13 @@ function log(log) {
 
       document.getElementById("bookxProductStatusDisplay").innerHTML = statusMessage;
   }
+ </script>
 
-  $(document).ready(function () {
-      determineBookxProductStatusMessage();
-      previewDisplayDate();
-      $("input[name='products_date_available']").change(function (e) {
-      determineBookxProductStatusMessage()
-    });
-      $("input[name='publishing_date']").change(function (e) {
-      determineBookxProductStatusMessage()
-      });
-      $("input[name='products_status']").change(function (e) {
-      determineBookxProductStatusMessage()});
-            $("input[name='products_quantity']").change(function (e) {
-      determineBookxProductStatusMessage()
-    });
-  });
-</script>
             
     <div class="container-fluid">
                 <?php
                 echo zen_draw_form('new_product', FILENAME_PRODUCT, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ( (isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
+                
                 if (isset($product_type)) {
                   echo zen_draw_hidden_field('product_type', $product_type);
                 }
@@ -989,11 +1018,55 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                   <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_SERIES, 'bookx_series_id', 'class="col-sm-3 control-label"'); ?>
                       <div class="col-sm-9 col-md-6">
                       <?php echo zen_draw_pull_down_menu('bookx_series_id', $series_array, $pInfo->bookx_series_id, 'class="form-control"'); ?>         </div>
+					   </div>
                         <?php } // end if loop  ?>
-                </div>
-
-
-                <!-- *** Field "Authors" starts here *** -->
+               
+<?php 
+$useSelect2 = false;
+if ($useSelect2 == true) { 
+    /**
+     * @todo To use Select2 for search select and insert authors or genres in the same product.
+     * @see https://select2.org/tagging
+     */
+    
+    ?>
+    
+    <div class="form-group">
+        <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_AUTHORS, 'blank_bookx_author_id', 'class="col-sm-3 control-label"'); ?>
+        <div class="row">
+            <div class="col-sm-9 col-md-6">
+            <?php
+            echo zen_draw_pull_down_menu('blank_bookx_author_id', $authors_array, '', 'id="blank_bookx_author_id" class="js-example-responsive form-control" '); ?>
+            </div>
+            <div class="col-sm-9 col-md-6">
+            <?php echo zen_draw_pull_down_menu('blank_bookx_author_type_id', $author_types_array, '', 'id="blank_bookx_author_type_id" class="form-control"'); ?>            
+            </div>
+        </div>
+  
+        <div id="author_pulldowns">
+        <?php 
+        
+        $author_counter = 0;
+  
+        foreach ($product_assigned_authors as $product_assigned_author) { ?>
+            <div class="drop_down_div">
+            <?php
+            echo zen_draw_hidden_field('assigned_author_db_id[' . $author_counter . ']', $product_assigned_author['primary_id']);
+            echo TEXT_PRODUCTS_BOOKX_AUTHOR . '&nbsp;' . zen_draw_pull_down_menu('bookx_author_id[' . $author_counter . ']', $authors_array, $product_assigned_author['bookx_author_id'], '',' class="form-control"');
+            if (1 < count($author_types_array)) {
+                echo TEXT_PRODUCTS_BOOKX_AUTHOR_TYPE . '&nbsp;' . zen_draw_pull_down_menu('bookx_author_type_id[' . $author_counter . ']', $author_types_array, $product_assigned_author['bookx_author_type_id']);
+            };
+            ?>
+            </div>
+            <?php 
+            $author_counter++;
+        } ?>
+        </div>
+    </div>
+                 
+<?php } else { ?>
+    
+<!-- *** Field "Authors" starts here *** -->
 <?php if (1 < count($authors_array)) { // no authors defined ?>
                   <div class="form-group">
                       <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_AUTHORS, 'blank_bookx_author_id', 'class="col-sm-3 control-label"'); ?>
@@ -1006,29 +1079,38 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
   }
   ?>
                           </div>
-                          <div id="author_pulldowns">
+                          <div id="author_pulldowns" class="row">
   <?php
   $author_counter = 0;
-  /* if (null != $product_assigned_authors) {
-    while (!$product_assigned_authors->EOF) { */
-  foreach ($product_assigned_authors as $product_assigned_author) {
-    echo '<div class="drop_down_div">';
-    echo zen_draw_hidden_field('assigned_author_db_id[' . $author_counter . ']', $product_assigned_author['primary_id']);
-    echo TEXT_PRODUCTS_BOOKX_AUTHOR . '&nbsp;' . zen_draw_pull_down_menu('bookx_author_id[' . $author_counter . ']', $authors_array, $product_assigned_author['bookx_author_id']);
-    if (1 < count($author_types_array)) {
-      echo TEXT_PRODUCTS_BOOKX_AUTHOR_TYPE . '&nbsp;' . zen_draw_pull_down_menu('bookx_author_type_id[' . $author_counter . ']', $author_types_array, $product_assigned_author['bookx_author_type_id']);
-    };
-    echo '</div>';
-    $author_counter++;
+  
+  foreach ($product_assigned_authors as $product_assigned_author) { ?>
+    <div class="drop_down_div">
+        <div class="col-sm-8">
+    <?php // zen_draw_pull_down_menu($name, $values, $default = '', $parameters = '', $required = false) {
+    echo zen_draw_label(TEXT_PRODUCTS_BOOKX_AUTHOR, 'bookx_author_id[' . $author_counter . ']', '');
+    echo zen_draw_pull_down_menu('bookx_author_id[' . $author_counter . ']', $authors_array, $product_assigned_author['bookx_author_id'], 'class="form-control"');
+    echo zen_draw_hidden_field('assigned_author_db_id[' . $author_counter . ']', $product_assigned_author['primary_id']); ?>
+   </div>
+     <?php if (1 < count($author_types_array)) { ?>
+      <div class="col-sm-4">
+      <?php
+      echo zen_draw_label(TEXT_PRODUCTS_BOOKX_AUTHOR_TYPE, 'bookx_author_type_id[' . $author_counter . ']');
+      echo zen_draw_pull_down_menu('bookx_author_type_id[' . $author_counter . ']', $author_types_array, $product_assigned_author['bookx_author_type_id'], 'class="form-control"');
+    }; ?>
+     </div>
+    </div>
+    <?php $author_counter++;
   }
-  //}
+ 
   ?>
                           </div>
-                          <a href="javascript:void(0);" onclick="addAuthorPulldown(<?php echo $author_counter; ?>);"><?php echo TEXT_PRODUCTS_BOOKX_ADD_AUTHOR; ?></a>
+                         <a href="javascript:void(0);" onclick="addAuthorPulldown(<?php echo $author_counter; ?>);" class="btn btn-primary btn-sm"><?php echo TEXT_PRODUCTS_BOOKX_ADD_AUTHOR; ?></a>
                       </div>
                   </div>
 <?php } // end if loop  ?>
                 <!-- *** Field "Authors" ends here *** -->
+   
+<?php } ?>
 
                 <!-- *** Field "Publisher" starts here *** -->
                         <?php if (1 < count($publisher_array)) { // no publishers defined  ?>
@@ -1051,11 +1133,9 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                   </div>
 <?php } // end if loop  ?>
                 
-      
-
                 <!-- *** Field "Publishing Date" starts here *** -->
                 <div class="form-group">
-                    <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_PUBLISHING_DATE . '<small>(YYYY-MM-DD)</small>', 'publishing_date', 'class="col-sm-3 control-label"'); ?>
+                    <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_PUBLISHING_DATE . '', 'publishing_date', 'class="col-sm-3 control-label"'); ?>
       
                     <div class="col-sm-9 col-md-6">
                         <div class="date input-group">
@@ -1066,16 +1146,22 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                             
                         </div>
                         <div class="input-group">
-                            <?php echo zen_draw_label('Format Options', 'format_date', 'class="control-label"'); ?>
-                       
-                            <select id="format_date" class="form-control">
-    <option value="yy-mm-dd">ISO 8601 - yy-mm-dd</option>
-    <option value="yy-MM">Short - yy</option>
-    <option value="DD, d MM, yy">Full - DD, d MM, yy</option>
-    <option value="&apos;day&apos; d &apos;of&apos; MM &apos;in the year&apos; yy">With text - 'day' d 'of' MM 'in the year' yy</option>
-  </select>
+                            <?php 
+                            $date_format_options = array(
+                              array('id' => 'yy-mm-dd',
+                                    'text' => 'ISO 8601 - yy-mm-dd'),
+                              array('id' => 'MM yy', 
+                                    'text' => 'Month Year'),
+                              array('id' =>'yy', 
+                                  'text' => 'Year')
+                            );
+                            
+                            echo zen_draw_label('Format Options', 'format_date', 'class="control-label"');
+                            //zen_draw_pull_down_menu($name, $values, $default = '', $parameters = '', $required = false)
+                            echo zen_draw_pull_down_menu('date_format', $date_format_options, $_POST['date_format'], 'id="format_date" class="form-control"');
+                            ?>
                         </div>
-                        <span class="help-block publishing_date_display">
+                        <span class="help-block">
                 <?php
                 
                 $bookx_np_number_of_days_edit_url = '<a href="' . zen_href_link(FILENAME_CONFIGURATION, 'gID=' . $boox_configuration_group_id . '&cID=' . $boox_configuration_pubdate_look_back_id) . '" target="_admin_blank">' . TEXT_PRODUCTS_BOOKX_NEW_PRODUCTS_LOOK_BACKWARD_SETTING_LINK . '</a>';
@@ -1085,14 +1171,7 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                     </div>
                 </div>
                 <script>
-  $( function() {
-    $("#datepicker1").datepicker({
-      showButtonPanel: true
-    });
-    $("#format_date").on( "change", function() {
-      $("#datepicker1").datepicker("option", "dateFormat", $(this).val());
-    });
-  } );
+  
   </script>
                 <!-- *** Field "Publishing Date" ends here *** -->
 
@@ -1175,14 +1254,14 @@ if (zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
                       foreach ($product_assigned_genres as $product_assigned_genre) {
                         echo '<div class="drop_down_div">';
                         echo zen_draw_hidden_field('assigned_genre_db_id[' . $genre_counter . ']', $product_assigned_genre['primary_id']);
-                        echo zen_draw_pull_down_menu('bookx_genre_id[' . $genre_counter . ']', $genre_array, $product_assigned_genre['bookx_genre_id']);
+                        echo zen_draw_pull_down_menu('bookx_genre_id[' . $genre_counter . ']', $genre_array, $product_assigned_genre['bookx_genre_id'], 'class="form-contorl"');
                         echo '</div>';
                         $genre_counter++;
                       }
                       //}
                       ?>
                           </div>
-                          <a href="javascript:void(0);" onclick="addGenrePulldown(<?php echo $genre_counter; ?>);"><?php echo TEXT_PRODUCTS_BOOKX_ADD_GENRE; ?></a>
+                          <a href="javascript:void(0);" onclick="addGenrePulldown(<?php echo $genre_counter; ?>);" class="btn btn-primary btn-sm"><?php echo TEXT_PRODUCTS_BOOKX_ADD_GENRE; ?></a>
                       </div>
                   </div>
                 <?php } // end if loop ?>
@@ -1406,4 +1485,63 @@ echo ((isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['searc
             </div>
 <?php echo '</form>'; ?>
 </div>
+
+<script>
+$(document).ready(function() {
+    
+    determineBookxProductStatusMessage();
+    //previewDisplayDate();
+    $("input[name='products_date_available']").change(function (e) {
+        determineBookxProductStatusMessage()
+    });
+    
+    $("input[name='publishing_date']").change(function (e) {
+        determineBookxProductStatusMessage()
+    });
+    $("input[name='products_status']").change(function (e) {
+        determineBookxProductStatusMessage()});
+    $("input[name='products_quantity']").change(function (e) {
+        determineBookxProductStatusMessage()
+    });
+
+    if ($("input[name='publishing_date']").val() !== '') {
+        $("#publishing_date_display").text($("input[name='publishing_date']").val());
+    }
+
+    $("input[name=publishing_date]").on("change focus", function() {
+        $("#publishing_date_display").text($("input[name='publishing_date']").val());
+    });
+    
+    /*
+     * Future Select2 or Choosen plugin for select search
+     */
+    /*
+    $(".js-example-responsive").select2({
+        placeholder: 'Select an option',
+        tags: true,
+        width: 'resolve' // need to override the changed default
+    });
+    
+    
+    $('.js-example-responsive').on("select2:selecting", function(e) {
+        console.log(e);
+        var author_id = e.params.args.data.id;
+        console.log('Selecting: ' , author_id);
+        if ($('.js-example-responsive').find("option[value='" + authorDefaulTypes[author_id] + "']")) {
+            console.log('foud' + authorDefaulTypes[author_id]);
+    } 
+    });
+    */
+    $("#datepicker1").datepicker({
+      showButtonPanel: true
+    });
+    $("#format_date").on( "change", function() {
+      $("#datepicker1").datepicker("option", "dateFormat", $(this).val());
+    });
+
+//document.getElementById("publishing_date_display").innerHTML = dateDisplayString;
+
+
+});
+</script>
         
