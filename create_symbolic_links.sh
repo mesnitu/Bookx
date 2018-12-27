@@ -56,6 +56,7 @@ ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/functions/extra_funct
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/init_includes/init_product_type_bookx.php ${dst_dir}/${admin_dir_name}/includes/init_includes/init_product_type_bookx.php
 
 # files in admin/includes/modules/product_bookx
+ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/preview_info_metatags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/preview_info_metatags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info_metatags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info_metatags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/copy_to_confirm.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/copy_to_confirm.php
