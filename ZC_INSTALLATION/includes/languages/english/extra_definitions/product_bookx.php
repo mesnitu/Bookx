@@ -137,3 +137,8 @@ define('PULL_DOWN_ALL_SERIES', 'Filter Series');
 define('PULL_DOWN_ALL_GENRES', 'Filter Genres');
 define('PULL_DOWN_ALL_IMPRINTS', 'Filter Imprint');
 define('PULL_DOWN_ALL_PUBLISHERS', 'Filter Publishers');
+
+/**
+ * @since version 096
+ */
+define('LABEL_EXTRA_ATTRIBUTES', 'Attributes: ');
