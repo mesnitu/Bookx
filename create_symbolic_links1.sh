@@ -2,14 +2,14 @@
 
 windows() { [[ -n "$WINDIR" ]]; }
 
-# version BookX 0.9.5 BETA
+# version BookX 0.9.6 BETA
 #src_dir=/FULL_PATH_TO_YOUR_BOOKX_INSTALLATION/bookX/ZC_INSTALLATION
 #dst_dir=/FULL_PATH_TO_YOUR_ZENCART_INSTALLATION/zen-cart
 #admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
 #tpl_dir_name=NAME_OF_YOUR_TEMPLATE
 
-src_dir="c:\xampp\htdocs\vhosts\zc156.local\bookx-zc155f\ZC_INSTALLATION"
-dst_dir="c:\xampp\htdocs\vhosts\zc156.local"
+src_dir="c:\xampp\htdocs\vhosts\bookx-zc155f\ZC_INSTALLATION"
+dst_dir="c:\xampp\htdocs\vhosts\zencart"
 admin_dir_name="zenadmin"
 tpl_dir_name="responsive_classic"
 
@@ -108,29 +108,33 @@ catalog_files=(
     includes/templates/template_default/templates/tpl_bookx_products_next_previous.php
 )
 
-echo "== Options ================="
-echo "-> Create symlinks ----- [0]"
-echo "-> Delete symlinks ----- [1]"
+echo "== Options ==============================="
+echo "-> Create symlinks -------------- [create]"
+echo "-> Delete symlinks -------------- [delete]"
+echo "-> Copy Files (for install) ----- [copy]"
 
 while true; do
     
-    read -e -p "Option [(0)/(1)]: " options
+    read -e -p "Option [type option]: " options
     
     if [ -z "$options" ]; then
 	    echo -n ""
         #echo $options
     else
-        if [ "$options" == "0" ]; then
+        if [ "$options" == "create" ]; then
             echo "-> Create symlinks: $options"        
         fi
-	    if [ "$options" == "1" ]; then
+	    if [ "$options" == "delete" ]; then
+            echo "-> Delete symlinks: $options"
+        fi
+		if [ "$options" == "copy" ]; then
             echo "-> Delete symlinks: $options"
         fi
         break;
     fi
 done
 
-if [ "$options" == "0" ]; then
+if [ "$options" == "create" ]; then
 
     #create folders first
     umask 000
@@ -173,7 +177,7 @@ if [ "$options" == "0" ]; then
     else
         ln -sf ${src_dir}/includes/templates/[YOUR-TEMPLATE]/css/stylesheet_bookx.css ${dst_dir}/includes/templates/${tpl_dir_name}/css/stylesheet_bookx.css     
     fi
-else
+elif [ "$options" == "delete" ]; then
     for i in "${admin_files[@]}"; do
         rm -v ${admin_path}/"$i"
         #echo "Delete admin files $i"
@@ -185,4 +189,11 @@ else
     rm -v ${dst_dir}/includes/templates/${tpl_dir_name}/css/stylesheet_bookx.css
     #echo "Delete template files"
     echo "Done"
+else 
+	echo "not yet done copy files"
+fi
+
+read -e -p "Done! Review or Click to Exit" exit
+if [ -z "$exit" ]; then
+	cmd <<< "exit"
 fi
