@@ -2,7 +2,7 @@
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5
+ * shop system. Tested for compatibility on ZC v. 1.5.6
  *
  * For latest version and support visit:
  * https://sourceforge.net/p/zencartbookx
@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: copy_to_confirm.php 2016-02-02 philou $
+ * @version BookX v1.0.1
+ * @version $Id: copy_product_confirm.php 2016-02-02 mesnitu $
  */
 
 if (!defined('IS_ADMIN_FLAG')) {

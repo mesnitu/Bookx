@@ -45,7 +45,7 @@ admin_files=(
     # files in admin/includes/modules/product_bookx
     includes/modules/product_bookx/collect_info_metatags.php
     includes/modules/product_bookx/collect_info.php
-    includes/modules/product_bookx/copy_to_confirm.php
+    includes/modules/product_bookx/copy_product_confirm.php
     includes/modules/product_bookx/delete_product_confirm.php
     includes/modules/product_bookx/preview_info.php
     includes/modules/product_bookx/preview_info_metatags.php

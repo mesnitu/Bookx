@@ -444,6 +444,32 @@ function bookx_get_products_subtitle($products_id, $language_id) {
   	return $image;
   }
   
+  /**
+   * 
+   * @param type $str
+   * @return type 
+   */
   function bkx_tpl_bold ($str) {
       return '<strong>' . $str . '</strong>';
   }
+
+  /**
+ * @since v0.9.6
+ * Insures that empty values are inserted Null in database
+ * @param type $value The value received to insert in database
+ * @return string
+ */
+function bookx_prepare_input($value) {
+    if (isset($value) && zen_not_null($value)) {
+        $value = zen_db_prepare_input($value);
+    } else {
+        $value = 'null';
+    }
+    return $value;
+}
+
+function pr($v) {
+    echo '<pre>';
+    print_r($v);
+    echo '</pre>';
+}

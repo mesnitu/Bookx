@@ -272,14 +272,14 @@ $form_action = (isset($_GET['pID'])) ? 'update_product' : 'insert_product';
 
   <!-- List group -->
   <ul class="list-group">
-      <li class="list-group-item"><?php echo (!empty($pInfo->publishing_date) ? bkx_tpl_bold(TABLE_HEADING_BOOKX_DATE_PUBLISHED) . $pInfo->publishing_date : '');?></li>
-      <li class="list-group-item"><?php echo (!empty($pInfo->authors_display) ? bkx_tpl_bold(LABEL_AUTHORS) . $pInfo->authors_display : '');?></li>
-    <li class="list-group-item"><?php echo (!empty($pInfo->genres_display) ? bkx_tpl_bold(LABEL_BOOKX_GENRE) . ': ' . $pInfo->genres_display  : '');?></li>
+      <li class="list-group-item"><?php echo bkx_tpl_bold(TABLE_HEADING_BOOKX_DATE_PUBLISHED) . ': ' . (!empty($pInfo->publishing_date) ? $pInfo->publishing_date : '---');?></li>
+      <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_AUTHORS) . (!empty($pInfo->authors_display) ? $pInfo->authors_display : '---');?></li>
+    <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_BOOKX_GENRE) . (!empty($pInfo->genres_display) ? $pInfo->genres_display  : '---');?></li>
     <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_EXTRA_ATTRIBUTES) . $bookx_extra_attributes; ?></li>
-    <li class="list-group-item"><?php echo (!empty($pInfo->isbn_display) ?  bkx_tpl_bold(LABEL_BOOKX_ISBN) . ': ' . $pInfo->isbn_display : '') ?></li>
-    <li class="list-group-item"><?php echo (!empty($pInfo->series) ? bkx_tpl_bold(LABEL_SERIES) . ' ' . $pInfo->series : '') ?></li>
-    <li class="list-group-item"><?php echo (!empty($pInfo->publisher) ? bkx_tpl_bold(LABEL_PUBLISHER) . ' ' . $pInfo->publisher : ''); ?></li>
-    <li class="list-group-item"><?php echo (!empty($pInfo->imprint) ? bkx_tpl_bold(LABEL_IMPRINT) . ' ' . $pInfo->imprint : ''); ?></li>
+    <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_BOOKX_ISBN) . (!empty($pInfo->isbn_display) ? $pInfo->isbn_display : '---') ?></li>
+    <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_SERIES) . (!empty($pInfo->series) ? $pInfo->series : '---') ?></li>
+    <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_PUBLISHER) . (!empty($pInfo->publisher) ? $pInfo->publisher : '---'); ?></li>
+    <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_IMPRINT) . (!empty($pInfo->imprint) ? $pInfo->imprint : '---'); ?></li>
     
   </ul>
 </div>
