@@ -14,7 +14,13 @@ admin_dir_name="zenadmin"
 tpl_dir_name="responsive_classic"
 
 admin_path=${dst_dir}\\${admin_dir_name}
-echo $admin_path
+
+echo
+echo "Source Directory: $src_dir"
+echo "Destination Directory: $dst_dir"
+echo "Admin Path: $admin_path"
+echo "Template Directory Name: $tpl_dir_name"
+echo
 
 admin_files=(
     bookx_author_types.php 
