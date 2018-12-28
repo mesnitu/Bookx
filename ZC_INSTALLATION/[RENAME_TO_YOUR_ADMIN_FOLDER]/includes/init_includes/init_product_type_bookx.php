@@ -1801,9 +1801,8 @@ EOT;
     //
     // remove the menu items
     //
-    // ======================================================
-
-
+    // ====================================================
+    
 	// let's see what we should do with the existing products
 
 	$sql = "SELECT type_id FROM {$const['TABLE_PRODUCT_TYPES']} WHERE type_handler = 'product_bookx';";
@@ -2118,7 +2117,9 @@ if ($const['PROJECT_VERSION_MINOR'] == "5.6") {
          * Checks the shops default encoding by ZC installation 
          */
         $default_encoding = $const['DB_CHARSET'];
-        $db_enconding = 'CHARACTER SET = utf8mb4, ';
+        
+        $character_set_table = "CHARACTER SET = utf8mb4, ";
+        $character_set_column = "CHARACTER SET 'utf8mb4' ";
 
         $db->Execute("CREATE TABLE " . TABLE_PRODUCT_BOOKX_FAMILIES . " (
             bookx_family_id int(11) NOT NULL,
@@ -2154,41 +2155,63 @@ if ($const['PROJECT_VERSION_MINOR'] == "5.6") {
              */
             $alter_enconding = true;
         }
-
+        /**
+         * Alter tables to use (int)'0' as default values
+         */
         $db->Execute(
-            "ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES']} " . $db_enconding . " CHANGE COLUMN type_sort_order type_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING']} " . $db_enconding . " CHANGE COLUMN binding_sort_order binding_sort_order INT(11) NULL DEFAULT '0'");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS']} " . $db_enconding . "  CHANGE COLUMN condition_sort_order condition_sort_order INT(11) NULL DEFAULT '0'");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA']} " . $db_enconding . "  CHANGE COLUMN bookx_publisher_id bookx_publisher_id INT(11) NULL DEFAULT '0',
+            "ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES']} " . $character_set_table . " CHANGE COLUMN type_sort_order type_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING']} " . $character_set_table . " CHANGE COLUMN binding_sort_order binding_sort_order INT(11) NULL DEFAULT '0'");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS']} " . $character_set_table . "  CHANGE COLUMN condition_sort_order condition_sort_order INT(11) NULL DEFAULT '0'");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA']} " . $character_set_table . "  CHANGE COLUMN bookx_publisher_id bookx_publisher_id INT(11) NULL DEFAULT '0',
     CHANGE COLUMN bookx_series_id bookx_series_id INT(11) NULL DEFAULT '0' ,
     CHANGE COLUMN bookx_imprint_id bookx_imprint_id INT(11) NULL DEFAULT '0' ,
     CHANGE COLUMN bookx_binding_id bookx_binding_id INT(11) NULL DEFAULT '0' ,
     CHANGE COLUMN bookx_printing_id bookx_printing_id INT(11) NULL DEFAULT '0' ,
     CHANGE COLUMN bookx_condition_id bookx_condition_id INT(11) NULL DEFAULT '0'");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION']} " . $db_enconding . " CHANGE COLUMN products_subtitle products_subtitle VARCHAR(128) NULL DEFAULT NULL;");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES']} " . $db_enconding . " CHANGE COLUMN genre_sort_order genre_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS']} " . $db_enconding . " CHANGE COLUMN imprint_sort_order imprint_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING']} " . $db_enconding . " CHANGE COLUMN printing_sort_order printing_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS']} " . $db_enconding . " CHANGE COLUMN publisher_sort_order publisher_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES']} " . $db_enconding . " CHANGE COLUMN series_sort_order series_sort_order INT(11) NULL DEFAULT '0';");
-        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION']} " . $db_enconding . " CHANGE COLUMN publisher_url publisher_url VARCHAR(191) NULL DEFAULT NULL;");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION']} " . $character_set_table . " CHANGE COLUMN products_subtitle products_subtitle VARCHAR(128) NULL DEFAULT NULL;");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES']} " . $character_set_table . " CHANGE COLUMN genre_sort_order genre_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS']} " . $character_set_table . " CHANGE COLUMN imprint_sort_order imprint_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING']} " . $character_set_table . " CHANGE COLUMN printing_sort_order printing_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS']} " . $character_set_table . " CHANGE COLUMN publisher_sort_order publisher_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES']} " . $character_set_table . " CHANGE COLUMN series_sort_order series_sort_order INT(11) NULL DEFAULT '0';");
+        $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION']} " . $character_set_table . " CHANGE COLUMN publisher_url publisher_url VARCHAR(191) NULL DEFAULT NULL;");
 
 
         if ($alter_enconding == true) {
 
-            $db_enconding = str_replace(',', '', $db_enconding);
+            $character_set_table = str_replace(',', '', $character_set_table);
 
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION']} " . $db_enconding . ";");
-            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION']} " . $db_enconding . ";");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS']} " . $character_set_table . ";");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS']} " . $character_set_table . ";");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION']} " . $character_set_table . ";");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION']} " . $character_set_table . ";");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION']} " . $character_set_table . ",
+                CHANGE COLUMN series_name series_name VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL,
+                CHANGE COLUMN series_description series_description TEXT " . $character_set_column . " NULL DEFAULT NULL;"); 
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION']}
+                CHANGE COLUMN publisher_description publisher_description TEXT " . $character_set_column . " NULL DEFAULT NULL;");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PUBLISHERS']}
+                CHANGE COLUMN `publisher_name` `publisher_name` VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION']} " . $character_set_table . ",
+                CHANGE COLUMN printing_description printing_description VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+            $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS_DESCRIPTION']} " . $character_set_table . ",
+                CHANGE COLUMN imprint_description imprint_description TEXT " . $character_set_column . " NULL DEFAULT NULL ;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_IMPRINTS']} 
+                CHANGE COLUMN imprint_name imprint_name VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL ;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION']} " . $character_set_table . ", 
+               CHANGE COLUMN genre_description genre_description VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION']}
+               CHANGE COLUMN products_subtitle products_subtitle VARCHAR(191) " . $character_set_column . " NULL DEFAULT NULL;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION']} " . $character_set_table . ",
+               CHANGE COLUMN condition_description condition_description VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION']} " . $character_set_table . ",
+              CHANGE COLUMN binding_description binding_description VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS']} " . $character_set_table . ", 
+              CHANGE COLUMN author_name author_name VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL ,
+              CHANGE COLUMN author_image_copyright author_image_copyright VARCHAR(64) " . $character_set_column . " NULL DEFAULT NULL;");
+             $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION']} " . $character_set_table . ", 
+               CHANGE COLUMN author_description author_description TEXT " . $character_set_column . " NULL DEFAULT NULL ;");
+
         }
 
         /**
@@ -2202,7 +2225,7 @@ if ($const['PROJECT_VERSION_MINOR'] == "5.6") {
             VALUES (
             'BookX Version', 'BOOKX_VERSION', '" . $version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL
              );");
-
+        
         $db->Execute("
             INSERT INTO {$const['TABLE_CONFIGURATION']} 
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
@@ -2215,7 +2238,9 @@ if ($const['PROJECT_VERSION_MINOR'] == "5.6") {
         /**
          * @todo change, add or remove this message
          */
-        $messageStack->add('Bookx Updated message to version ' . $version, 'success');
+        $update_message = "Remove files admin/product_bookx.php";
+        $messageStack->add('Bookx Updated to version ' . $version, 'success');
+        $messageStack->add($update_message, 'waning');
     }
 
     if ('uninstall' == $bookx_install) {
