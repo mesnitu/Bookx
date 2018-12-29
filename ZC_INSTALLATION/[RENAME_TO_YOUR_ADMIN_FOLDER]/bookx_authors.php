@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [admin]/bookx_authors.php 2016-02-02 philou $
+ * @version BookX V 1.0.1
+ * @version $Id: [admin]/bookx_authors.php 2018-12-28 mesnitu $
  */
 
 /**
@@ -29,6 +29,7 @@
   require('includes/application_top.php');
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
+  
   //pr($sanitizer);
   if (zen_not_null($action)) {
     switch ($action) {
@@ -223,22 +224,20 @@
     
    
     <div class="col-xs-6">
-       <?php echo zen_draw_form('search', FILENAME_BOOKX_AUTHORS, '', 'get'); ?>
-         <div class="form-group row">
-            <?php echo zen_draw_label(HEADING_TITLE_SEARCH_DETAIL, 'search', 'class="col-sm-2 col-form-label col-form-label-sm"'); ?>
-            <div class="col-sm-10 col-md-6">
+       <?php echo zen_draw_form('search', FILENAME_BOOKX_AUTHORS, '', 'get', 'class="form-inline"'); ?>
+         <div class="form-group">
+            <?php echo zen_draw_label(HEADING_TITLE_SEARCH_DETAIL, 'search', 'class="sr-only"'); ?>
                 <?php
-			// show reset search
+		   echo zen_draw_input_field('search', '','class="form-control" placeholder="' . HEADING_TITLE_SEARCH_DETAIL . '"') . zen_hide_session_id();
+           // show reset search
 		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
-		      echo '<a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS) . '" class="btn btn-secondary" role="button">Reset </a>&nbsp;&nbsp;';
+		      echo '<a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS) . '" class="btn btn-primary" role="button">Reset</a>';
 		    }
-		   echo zen_draw_input_field('search', '','class="form-control"') . zen_hide_session_id();
+            
 		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
-		      $keywords = zen_db_input(zen_db_prepare_input($_GET['search']));
-		      echo '<br />' . TEXT_INFO_SEARCH_DETAIL_FILTER . $keywords;
-		    } ?>
-                    
-            </div>
+		      $keywords = zen_db_input(zen_db_prepare_input($_GET['search'])); ?>
+             <div class="alert alert-success" role="alert"><?php echo TEXT_INFO_SEARCH_DETAIL_FILTER . $keywords; ?></div>
+		    <?php } ?>
         </div>
         </form>
     </div>
@@ -297,7 +296,7 @@
    
   $author_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $author_query_raw, $author_query_numrows);
   $author = $db->Execute($author_query_raw);
-
+  
   $author_types_array = array(array('id' => '', 'text' => TEXT_NONE));
   $author_types = $db->Execute('SELECT at.bookx_author_type_id, atd.type_description
                                 FROM ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES . ' at
