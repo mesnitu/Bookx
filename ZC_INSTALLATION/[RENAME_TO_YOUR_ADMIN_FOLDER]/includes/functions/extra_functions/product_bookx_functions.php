@@ -453,19 +453,25 @@ function bookx_get_products_subtitle($products_id, $language_id) {
       return '<strong>' . $str . '</strong>';
   }
 
-  /**
- * @since v0.9.6
+/**
+ * @since v1.0.0
  * Insures that empty values are inserted Null in database
  * @param type $value The value received to insert in database
  * @return string
  */
 function bookx_prepare_input($value) {
-    if (isset($value) && zen_not_null($value)) {
-        $value = zen_db_prepare_input($value);
-    } else {
-        $value = 'null';
+    if(isset($value)) {
+        switch ($value) {
+            case is_int($value):
+                return (int) $value;
+                break;
+            case zen_not_null($value):
+                return zen_db_prepare_input($value);
+            default:
+                return 'null';
+                break;
+        }
     }
-    return $value;
 }
 
 function pr($v) {
