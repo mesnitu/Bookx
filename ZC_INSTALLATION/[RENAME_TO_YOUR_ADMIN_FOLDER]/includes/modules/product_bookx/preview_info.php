@@ -286,18 +286,23 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
                     ?>
                     <p><?php echo $pInfo->products_description; ?></p>
                 </div>
+            
+            <?php
+            $display = function ($label, $param) {
+                return '<strong>' . $label . ' </strong>' . (!empty($param) ? $param : '---');
+            };
+            ?>
                 <!-- List group -->
                 <ul class="list-group">
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(TABLE_HEADING_BOOKX_DATE_PUBLISHED) . ': ' . (!empty($pInfo->publishing_date) ? $pInfo->publishing_date : '---'); ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_AUTHORS) . (!empty($pInfo->authors_display) ? $pInfo->authors_display : '---'); ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_BOOKX_GENRE) . (!empty($pInfo->genres_display) ? $pInfo->genres_display : '---'); ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_EXTRA_ATTRIBUTES) . $bookx_extra_attributes; ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_BOOKX_ISBN) . (!empty($pInfo->isbn_display) ? $pInfo->isbn_display : '---') ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_SERIES) . (!empty($pInfo->series) ? $pInfo->series : '---') ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_PUBLISHER) . (!empty($pInfo->publisher) ? $pInfo->publisher : '---'); ?></li>
-                        <li class="list-group-item"><?php echo bkx_tpl_bold(LABEL_IMPRINT) . (!empty($pInfo->imprint) ? $pInfo->imprint : '---'); ?></li>
-
-                    </ul>
+                    <li class="list-group-item"><?php echo $display(TABLE_HEADING_BOOKX_DATE_PUBLISHED, $pInfo->publishing_date); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_AUTHORS, $pInfo->publishing_date); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_BOOKX_GENRE ,$pInfo->genres_display); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_EXTRA_ATTRIBUTES, $bookx_extra_attributes); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_BOOKX_ISBN, $pInfo->isbn_display);?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_SERIES, $pInfo->series);?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_PUBLISHER, $pInfo->publisher); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_IMPRINT, $pInfo->imprint); ?></li>
+                </ul>
             </div>
 
         </div>

@@ -444,15 +444,7 @@ function bookx_get_products_subtitle($products_id, $language_id) {
   	return $image;
   }
   
-  /**
-   * 
-   * @param type $str
-   * @return type 
-   */
-  function bkx_tpl_bold ($str) {
-      return '<strong>' . $str . '</strong>';
-  }
-
+ 
 /**
  * @since v1.0.0
  * Insures that empty values are inserted Null in database
