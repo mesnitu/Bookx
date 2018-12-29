@@ -48,7 +48,7 @@ admin_files=(
     includes/modules/product_bookx/copy_product_confirm.php
     includes/modules/product_bookx/delete_product_confirm.php
     includes/modules/product_bookx/preview_info.php
-    includes/modules/product_bookx/preview_info_metatags.php
+    includes/modules/product_bookx/preview_info_meta_tags.php
     includes/modules/product_bookx/update_product.php
     # files in admin/includes/languages/english
     includes/languages/english/bookx_author_types.php
