@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [admin]/includes/extra_datafiles/bookx_type_extra_database_names.php 2016-02-02 philou $
+ * @version BookX v1.0.0
+ * @version $Id: [admin]/includes/extra_datafiles/bookx_type_extra_database_names.php 2019-01-06 mesnitu $
  */
 
 if (!defined('IS_ADMIN_FLAG')) {
@@ -49,8 +49,10 @@ define('TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION', DB_PREFIX . 'product_bookx_seri
 
 
 /**
- * @since version bookx v096 
+ * @since version bookx v1.0.0
  * 
  */
 define('TABLE_PRODUCT_BOOKX_FAMILIES', DB_PREFIX . 'product_bookx_families');
 define('TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS', DB_PREFIX . 'product_bookx_families_to_products');
+define('TABLE_PRODUCT_BOOKX_BOOKX_SEARCH', DB_PREFIX . 'product_bookx_search');
+
