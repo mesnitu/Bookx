@@ -25,9 +25,9 @@ class bookxAdminObserver extends base {
     global $zco_notifier;
 
     $zco_notifier->attach(
-            $this, array('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT'/* ,
-          'NOTIFIER_CART_ADD_CART_END' */
-        , 'NOTIFY_BEGIN_ADMIN_PRODUCTS'
+        $this, array('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT',
+        //'NOTIFIER_CART_ADD_CART_END',
+        'NOTIFY_BEGIN_ADMIN_PRODUCTS'
             )
     );
   }
@@ -50,6 +50,7 @@ class bookxAdminObserver extends base {
       require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . FILENAME_BOOKX_PRODUCT . '.php');
     }
   }
+  
   /**
 	 * Thsi will alter the category listing query so it lists some BookX-specific attributes, such as subtitle and ISBN
 	 */

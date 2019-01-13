@@ -204,18 +204,22 @@ $incl_dir->close();
   } */
 
 $authors_array = array(
-    array('id' => '', 
-          'text' => TEXT_NONE)
-    );
+    array(
+        'id' => '',
+        'text' => TEXT_NONE
+    )
+);
+
 $authors = $db->Execute('SELECT bookx_author_id, author_name, author_default_type FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' order by author_name');
+
 while (!$authors->EOF) {
-  
-  $authors_array[] = array(
-      'id' => $authors->fields['bookx_author_id'],
-      'text' => $authors->fields['author_name'],
-      'default_type' => $authors->fields['author_default_type']
-  );
-  $authors->MoveNext();
+
+    $authors_array[] = array(
+        'id' => $authors->fields['bookx_author_id'],
+        'text' => $authors->fields['author_name'],
+        'default_type' => $authors->fields['author_default_type']
+    );
+    $authors->MoveNext();
 }
 
 $author_types_array = array(array('id' => '', 'text' => TEXT_NONE));
@@ -263,69 +267,78 @@ while (!$genre->EOF) {
 }
 
 $series_array = array(array('id' => '', 'text' => TEXT_NONE));
-$series = $db->Execute ('SELECT s.bookx_series_id, sd.series_name
+$series = $db->Execute('SELECT s.bookx_series_id, sd.series_name
                        FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' s
 					   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' sd ON s.bookx_series_id = sd.bookx_series_id AND sd.languages_id = "' . $_SESSION['languages_id'] . '" ORDER BY sd.series_name ASC');
 
 while (!$series->EOF) {
-    $series_array[] = array('id'   => $series->fields['bookx_series_id'],
-        'text' => $series->fields['series_name']);
-    $series->MoveNext ();
+    $series_array[] = array(
+        'id' => $series->fields['bookx_series_id'],
+        'text' => $series->fields['series_name']
+    );
+    $series->MoveNext();
 }
 
 $binding_array = array(array('id' => '', 'text' => TEXT_NONE));
-$binding = $db->Execute ('SELECT b.bookx_binding_id, bd.binding_description
+$binding = $db->Execute('SELECT b.bookx_binding_id, bd.binding_description
                        FROM ' . TABLE_PRODUCT_BOOKX_BINDING . ' b
 					   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bd ON b.bookx_binding_id = bd.bookx_binding_id AND bd.languages_id = "' . $_SESSION['languages_id'] . '" ORDER BY b.binding_sort_order, bd.binding_description');
 
 while (!$binding->EOF) {
-    $binding_array[] = array('id' => $binding->fields['bookx_binding_id'],
-        'text' => $binding->fields['binding_description']);
-    $binding->MoveNext ();
+    $binding_array[] = array(
+        'id' => $binding->fields['bookx_binding_id'],
+        'text' => $binding->fields['binding_description']
+    );
+    $binding->MoveNext();
 }
 
 $printing_array = array(array('id' => '', 'text' => TEXT_NONE));
-$printing = $db->Execute ('SELECT p.bookx_printing_id, pd.printing_description
+$printing = $db->Execute('SELECT p.bookx_printing_id, pd.printing_description
                        FROM ' . TABLE_PRODUCT_BOOKX_PRINTING . ' p
 					   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' pd ON p.bookx_printing_id = pd.bookx_printing_id AND pd.languages_id = "' . $_SESSION['languages_id'] . '" ORDER BY p.printing_sort_order, pd.printing_description');
 
 while (!$printing->EOF) {
-    $printing_array[] = array('id' => $printing->fields['bookx_printing_id'],
-        'text' => $printing->fields['printing_description']);
-    $printing->MoveNext ();
+    $printing_array[] = array(
+        'id' => $printing->fields['bookx_printing_id'],
+        'text' => $printing->fields['printing_description']
+    );
+    $printing->MoveNext();
 }
 
 $condition_array = array(array('id' => '', 'text' => TEXT_NONE));
-$condition = $db->Execute ('SELECT c.bookx_condition_id, cd.condition_description
+$condition = $db->Execute('SELECT c.bookx_condition_id, cd.condition_description
                        FROM ' . TABLE_PRODUCT_BOOKX_CONDITIONS . ' c
 					   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' cd ON c.bookx_condition_id = cd.bookx_condition_id AND cd.languages_id = "' . $_SESSION['languages_id'] . '" ORDER BY c.condition_sort_order, cd.condition_description');
 
 while (!$condition->EOF) {
-    $condition_array[] = array('id' => $condition->fields['bookx_condition_id'],
-        'text' => $condition->fields['condition_description']);
-    $condition->MoveNext ();
+    $condition_array[] = array(
+        'id' => $condition->fields['bookx_condition_id'],
+        'text' => $condition->fields['condition_description']
+    );
+    $condition->MoveNext();
 }
 
 $category_lookup = $db->Execute("SELECT *
                                  FROM " . TABLE_CATEGORIES . " c,
                                       " . TABLE_CATEGORIES_DESCRIPTION . " cd
-                                 WHERE c.categories_id = " . (int) $current_category_id . "
+                                 WHERE c.categories_id = " . (int)$current_category_id . "
                                  AND c.categories_id = cd.categories_id
-                                 AND cd.language_id = " . (int) $_SESSION['languages_id']);
+                                 AND cd.language_id = " . (int)$_SESSION['languages_id']);
 
-if(!$category_lookup->EOF) {
+if (!$category_lookup->EOF) {
     $cInfo = new objectInfo($category_lookup->fields);
-}
-else {
+} else {
     $cInfo = new objectInfo(array());
 }
 
 $manufacturers_array = array(array(
-        'id' => '',
-        'text' => TEXT_NONE));
-$manufacturers = $db->Execute ("SELECT manufacturers_id, manufacturers_name
+    'id' => '',
+    'text' => TEXT_NONE
+));
+$manufacturers = $db->Execute("SELECT manufacturers_id, manufacturers_name
                                FROM " . TABLE_MANUFACTURERS . "
                                ORDER BY manufacturers_name");
+
 foreach ($manufacturers as $manufacturer) {
     $manufacturers_array[] = array(
         'id' => $manufacturer['manufacturers_id'],
@@ -334,15 +347,19 @@ foreach ($manufacturers as $manufacturer) {
 }
 
 $tax_class_array = array(array(
-        'id' => '0',
-        'text' => TEXT_NONE));
+    'id' => '0',
+    'text' => TEXT_NONE
+));
+
 $tax_class = $db->Execute("SELECT tax_class_id, tax_class_title
                            FROM " . TABLE_TAX_CLASS . "
                            ORDER BY tax_class_title");
+
 foreach ($tax_class as $item) {
     $tax_class_array[] = array(
         'id' => $item['tax_class_id'],
-        'text' => $item['tax_class_title']);
+        'text' => $item['tax_class_title']
+    );
 }
 
 $languages = zen_get_languages();
@@ -353,54 +370,65 @@ if (zen_get_categories_status($current_category_id) == 0 && $pInfo->products_sta
 }
 
 // Virtual Products
-if (!isset ($pInfo->products_virtual))
+if (!isset($pInfo->products_virtual))
 //@TODO check this line 
-    $pInfo->products_virtual = DEFAULT_PRODUCT_BOOKX_PRODUCTS_VIRTUAL;
+$pInfo->products_virtual = DEFAULT_PRODUCT_BOOKX_PRODUCTS_VIRTUAL;
 switch ($pInfo->products_virtual) {
-    case '0': $is_virtual = false;
+    case '0':
+        $is_virtual = false;
         $not_virtual = true;
         break;
-    case '1': $is_virtual = true;
+    case '1':
+        $is_virtual = true;
         $not_virtual = false;
         break;
-    default: $is_virtual = false;
+    default:
+        $is_virtual = false;
         $not_virtual = true;
 }
 // Always Free Shipping
-if (!isset ($pInfo->product_is_always_free_shipping))
+if (!isset($pInfo->product_is_always_free_shipping))
 //@TODO check this line
-    $pInfo->product_is_always_free_shipping = DEFAULT_PRODUCT_BOOKX_PRODUCTS_IS_ALWAYS_FREE_SHIPPING;
+$pInfo->product_is_always_free_shipping = DEFAULT_PRODUCT_BOOKX_PRODUCTS_IS_ALWAYS_FREE_SHIPPING;
 switch ($pInfo->product_is_always_free_shipping) {
-    case '0': $is_product_is_always_free_shipping = false;
+    case '0':
+        $is_product_is_always_free_shipping = false;
         $not_product_is_always_free_shipping = true;
         $special_product_is_always_free_shipping = false;
         break;
-    case '1': $is_product_is_always_free_shipping = true;
+    case '1':
+        $is_product_is_always_free_shipping = true;
         $not_product_is_always_free_shipping = false;
         $special_product_is_always_free_shipping = false;
         break;
-    case '2': $is_product_is_always_free_shipping = false;
+    case '2':
+        $is_product_is_always_free_shipping = false;
         $not_product_is_always_free_shipping = false;
         $special_product_is_always_free_shipping = true;
         break;
-    default: $is_product_is_always_free_shipping = false;
+    default:
+        $is_product_is_always_free_shipping = false;
         $not_product_is_always_free_shipping = true;
         $special_product_is_always_free_shipping = false;
         break;
 }
 // products_qty_box_status shows
-if (!isset ($pInfo->products_qty_box_status))
+if (!isset($pInfo->products_qty_box_status))
     $pInfo->products_qty_box_status = PRODUCTS_QTY_BOX_STATUS;
 switch ($pInfo->products_qty_box_status) {
-    case '0': $is_products_qty_box_status = false;
+    case '0':
+        $is_products_qty_box_status = false;
         $not_products_qty_box_status = true;
         break;
-    case '1': $is_products_qty_box_status = true;
+    case '1':
+        $is_products_qty_box_status = true;
         $not_products_qty_box_status = false;
         break;
-    default: $is_products_qty_box_status = true;
+    default:
+        $is_products_qty_box_status = true;
         $not_products_qty_box_status = false;
 }
+
 // Product is Priced by Attributes
 if (!isset ($pInfo->products_priced_by_attribute))
     $pInfo->products_priced_by_attribute = '0';
@@ -415,42 +443,51 @@ switch ($pInfo->products_priced_by_attribute) {
         $not_products_priced_by_attribute = true;
 }
 // Product is Free
-if (!isset ($pInfo->product_is_free))
+if (!isset($pInfo->product_is_free))
     $pInfo->product_is_free = '0';
 switch ($pInfo->product_is_free) {
-    case '0': $in_product_is_free = false;
+    case '0':
+        $in_product_is_free = false;
         $out_product_is_free = true;
         break;
-    case '1': $in_product_is_free = true;
+    case '1':
+        $in_product_is_free = true;
         $out_product_is_free = false;
         break;
-    default: $in_product_is_free = false;
+    default:
+        $in_product_is_free = false;
         $out_product_is_free = true;
 }
 // Product is Call for price
-if (!isset ($pInfo->product_is_call))
+if (!isset($pInfo->product_is_call))
     $pInfo->product_is_call = '0';
 switch ($pInfo->product_is_call) {
-    case '0': $in_product_is_call = false;
+    case '0':
+        $in_product_is_call = false;
         $out_product_is_call = true;
         break;
-    case '1': $in_product_is_call = true;
+    case '1':
+        $in_product_is_call = true;
         $out_product_is_call = false;
         break;
-    default: $in_product_is_call = false;
+    default:
+        $in_product_is_call = false;
         $out_product_is_call = true;
 }
 // Products can be purchased with mixed attributes retail
-if (!isset ($pInfo->products_quantity_mixed))
+if (!isset($pInfo->products_quantity_mixed))
     $pInfo->products_quantity_mixed = '0';
 switch ($pInfo->products_quantity_mixed) {
-    case '0': $in_products_quantity_mixed = false;
+    case '0':
+        $in_products_quantity_mixed = false;
         $out_products_quantity_mixed = true;
         break;
-    case '1': $in_products_quantity_mixed = true;
+    case '1':
+        $in_products_quantity_mixed = true;
         $out_products_quantity_mixed = false;
         break;
-    default: $in_products_quantity_mixed = true;
+    default:
+        $in_products_quantity_mixed = true;
         $out_products_quantity_mixed = false;
 }
 
@@ -482,9 +519,9 @@ $off_image_delete = true;
   
 var tax_rates = new Array();
     <?php
-    for ($i = 0, $n = sizeof ($tax_class_array); $i < $n; $i++) {
+    for ($i = 0, $n = sizeof($tax_class_array); $i < $n; $i++) {
         if ($tax_class_array[$i]['id'] > 0) {
-            echo 'tax_rates["' . $tax_class_array[$i]['id'] . '"] = ' . zen_get_tax_rate_value ($tax_class_array[$i]['id']) . ';' . "\n";
+            echo 'tax_rates["' . $tax_class_array[$i]['id'] . '"] = ' . zen_get_tax_rate_value($tax_class_array[$i]['id']) . ';' . "\n";
         }
     }
     ?>
@@ -530,7 +567,7 @@ var authorDefaulTypes = {
 <?php
 $divider = '';
 foreach ($authors_array as $author) {
-    if (array_key_exists ('default_type', $author)) {
+    if (array_key_exists('default_type', $author)) {
         echo $divider, $author['id'] . ': ' . ($author['default_type'] ? $author['default_type'] : 'null');
         if ('' == $divider)
             $divider = ',';
@@ -538,7 +575,7 @@ foreach ($authors_array as $author) {
 }
 ?>
 }
-console.log(authorDefaulTypes);
+//console.log(authorDefaulTypes);
 function setAuthorDefaultType(authorSelect) {
     
     var authorSelectId = authorSelect.getAttribute("id");
@@ -660,7 +697,7 @@ function checkISBN() {
         }
 
         if (calculatedCheckDigit != checkDigit) {
-            document.getElementById("isbn_display").innerHTML = <?php echo '"<span class=\"alert\">' . sprintf (TEXT_JAVASCRIPT_ISBN_WRONG_CHECKDIGIT, ' + isbnTXT + ', '+ calculatedCheckDigit +') . '</span>"'; ?>;
+            document.getElementById("isbn_display").innerHTML = <?php echo '"<span class=\"alert\">' . sprintf(TEXT_JAVASCRIPT_ISBN_WRONG_CHECKDIGIT, ' + isbnTXT + ', '+ calculatedCheckDigit +') . '</span>"'; ?>;
         }
 
         if (13 == isbnTXT.length) {
@@ -670,20 +707,20 @@ function checkISBN() {
     }
 }
 
-  /*
-  var localeMonthNames = new Array();
-  localeMonthNames[0] = "<?php echo strftime ('%B', mktime (0, 0, 0, 1, 1)); ?>";
-  localeMonthNames[1] = "<?php echo strftime ('%B', mktime (0, 0, 0, 2, 1)); ?>";
-  localeMonthNames[2] = "<?php echo strftime ('%B', mktime (0, 0, 0, 3, 1)); ?>";
-  localeMonthNames[3] = "<?php echo strftime ('%B', mktime (0, 0, 0, 4, 1)); ?>";
-  localeMonthNames[4] = "<?php echo strftime ('%B', mktime (0, 0, 0, 5, 1)); ?>";
-  localeMonthNames[5] = "<?php echo strftime ('%B', mktime (0, 0, 0, 6, 1)); ?>";
-  localeMonthNames[6] = "<?php echo strftime ('%B', mktime (0, 0, 0, 7, 1)); ?>";
-  localeMonthNames[7] = "<?php echo strftime ('%B', mktime (0, 0, 0, 8, 1)); ?>";
-  localeMonthNames[8] = "<?php echo strftime ('%B', mktime (0, 0, 0, 9, 1)); ?>";
-  localeMonthNames[9] = "<?php echo strftime ('%B', mktime (0, 0, 0, 10, 1)); ?>";
-  localeMonthNames[10] = "<?php echo strftime ('%B', mktime (0, 0, 0, 11, 1)); ?>";
-  localeMonthNames[11] = "<?php echo strftime ('%B', mktime (0, 0, 0, 12, 1)); ?>";
+/*  
+var localeMonthNames = new Array();
+  localeMonthNames[0] = "<?php echo strftime('%B', mktime(0, 0, 0, 1, 1)); ?>";
+  localeMonthNames[1] = "<?php echo strftime('%B', mktime(0, 0, 0, 2, 1)); ?>";
+  localeMonthNames[2] = "<?php echo strftime('%B', mktime(0, 0, 0, 3, 1)); ?>";
+  localeMonthNames[3] = "<?php echo strftime('%B', mktime(0, 0, 0, 4, 1)); ?>";
+  localeMonthNames[4] = "<?php echo strftime('%B', mktime(0, 0, 0, 5, 1)); ?>";
+  localeMonthNames[5] = "<?php echo strftime('%B', mktime(0, 0, 0, 6, 1)); ?>";
+  localeMonthNames[6] = "<?php echo strftime('%B', mktime(0, 0, 0, 7, 1)); ?>";
+  localeMonthNames[7] = "<?php echo strftime('%B', mktime(0, 0, 0, 8, 1)); ?>";
+  localeMonthNames[8] = "<?php echo strftime('%B', mktime(0, 0, 0, 9, 1)); ?>";
+  localeMonthNames[9] = "<?php echo strftime('%B', mktime(0, 0, 0, 10, 1)); ?>";
+  localeMonthNames[10] = "<?php echo strftime('%B', mktime(0, 0, 0, 11, 1)); ?>";
+  localeMonthNames[11] = "<?php echo strftime('%B', mktime(0, 0, 0, 12, 1)); ?>";
 
   
   function previewDisplayDate() {
@@ -714,8 +751,7 @@ function checkISBN() {
     }
     document.getElementById("publishing_date_display").innerHTML = dateDisplayString;
 }
-*/
-/*
+
 function previewDisplayDate() {
   
   var dateDisplayString = document.forms["new_product"].publishing_date.value;
@@ -723,7 +759,7 @@ function previewDisplayDate() {
 }
 */
 
-  Date.daysBetween = function(date1, date2) {
+Date.daysBetween = function(date1, date2) {
     //Get 1 day in milliseconds
     var one_day = 1000 * 60 * 60 * 24;
 
@@ -881,9 +917,9 @@ function determineBookxProductStatusMessage() {
         $sql_config_value = 'SELECT * FROM ' . TABLE_CONFIGURATION . ' WHERE configuration_key="SHOW_NEW_PRODUCTS_LIMIT"';
         $check_configure = $db->Execute ($sql_config_value);
         ?>
+        
         statusMessage += '<span class="bookx_article_status_explain">\n\
-        <?php printf (TEXT_ZC_NEW_PRODUCTS_LIMIT_WARNING, $check_configure->fields['configuration_title'], $check_configure->fields['configuration_value'], zen_href_link (FILENAME_CONFIGURATION, 'gID=' . $check_configure->fields['configuration_group_id'] . '&cID=' . $check_configure->fields['configuration_id']));
-        ?></span>';
+        <?php printf (TEXT_ZC_NEW_PRODUCTS_LIMIT_WARNING, $check_configure->fields['configuration_title'], $check_configure->fields['configuration_value'], zen_href_link (FILENAME_CONFIGURATION, 'gID=' . $check_configure->fields['configuration_group_id'] . '&cID=' . $check_configure->fields['configuration_id']));?></span>';
     }
 
     document.getElementById("bookxProductStatusDisplay").innerHTML = statusMessage;
@@ -892,9 +928,9 @@ function determineBookxProductStatusMessage() {
         
 <div class="container-fluid">
     <?php
-    echo zen_draw_form('new_product', FILENAME_PRODUCT, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ( (isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
+    echo zen_draw_form('new_product', FILENAME_PRODUCT, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ((isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
     if (isset($product_type)) {
-      echo zen_draw_hidden_field('product_type', $product_type);
+        echo zen_draw_hidden_field('product_type', $product_type);
     }
     ?>
 
@@ -911,13 +947,13 @@ function determineBookxProductStatusMessage() {
 <!--    <span class="glyphicon glyphicon-book" aria-hidden="true"></span>-->
     <div>
         <span class="floatButton text-right">
-      <button type="submit" class="btn btn-primary"><?php echo IMAGE_PREVIEW; ?></button>&nbsp;&nbsp;<a href="<?php echo zen_href_link(FILENAME_CATEGORY_PRODUCT_LISTING, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ( (isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ( (isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : '')); ?>" class="btn btn-default" role="button"><?php echo IMAGE_CANCEL; ?></a>
+      <button type="submit" class="btn btn-primary"><?php echo IMAGE_PREVIEW; ?></button>&nbsp;&nbsp;<a href="<?php echo zen_href_link(FILENAME_CATEGORY_PRODUCT_LISTING, 'cPath=' . $current_category_id . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : '') . ((isset($_POST['search']) && !empty($_POST['search']) && empty($_GET['search'])) ? '&search=' . $_POST['search'] : '')); ?>" class="btn btn-default" role="button"><?php echo IMAGE_CANCEL; ?></a>
         </span>
     </div>
     <div class="form-group">
         <?php
 // show when product is linked
-      if (isset($_GET['pID']) && zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
+        if (isset($_GET['pID']) && zen_get_product_is_linked($_GET['pID']) == 'true' && $_GET['pID'] > 0) {
             ?>
         <?php echo zen_draw_label(TEXT_MASTER_CATEGORIES_ID, 'master_category', 'class="col-sm-3 control-label"'); ?>
             <div class="col-sm-9 col-md-6">

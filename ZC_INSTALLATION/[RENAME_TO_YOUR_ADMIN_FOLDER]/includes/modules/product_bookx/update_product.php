@@ -327,7 +327,9 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
         ///////////////////////////////////////////////////////
     }
 
-    //** look for additional update_product*.php files and include now **//
+    /**
+     *  look for additional update_product*.php files and include now 
+     */
     $incl_dir = @dir(DIR_FS_ADMIN . '/includes/modules/product_bookx');
     while ($file = $incl_dir->read()) {
         if('update_product_' == substr($file, 0, 15)) {

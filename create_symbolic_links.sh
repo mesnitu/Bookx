@@ -18,6 +18,8 @@ mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/observers
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german/extra_definitions
+# Adds Installer Folder
+mkdir -p ${dst_dir}/${admin_dir_name}/includes/includes/installers/bookx
 mkdir -p ${dst_dir}/includes/languages/german
 mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
 mkdir -p ${dst_dir}/includes/classes/observers

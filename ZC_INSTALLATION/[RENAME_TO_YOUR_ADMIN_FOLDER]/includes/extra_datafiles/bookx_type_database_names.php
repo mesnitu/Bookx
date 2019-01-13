@@ -54,5 +54,7 @@ define('TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION', DB_PREFIX . 'product_bookx_seri
  */
 define('TABLE_PRODUCT_BOOKX_FAMILIES', DB_PREFIX . 'product_bookx_families');
 define('TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS', DB_PREFIX . 'product_bookx_families_to_products');
-define('TABLE_PRODUCT_BOOKX_BOOKX_SEARCH', DB_PREFIX . 'product_bookx_search');
+define('TABLE_PRODUCT_BOOKX_SEARCH', DB_PREFIX . 'product_bookx_search');
+
+
 

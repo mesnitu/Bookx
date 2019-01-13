@@ -9,6 +9,7 @@ clover.xml
 .vscode
 
 ### NetBeans ###
+nbproject
 nbproject/private/
 build/
 nbbuild/

@@ -313,7 +313,7 @@ function bookx_get_products_subtitle($products_id, $language_id) {
 
   function bookx_convert_product_to_bookx_type($product_id = null) {
   	global $db;
-
+    
   	$sql = 'SELECT * FROM ' . TABLE_PRODUCT_TYPES . ' WHERE type_handler = "product_bookx"';
 
   	$result = $db->Execute($sql); /* @var $result queryFactoryResult */
@@ -466,8 +466,122 @@ function bookx_prepare_input($value) {
     }
 }
 
-function pr($v) {
+/**
+ * Checks missing relations between bookx tables_to_products and table products.
+ * 
+ * @category admin
+ * @global type $db
+ * @param array $bx_tables an array on tables to check
+ * @param bool $delete default false
+ * @return string $msg info
+ * 
+ */
+function bookx_check_missing_product_relations($bx_tables, $field_id, $delete = false) {
+    global $db;
+    $msg = '';
+    if (is_array($bx_tables)) {
+
+        foreach ($bx_tables as $table => $table2) {
+            $check = $db->Execute("SELECT ".$field_id." FROM " . $table . " WHERE 
+                ".$field_id." NOT IN (SELECT ".$field_id." FROM " .$table2 . ");");
+            pr($check);
+            $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in " . $table . "<br />" : $table . " all Good!<br />";
+            if ($delete == true && $check->Count() > 0) {
+                $msg .= ($check->Count() > 0) ? "Deleted " . $check->Count() . " in " . $table . "<br />" : "All Goodfff!";
+                $db->Execute("DELETE FROM " . $table . " WHERE 
+                ".$field_id." NOT IN (SELECT ".$field_id." FROM " . $table2 . ");");   
+            }
+        }
+    }
+    return $msg;
+}
+
+/**
+ * 
+ * @param type $url the git api release links
+ * @param type $compare if <b>TRUE</b> returns an array. Else, display formated info (on install) 
+ * @param type $install maybe future git install releases. 
+ * @return type array
+ */
+function check_git_release_for($url, $compare = false, $install = null) {
+    //$download_folder = '';
+    $cInit = curl_init();
+    curl_setopt($cInit, CURLOPT_URL, $url);
+    curl_setopt($cInit, CURLOPT_RETURNTRANSFER, 1); // 1 = TRUE
+    curl_setopt($cInit, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+    curl_setopt($cInit, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+    $output = curl_exec($cInit);
+    $response = curl_getinfo($cInit, CURLINFO_HTTP_CODE);
+    if ($response == "200") {
+        $result = json_decode($output, true);
+    } else {
+        $info = "No info found " . $response;
+    }
+
+    if ($compare == false) {
+        $info = "Latest Release: " . $result[0]['name'] . " <br />Download: <a href=" . $result[0]['zipball_url'] . " rel=\"no-follow\" >" . $result[0]['name'] . "</a> <br />published: " . $result[0]['published_at'] . "\n";
+    } else {
+        $info = array(
+            'tag_name' => $result[0]['tag_name'],
+            'html_url' => $result[0]['html_url'],
+            'zipball_url' => $result[0]['zipball_url'],
+            'published_at' => $result[0]['published_at'],
+            'body' => $result[0]['body'],
+            'author' => $result[0]['author']['login']
+        );
+    }
+
+    curl_close($cInit);
+
+    return $info;
+}
+
+function bookx_update_plugin_release($now = true, $days = null) {
+    global $objGit;
+
+    $file = DIR_FS_ADMIN . 'includes/exra_datafiles/bookx/plugin_check.json';
+    $msg = '';
+    $date = new DateTime(); //this returns the current date time
+    $today = $date->format('Y-m-d');
+
+//    if (zen_not_null($days) && zen_date_diff($today, $last_checked) <= -$conf_date) {
+//        $last_checked = $read_file->last_check_date;
+//        //@todo by days
+//    }
+
+    if ($now) {
+        foreach ($objGit as $key => $plugin) {
+            if ($key !== 'last_check_date') {
+                $msg .= (empty($plugin->url)) ? '<span class="text-danger">No url found for ' . $key . '</span><br />' : '<span>Updated Info for ' . $key . '</span><br />';
+                $check = check_git_release_for($plugin->url, true);
+                if ($tag_name !== $plugin->installed) {
+                    $objGit->{$key}->last_release = $check['tag_name'];
+                    $objGit->{$key}->html_url = $check['html_url'];
+                }
+            }
+        }
+    }
+    $objGit->last_check_date = $today;
+
+    file_put_contents($file, json_encode($objGit, JSON_PRETTY_PRINT));
+    return $msg;
+}
+
+
+
+function pr($v,$dedug=null) {
     echo '<pre>';
+    echo $vn;
     print_r($v);
+    if ($dedug) {
+        debug_print_backtrace();
+    }
+    echo '</pre>';
+}
+
+function vd($v) {
+    echo '<pre>';
+    var_dump($v);
     echo '</pre>';
 }

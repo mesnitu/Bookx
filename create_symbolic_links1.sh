@@ -74,6 +74,16 @@ admin_files=(
     includes/languages/german/bookx_series.php
     includes/languages/german/product_bookx.php
     includes/languages/german/extra_definitions/product_bookx.php
+    #since v1.0.0
+    includes/extra_configures/bookx_extrafiles_folder.php
+    includes/extra_datafiles/bookx/installers/bookx_install_v1.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v09.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v091.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v092.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v093.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v094.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v095.php
+    includes/extra_datafiles/bookx/plugin_check.json
     )
 
 #files in catalog
@@ -148,6 +158,12 @@ if [ "$options" == "create" ]; then
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german/extra_definitions
+    
+    # v1.0.0 Adds Installer and bookx folder to extra_datafiles
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_configures
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/installers
+    
     mkdir -p ${dst_dir}/includes/languages/german
     mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
     mkdir -p ${dst_dir}/includes/classes/observers
