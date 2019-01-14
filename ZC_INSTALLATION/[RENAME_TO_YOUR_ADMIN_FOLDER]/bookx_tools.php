@@ -157,16 +157,43 @@ if (isset($_GET['action']) &&
     require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_install_v1.php';
 }
 
-/**
- * Get git releases info from json file
- */
-$jsonStr = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER . 'plugin_check.json');
-$objGit = json_decode($jsonStr);
+if (BOOKX_DISPLAY_GIT_RELEASES == true) {
+    /**
+     * Get git releases info from json file
+     */
+    $jsonStr = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER . 'plugin_check.json');
+    $objGit = json_decode($jsonStr);
 
-if (isset($_GET) && 'check_git_releases' == $_GET['action']) {
-    $messageStack->add_session(bookx_update_plugin_release(), 'success');
-    $_SESSION['bookx']['checked_date'] = true;
-    zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+    if (isset($_GET) && 'check_git_releases' == $_GET['action']) {
+        $messageStack->add_session(bookx_update_plugin_release(), 'success');
+        $_SESSION['bookx']['checked_date'] = true;
+        zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+    }
+
+    //define('EP4BOOKX_VERSION', '0.9.9');
+    $ep4bookx_exists = false;
+//pr(bookx_update_plugin_release());
+    if ($action == 'update_git_repositories') {
+
+        /**
+         * Maybe the file was corrupted or no installed version is available. 
+         * Check installed versions and update
+         * Note: Until now, EP4 doesn't widely annouce is version. 
+         */
+        if ($ep4bookx_exists) {
+            $objGit->ep4bookx->installed = '';
+            $objGit->ep4bookx->url = $_POST['ep4bookx'];
+        }
+        if ($ep4_exists) {
+            $objGit->ep4->installed = EP4BOOKX_VERSION;
+            $objGit->ep4->url = $_POST['ep4'];
+        }
+        $json = json_encode($objGit, JSON_PRETTY_PRINT);
+        file_put_contents(BOOKX_EXTRA_DATAFILES . '/plugin_check.json', $json);
+        //EP4BOOKX_VERSION
+        $messageStack->add_session(bookx_update_plugin_release(), 'info');
+        zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+    }
 }
 
 if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) {
@@ -180,32 +207,6 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
     zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
 }
 
-
-
-//define('EP4BOOKX_VERSION', '0.9.9');
-$ep4bookx_exists = false;
-//pr(bookx_update_plugin_release());
-if ($action == 'update_git_repositories') {
-
-    /**
-     * Maybe the file was corrupted or no installed version is available. 
-     * Check installed versions and update
-     * Note: Until now, EP4 doesn't widely annouce is version. 
-     */
-    if ($ep4bookx_exists) {
-        $objGit->ep4bookx->installed = '';
-        $objGit->ep4bookx->url = $_POST['ep4bookx'];
-    }
-    if ($ep4_exists) {
-        $objGit->ep4->installed = EP4BOOKX_VERSION;
-        $objGit->ep4->url = $_POST['ep4'];
-    }
-    $json = json_encode($objGit, JSON_PRETTY_PRINT);
-    file_put_contents(BOOKX_EXTRA_DATAFILES . '/plugin_check.json', $json);
-    //EP4BOOKX_VERSION
-    $messageStack->add_session(bookx_update_plugin_release(), 'info');
-    zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
-}
 ?>
 
 <!doctype html>
