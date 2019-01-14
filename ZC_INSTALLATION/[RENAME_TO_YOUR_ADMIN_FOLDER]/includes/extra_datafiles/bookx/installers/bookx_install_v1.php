@@ -501,7 +501,7 @@ switch (true) {
     if ('install' == $bookx_install) { // could also be "reset" ! ???
 
 	        $sql = "REPLACE INTO {$const['TABLE_PRODUCT_TYPES']} (type_name, type_handler, type_master_type, allow_add_to_cart, date_added, last_modified)
-	                   VALUES ( 'Products - Bookx', 'product_bookx', 1,  'Y', now(), now())";
+	                   VALUES ( 'Product - Bookx', 'product_bookx', 1,  'Y', now(), now())";
 	       $db->Execute($sql);
            
         
