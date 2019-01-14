@@ -33,14 +33,10 @@ if (strpos($_SERVER['PHP_SELF'], 'login.php')) {
     $login_page = true;
 }
 
-/**
- * Check install
- */
 // Test for existing installation
 //pr($_SESSION);
 //pr($_GET);
 //pr($_POST);
-
 
 if (!$login_page) {
     

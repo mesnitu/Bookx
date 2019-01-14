@@ -61,8 +61,11 @@ define('TEXT_BOOKX_STATUS_NOT_INSTALLED', 'BookX is currently <strong>not</stron
 
 define('BOOKX_LINK_INSTALL', 'Install BookX. (Please make a database backup before you proceed!)');
 define('BOOKX_LINK_UPDATE', 'Update BookX to new version. (Please make a database backup before you proceed!)');
-define('BOOKX_LINK_REMOVE', 'Remove BookX from the Database. (Please make a database backup before you proceed!) All BookX products as well as authors, genres, publishers etc. will be deleted!');
-define('BOOKX_LINK_RESET', 'Reset BookX settngs to defaults. Missing configuration entries will be fixed. <STRONG>No products will be altered or deleted!</strong> (Please make a database backup before you proceed!)');
+define('BOOKX_LINK_REMOVE_DESC', 'Remove BookX from the Database. (Please make a database backup before you proceed!) All BookX products as well as authors, genres, publishers etc. will be deleted!');
+define('BOOKX_LINK_REMOVE', 'Remove');
+
+define('BOOKX_LINK_RESET_DESC', 'Reset BookX settngs to defaults. Missing configuration entries will be fixed. <STRONG>No products will be altered or deleted!</strong> (Please make a database backup before you proceed!)');
+define('BOOKX_LINK_RESET', 'Reset');
 
 
 define('TEXT_CONVERT_BOOKX_PRODUCTS', 'Convert all products of type "BookX" to products of type "General" and remove all product attributes which are specific to product type "BookX".');
@@ -70,7 +73,8 @@ define('TEXT_DELETE_BOOKX_PRODUCTS', 'Completely delete all products of type "Bo
 
 define('BOOKX_CONFIRM_REMOVE', 'Are you sure?');
 
-define('BOOKX_LINK_MANAGE_PRODUCT_MIGRATION', 'Convert existing products to product type "Book X" or from type "BookX" to another product type. (Selection on next screen)');
+define('BOOKX_LINK_MANAGE_PRODUCT_MIGRATION_DESC', 'Convert existing products to product type "BookX" or from type "BookX" to another product type. (Selection on next screen)');
+define('BOOKX_LINK_MANAGE_PRODUCT_MIGRATION', 'Convert ');
 
 define('BOOKX_OPTION_IMPORT', '<strong>Option 1: Convert existing products to product type "BookX":</strong>');
 define('BOOKX_SELECT_PRODUCT_TYPE_SOURCE_FOR_MIGRATION', 'Select product type from which to convert to product type "BookX":');

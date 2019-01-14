@@ -172,7 +172,7 @@ if (BOOKX_DISPLAY_GIT_RELEASES == true) {
 
     //define('EP4BOOKX_VERSION', '0.9.9');
     $ep4bookx_exists = false;
-//pr(bookx_update_plugin_release());
+    //pr(bookx_update_plugin_release());
     if ($action == 'update_git_repositories') {
 
         /**
@@ -388,7 +388,7 @@ if ($action == 'bookx_install_options') {
                                 </div>
                             </div>
                             <div class="form-group">
-                                <?php echo zen_draw_label('Use Dinamic Metatags', 'bookx_dinamic_metagas', 'class="col-sm-3 control-label"'); ?>
+                                <?php echo zen_draw_label('Use Dinamic Metatags', 'bookx_dinamic_metatags', 'class="col-sm-3 control-label"'); ?>
                                 <div class="col-sm-9 col-md-6"> 
                                     <?php
                                     $bookx_dinamic_metatags = array(
@@ -407,7 +407,7 @@ if ($action == 'bookx_install_options') {
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                         <?php echo $msg; ?>
                                     </div>
-                                    <?php echo zen_draw_pull_down_menu('bookx_dinamic_metagas', $bookx_dinamic_metatags, $bookx_dinamic_metatags[1]['id'], 'id="confMetaTags" class="form-control"'); ?>
+                                    <?php echo zen_draw_pull_down_menu('bookx_dinamic_metatags', $bookx_dinamic_metatags, $bookx_dinamic_metatags[1]['id'], 'id="confMetaTags" class="form-control"'); ?>
                                 </div>
                             </div>
                             <?php
