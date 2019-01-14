@@ -144,7 +144,12 @@ $sql = "SELECT IFNULL(column_name, '') FROM information_schema.columns WHERE tab
 	    									,'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_IMPRINT_STATUS'
 	    									)";
 	    		$db->Execute($sql);
-                if (defined(TABLE_PRODUCT_TYPE_LAYOUT_LANGUAGE)) {
+                /**
+                 * PHP Warning: Use of undefined constant TABLE_PRODUCT_TYPE_LAYOUT_LANGUAGE
+                 * I guess this is related to the german zencart version. Adding var $german_installed to skip 
+                 * this warning.
+                 */
+                if ($german_installed && defined(TABLE_PRODUCT_TYPE_LAYOUT_LANGUAGE)) {
     	    		$sql = "DELETE FROM {$const['TABLE_PRODUCT_TYPE_LAYOUT_LANGUAGE']}
     				    		WHERE configuration_key IN ('SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_STATUS'
     				    		,'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_TAGLINE_STATUS'
