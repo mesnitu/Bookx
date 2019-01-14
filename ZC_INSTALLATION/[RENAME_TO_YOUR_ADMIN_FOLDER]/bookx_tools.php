@@ -79,6 +79,7 @@ if (0 < $product_type->RecordCount()) {
     
     // check if any bookx table is present. If only bookx tables were imported, it's a update
     if (isset($_GET['confirm_update']) == true) {
+        
         $_SESSION['bookx_install'] = 'do_reset';
         $already_installed = true;
         $installed_version = '0.9'; // some first BETA files had no version info
@@ -310,15 +311,15 @@ if ($action == 'bookx_install_options') {
         $form_action = ($already_installed) ? 'action=bookx_update' : 'action=bookx_install';
         if ($already_installed && ($installed_version !== $bookx_version)) {
             /**
-             * SHow a warning about updating 0.9.5 to 1.0.0
+             * Show a warning about updating version
              */
-            $update_msg = "You have $installed_version. While database updates can be applied, some files have changed.";
+            $update_msg = "Updating BookX from v$installed_version to v$bookx_version";
         }
         ?>
 
             <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Bookx <?php echo $title; ?> Options<span class="glyphicon glyphicon-cog pull-right" aria-hidden="true"></span></h3>
+                            <h3 class="panel-title">BookX <?php echo $title; ?> Options<span class="glyphicon glyphicon-cog pull-right" aria-hidden="true"></span></h3>
                         </div>
                         <div class="panel-body">
                             <?php
