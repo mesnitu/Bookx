@@ -332,25 +332,9 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             KEY idx_pbxs_series_name (series_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_db_encoding . ";");
     $update_095_msg .= $list_msg("Added TABLE_PRODUCT_BOOKX_BOOKX_SEARCH<br>");
-
-    if ($bookx_uses_ceon == true) {
-        $db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} 
-            (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
-            VALUES (
-            'Use CEON URI Module', 'BOOKX_USES_CEON_URI_MODULE', '0', 
-            'Enable Ceon Uri Module. Default 0', {$cf_gid}, '310', now(), now(), NULL,
-            'zen_cfg_select_option(array(\"0\", \"1\"),');");
-    }
-
-    if ($bookx_uses_dinamic_metatags == true) {
-
-        $db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} 
-            (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
-            VALUES (
-            'Use Dinamic MetaTags', 'BOOKX_USES_DINAMIC_METATAGS', '0', 
-            'Enable Dinamic MetaTags. Default 0', {$cf_gid}, '320', now(), now(), NULL,
-            'zen_cfg_select_option(array(\"0\", \"1\"),');");
-    }
+    
+   
+   
 //zen_register_admin_page('bookxFamilies', 'BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'FILENAME_BOOKX_FAMILIES', '', 'extras', 'Y', 20);
 
     $db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} 
@@ -373,12 +357,36 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
     $update_095_msg .= $list_msg("Bookx Updated to version " . $bookx_version);
 
 
-    if ( isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
+    if (isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
 
         $messageStack->add_session('<ul style="line-height:1.5;">' . $update_095_msg . '</ul>', 'info');
-        unset($_SESSION['bookx_install']);
+        
         zen_redirect(FILENAME_BOOKX_TOOLS . '.php?action=bookx_reset_to_defaults');
     } else {
+        /**
+        * If its' a update with existing bookx tables but no pType and Version, no cf_gid is set.
+        * On reset will add this
+        */
+        if ($bookx_uses_ceon == true) {
+        $db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} 
+            (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
+            VALUES (
+            'Use CEON URI Module', 'BOOKX_USES_CEON_URI_MODULE', '0', 
+            'Enable Ceon Uri Module. Default 0', {$cf_gid}, '310', now(), now(), NULL,
+            'zen_cfg_select_option(array(\"0\", \"1\"),');");
+
+    }
+
+    if ($bookx_uses_dinamic_metatags == true) {
+
+        $db->Execute("REPLACE INTO {$const['TABLE_CONFIGURATION']} 
+            (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
+            VALUES (
+            'Use Dinamic MetaTags', 'BOOKX_USES_DINAMIC_METATAGS', '0', 
+            'Enable Dinamic MetaTags. Default 0', {$cf_gid}, '320', now(), now(), NULL,
+            'zen_cfg_select_option(array(\"0\", \"1\"),');");
+    }
+        
         $messageStack->add('<ul style="line-height:1.5;">' . $update_095_msg . '</ul>', 'info');
         //zen_redirect(zen_href_link(FILENAME_BOOKX_TOOLS));
     }

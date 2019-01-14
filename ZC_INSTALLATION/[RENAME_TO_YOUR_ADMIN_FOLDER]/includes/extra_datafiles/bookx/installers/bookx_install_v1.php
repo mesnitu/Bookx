@@ -264,10 +264,17 @@ if (isset($_POST) && (!empty($_POST))) {
 
     $table_character_set = "CHARACTER SET = " . $default_db_encoding . "";
     $column_character_set = "CHARACTER SET '" . $default_db_encoding . "'";
-    $bookx_uses_ceon = ($_POST['bookx_ceon'] == 'enable_ceon') ? true : false;
-    $bookx_uses_dinamic_metatags = ($_POST['bookx_dinamic_metatags'] == 'enable') ? true : false;
     
-    
+    if(isset($_POST['bookx_ceon']) && ($_POST['bookx_ceon'] == 'enable_ceon')) {
+        $bookx_uses_ceon = true;
+        //for update -> reset
+       $_SESSION['bookx_install_ceon'] = true;
+    }
+    if(isset($_POST['bookx_dinamic_metatags']) && ($_POST['bookx_dinamic_metatags'] == 'enable')) {
+        $bookx_uses_dinamic_metatags = true;
+        //for update -> reset
+        $_SESSION['bookx_install_metatags'] = true;
+    }
 }
 
 switch (true) {
@@ -278,7 +285,7 @@ switch (true) {
 
 	    $config_groups = $db->Execute($sql);
 	    $cf_gid = null;
-
+        
 	    while (!$config_groups->EOF) {
 	    	$cf_gid = $config_groups->fields['configuration_group_id'];
 	    	$config_groups->MoveNext();
@@ -378,9 +385,17 @@ switch (true) {
          * @since v1.0.0 
          * Check installation options
          */
-        unset($bookx_uses_ceon, $bookx_uses_dinamic_metatags);
+        //unset($bookx_uses_ceon, $bookx_uses_dinamic_metatags);
         
+        if (isset($_SESSION['bookx_install'])) {
+            if ((isset($_SESSION['bookx_install_ceon'])) || isset($_SESSION['bookx_install_metatags'])) {
+                $bookx_uses_ceon = $_SESSION['bookx_install_ceon'];
+                $bookx_uses_dinamic_metatags = $_SESSION['bookx_install_ceon'];
+            }
+        }
+
         $sql = $db->Execute("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key ='BOOKX_USES_CEON_URI_MODULE'");
+        
         if ($sql->RecordCount() > 0) {
             $bookx_uses_ceon = true;
         }
@@ -1134,25 +1149,24 @@ EOT;
          */
         
         if ($bookx_uses_ceon == true) {
-           
-            $db->Execute("
-            REPLACE INTO {$const['TABLE_CONFIGURATION']} 
+           $sql ="REPLACE INTO " . TABLE_CONFIGURATION . "
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
             VALUES (
             'Use CEON URI Module', 'BOOKX_USES_CEON_URI_MODULE', '1', 
-            'Enable Ceon Uri Module. Default 0', {$cf_gid}, '310', now(), now(), NULL,
-            'zen_cfg_select_option(array(\"0\", \"1\"),');");
+            'Enable Ceon Uri Module. Default 0', '{$cf_gid}', '310', now(), now(), NULL,
+            'zen_cfg_select_option(array(\"0\", \"1\"),');";
+            
+            $db->Execute($sql);
         }
         
         if ($bookx_uses_dinamic_metatags == true) {
-            
-            $db->Execute("
-            REPLACE INTO {$const['TABLE_CONFIGURATION']} 
+            $sql = "REPLACE INTO {$const['TABLE_CONFIGURATION']} 
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
             VALUES (
             'Use Dinamic MetaTags', 'BOOKX_USES_DINAMIC_METATAGS', '1', 
-            'Enable Dinamic MetaTags. Default 0', {$cf_gid}, '320', now(), now(), NULL,
-            'zen_cfg_select_option(array(\"0\", \"1\"),');");
+            'Enable Dinamic MetaTags. Default 0', '{$cf_gid}', '320', now(), now(), NULL,
+            'zen_cfg_select_option(array(\"0\", \"1\"),');";
+            $db->Execute($sql);
                 
         }
 
@@ -1163,10 +1177,9 @@ EOT;
 
     if ('reset' == $bookx_install) { 
         $messageStack->add_session('' . BOOKX_MS_RESET_SUCCESS . '', 'success');
-        if ( isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
-         unset($_SESSION['bookx_install']);
-        zen_redirect(FILENAME_BOOKX_TOOLS . '.php?action=bookx_reset_to_defaults');
-        }  
+//        if (isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
+//       
+//        }  
     } else {
         $messageStack->add_session('' . BOOKX_MS_SUCCESS . '', 'success');
         
@@ -1175,6 +1188,12 @@ EOT;
             REPLACE INTO {$const['TABLE_CONFIGURATION']} 
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,last_modified, date_added, use_function, set_function) VALUES (
             'BookX Version', 'BOOKX_VERSION', '" . $bookx_version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL);");
+    
+             unset(
+            $_SESSION['bookx_install'], 
+            $_SESSION['bookx_install_ceon'],
+            $_SESSION['bookx_install_metatags'] 
+            );
     zen_redirect(FILENAME_BOOKX_TOOLS.'.php');
     break; // install and reset
 
