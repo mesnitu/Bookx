@@ -1,5 +1,21 @@
 <?php
 
+/**
+ * This file is part of the ZenCart add-on Book X which
+ * introduces a new product type for books to the Zen Cart
+ * shop system. Tested for compatibility on ZC v. 1.5.6a
+ *
+ * @package admin
+ * @author  Philou
+ * @copyright Copyright 2013
+ * @copyright Copyright 2003-2019 Zen Cart Development Team
+ * @copyright Portions Copyright 2003 osCommerce
+ * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
+ *
+ * @version BookX V 1.0.0
+ * @version $Id: [admin]includes/extra_datafiles/bookx/installers/bookx_install_v1.php 2019-01-10 mesnitu $
+ */
+
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
@@ -75,6 +91,9 @@ $admin_page_keys = array('configBookXTools',
 
 
 // necessary BookX files
+/**
+ * @todo May this array could in another file so it can be used for other purposes 
+ */
 $required_files = array(
 		DIR_FS_CATALOG . 'includes/auto_loaders/config.bookx.php',
 		DIR_FS_CATALOG . 'includes/classes/observers/class.bookx_observers.php',
@@ -97,13 +116,11 @@ $required_files = array(
         DIR_FS_CATALOG_MODULES . $current_template .'/new_products.php',
         DIR_FS_CATALOG_MODULES . $current_template .'/product_listing_alpha_sorter.php',
         DIR_FS_CATALOG_MODULES . $current_template .'/upcoming_products.php',
-    
 		DIR_FS_CATALOG_TEMPLATES . $current_template . '/common/tpl_tabular_display.php',
 		DIR_FS_CATALOG_TEMPLATES . $current_template . '/css/stylesheet_bookx.css',
 		DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_index_product_list.php',
         DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_modules_upcoming_products.php',
        // DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_modules_whats_new.php',
-    
 		DIR_FS_CATALOG_TEMPLATES . 'template_default/sideboxes/tpl_bookx_filters_select.php',
 		DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_authors_list_default.php',
 		DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_publishers_list_default.php',
@@ -112,7 +129,6 @@ $required_files = array(
 		DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_series_list_default.php',
 		DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_product_bookx_info_display.php',
         DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_products_next_previous.php',
-
 		DIR_FS_ADMIN.'includes/languages/english/product_bookx.php',
 		DIR_FS_ADMIN.'bookx_author_types.php',
 		DIR_FS_ADMIN.'bookx_authors.php',
@@ -126,6 +142,19 @@ $required_files = array(
 		DIR_FS_ADMIN.'bookx_tools.php',
 		DIR_FS_ADMIN.'includes/extra_datafiles/bookx_type_database_names.php',
 		DIR_FS_ADMIN.'includes/extra_datafiles/bookx_type_filenames.php',
+        //@since v1.0.0.0
+        DIR_FS_ADMIN.'includes/extra_configures/bookx_extrafiles_folder.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx_sanitizer_fields.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/plugin_check.json',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx/bookx_install_include_german.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_install_v1.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v09.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v091.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v092.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v093.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v094.php',
+        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v095.php',
+        
 		DIR_FS_ADMIN.'includes/functions/extra_functions/product_bookx_functions.php',
 		/*DIR_FS_ADMIN.'includes/modules/product_bookx/collect_info_metatags.php',*/
 		DIR_FS_ADMIN.'includes/modules/product_bookx/collect_info.php',
@@ -136,6 +165,7 @@ $required_files = array(
 		DIR_FS_ADMIN.'includes/modules/product_bookx/preview_info.php',
 		DIR_FS_ADMIN.'includes/modules/product_bookx/update_product.php',
 		DIR_FS_ADMIN.'product_bookx.php'
+        
 		);
 
 		// possibly overriden BookX files
@@ -215,7 +245,7 @@ if ($login_page == false ) {
 	for ($i=0, $n=sizeof($installed_languages); $i<$n; $i++) {
 		if ('de' == $installed_languages[$i]['code']) $german_installed = true;
 	}
-
+  
 	foreach ($available_languages as $language) {
 		$files_missing = array();
 		switch (true) {
@@ -236,10 +266,6 @@ if ($login_page == false ) {
 			$messageStack->add('' . sprintf(BOOKX_MS_SOME_LANGUAGE_FILES_MISSING, $language) . '<br />'.implode(', ', $files_missing), 'caution');
 		}
 	}
-    
-    /**
-     * 
-     */
 }
 
 //=======================================
