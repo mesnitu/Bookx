@@ -20,7 +20,7 @@
 if (!defined('IS_ADMIN_FLAG')) {
   die('Illegal Access');
 }
-//pr($_GET, "COLLECT");
+pr($_GET, "COLLECT");
 $sql = 'SELECT configuration_group_id FROM ' . TABLE_CONFIGURATION_GROUP . ' WHERE configuration_group_title = "BookX";';
 
 $config_groups = $db->Execute($sql);

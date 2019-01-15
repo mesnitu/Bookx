@@ -478,7 +478,7 @@ function bookx_check_missing_product_relations($bx_tables, $field_id, $delete = 
         foreach ($bx_tables as $table => $table2) {
             $check = $db->Execute("SELECT ".$field_id." FROM " . $table . " WHERE 
                 ".$field_id." NOT IN (SELECT ".$field_id." FROM " .$table2 . ");");
-            pr($check);
+           
             $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in " . $table . "<br />" : $table . " all Good!<br />";
             if ($delete == true && $check->Count() > 0) {
                 $msg .= ($check->Count() > 0) ? "Deleted " . $check->Count() . " in " . $table . "<br />" : "All Goodfff!";
