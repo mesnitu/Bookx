@@ -29,7 +29,7 @@
   require('includes/application_top.php');
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
-  pr($_GET);
+  
   if (zen_not_null($action)) {
     switch ($action) {
       case 'insert':
