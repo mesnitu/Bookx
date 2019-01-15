@@ -158,7 +158,7 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
         for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
             $language_id = $languages[$i]['id'];
 
-            $sql_data_array = array('products_subtitle' => zen_db_prepare_input($_POST['products_subtitle'][$language_id])
+            $sql_data_array = array('products_subtitle' => bookx_null_check($_POST['products_subtitle'][$language_id])
             );
 
             if($action == 'insert_product') {
@@ -306,7 +306,7 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
             $language_id = $languages[$i]['id'];
 
             $sql_data_array = array(
-                'products_subtitle' => zen_db_prepare_input($_POST['products_subtitle'][$language_id])
+                'products_subtitle' => bookx_null_check($_POST['products_subtitle'][$language_id])
             );
             if($action == 'insert_product' ||
                 ($action == 'update_product' && null === bookx_get_products_subtitle($products_id, $language_id))) {
