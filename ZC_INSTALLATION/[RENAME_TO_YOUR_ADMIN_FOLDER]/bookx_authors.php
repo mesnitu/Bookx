@@ -35,13 +35,16 @@
     switch ($action) {
       case 'insert':
       case 'save':
-        if (isset($_GET['mID'])) $bookx_author_id = zen_db_prepare_input($_GET['mID']);
-        $author_name = zen_db_prepare_input($_POST['author_name']);
-        $author_image_copyright = zen_db_prepare_input($_POST['author_image_copyright']);
-        $author_url = str_replace('http://', '', zen_db_prepare_input($_POST['author_url']));
-
-        $author_sort_order = zen_db_prepare_input($_POST['author_sort_order']);
-        $author_default_type = zen_db_prepare_input($_POST['author_default_type']);
+        
+        if (isset($_GET['mID'])) {
+            $bookx_author_id = zen_db_prepare_input($_GET['mID']);
+        }
+        $author_name =  bookx_null_check($_POST['author_name']);
+        $author_image_copyright =  bookx_null_check($_POST['author_image_copyright']);
+        $author_url = str_replace('http://', '',  bookx_null_check($_POST['author_url']));
+        
+        $author_sort_order = bookx_null_check($_POST['author_sort_order']);
+        $author_default_type =  bookx_null_check($_POST['author_default_type']);
 
         $sql_data_array = array('author_name' => $author_name,
         						'author_sort_order' => (int)$author_sort_order,
@@ -383,7 +386,7 @@
     
       $default_directory = 'bookx_authors/';
 
-      $contents[] = array('text' => '<BR />' . TEXT_AUTHOR_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
+      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
       $contents[] = array('text' => '<br />' . TEXT_AUTHOR_IMAGE_MANUAL . '&nbsp;' . zen_draw_input_field('author_image_manual'));
 
       $contents[] = array('text' => '<br>' . TEXT_AUTHOR_IMAGE_COPYRIGHT . '&nbsp;' . zen_draw_input_field('author_image_copyright', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_image_copyright')));
@@ -400,15 +403,15 @@
 
 
       $contents[] = array('text' => '<br>' . TEXT_AUTHOR_DESCRIPTION . $author_description_textarea);
-
-      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_SORT_ORDER . '<br>' . zen_draw_input_field('author_sort_order'));
+      $default_value = ($author_sort_order) ?? '0';
+      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_SORT_ORDER . '<br>' . zen_draw_input_field('author_sort_order', $default_value),'');
 
       $contents[] = array('align' => 'center', 'text' => '<br>' . zen_image_submit('button_save.gif', IMAGE_SAVE) . ' <a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . '&mID=' . $_GET['mID']) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
+       
       break;
       
     case 'edit':
-        pr($_GET);
-        pr($_POST);
+       
       $heading[] = array('text' => '<b>' . TEXT_HEADING_EDIT_AUTHOR . '</b>');
 
       $contents = array('form' => zen_draw_form('author', FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . '&mID=' . $aInfo->bookx_author_id . '&action=save' . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : ''), 'post', 'enctype="multipart/form-data"'));
