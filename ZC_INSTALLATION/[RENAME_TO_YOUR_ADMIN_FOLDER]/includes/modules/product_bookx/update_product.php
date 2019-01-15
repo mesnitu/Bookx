@@ -112,11 +112,11 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
             'bookx_binding_id' => (int) $_POST['bookx_binding_id'],
             'bookx_printing_id' => (int) $_POST['bookx_printing_id'],
             'bookx_condition_id' => (int) $_POST['bookx_condition_id'],
-            'publishing_date' => bookx_prepare_input($publishing_date),
-            'pages' => bookx_prepare_input($_POST['pages']),
-            'volume' => bookx_prepare_input($_POST['volume']),
-            'size' => bookx_prepare_input($_POST['size']),
-            'isbn' => bookx_prepare_input(preg_replace('/[^0-9]/', '', $_POST['isbn']))
+            'publishing_date' => bookx_null_check($publishing_date),
+            'pages' => bookx_null_check($_POST['pages']),
+            'volume' => bookx_null_check($_POST['volume']),
+            'size' => bookx_null_check($_POST['size']),
+            'isbn' => bookx_null_check(preg_replace('/[^0-9]/', '', $_POST['isbn']))
         );
 
         zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array);
@@ -211,11 +211,11 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
             'bookx_binding_id' => (int) $_POST['bookx_binding_id'],
             'bookx_printing_id' => (int) $_POST['bookx_printing_id'],
             'bookx_condition_id' => (int) $_POST['bookx_condition_id'],
-            'publishing_date' => bookx_prepare_input($publishing_date),
-            'pages' => bookx_prepare_input($_POST['pages']),
-            'volume' => bookx_prepare_input($_POST['volume']),
-            'size' => bookx_prepare_input($_POST['size']),
-            'isbn' => bookx_prepare_input(preg_replace('/[^0-9]/', '', $_POST['isbn']))
+            'publishing_date' => bookx_null_check($publishing_date),
+            'pages' => bookx_null_check($_POST['pages']),
+            'volume' => bookx_null_check($_POST['volume']),
+            'size' => bookx_null_check($_POST['size']),
+            'isbn' => bookx_null_check(preg_replace('/[^0-9]/', '', $_POST['isbn']))
         );
 
         zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array, 'update', "products_id = '" . (int) $products_id . "'");

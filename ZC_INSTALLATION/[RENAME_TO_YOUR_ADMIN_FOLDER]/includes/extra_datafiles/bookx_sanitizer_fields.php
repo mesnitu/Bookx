@@ -20,15 +20,19 @@ $group = array(
     'bookx_printing_id',
     'blank_bookx_author_id',
     'blank_bookx_genre_id',
-    'blank_bookx_author_type_id'
+    'blank_bookx_author_type_id',
+    'author_default_type',
+    'author_sort_order'
 );
 
 $sanitizer->addSimpleSanitization('CONVERT_INT', $group);
 
 $group = array(
     'bookx_publisher_name', 
-    'bookx_author_name', 
-    'bookx_author_type_name', 
+    'bookx_author_name',
+    'author_name',
+    'bookx_author_type_name',
+    'author_image_copyright',
     'bookx_publisher_name', 
     'bookx_genre_name',
     'products_subtitle',
@@ -39,6 +43,15 @@ $group = array(
 );
 $sanitizer->addSimpleSanitization('WORDS_AND_SYMBOLS_REGEX', $group);
 
+
+// URL AND FILE PATHS
+$group = array(
+    'author_url'
+);
+
+$sanitizer->addSimpleSanitization('FILE_PATH_OR_URL', $group);
+
+// For inserting books
 $group = array(
     'bookx_author_id' => array(
         'sanitizerType' => 'CONVERT_INT', 
@@ -68,5 +81,7 @@ $group = array(
     );
 
 $sanitizer->addComplexSanitization($group);
+
+
 
 }

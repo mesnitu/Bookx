@@ -136,17 +136,17 @@ if(isset($_POST['products_id']) && isset($_POST['categories_id'])) {
             " (products_id, bookx_publisher_id, bookx_series_id, bookx_imprint_id, bookx_binding_id, bookx_printing_id, bookx_condition_id, publishing_date, pages, volume, size, isbn)
                           VALUES (
                          '" . (int) $dup_products_id . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_publisher_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_series_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_imprint_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_binding_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_printing_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_extra->fields['bookx_condition_id']) . "',
-                         '" . bookx_prepare_input($bookx_extra->fields['publishing_date']) . "',
-                         '" . bookx_prepare_input($bookx_extra->fields['pages']) . "',
-                         '" . bookx_prepare_input($bookx_extra->fields['volume']) . "',
-                         '" . bookx_prepare_input($bookx_extra->fields['size']) . "',
-                         '" . bookx_prepare_input($bookx_extra->fields['isbn']) . "')");
+                         '" . (int) $bookx_extra->fields['bookx_publisher_id'] . "',
+                         '" . (int) $bookx_extra->fields['bookx_series_id'] . "',
+                         '" . (int) $bookx_extra->fields['bookx_imprint_id'] . "',
+                         '" . (int) $bookx_extra->fields['bookx_binding_id'] . "',
+                         '" . (int) $bookx_extra->fields['bookx_printing_id'] . "',
+                         '" . (int) $bookx_extra->fields['bookx_condition_id'] . "',
+                         '" . bookx_null_check($bookx_extra->fields['publishing_date']) . "',
+                         '" . bookx_null_check($bookx_extra->fields['pages']) . "',
+                         '" . bookx_null_check($bookx_extra->fields['volume']) . "',
+                         '" . bookx_null_check($bookx_extra->fields['size']) . "',
+                         '" . bookx_null_check($bookx_extra->fields['isbn']) . "')");
 
         $bookx_assigned_genres = $db->Execute('SELECT bookx_genre_id from ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS .
             ' WHERE products_id = "' . (int) $products_id . '"');
@@ -155,7 +155,7 @@ if(isset($_POST['products_id']) && isset($_POST['categories_id'])) {
                           (products_id, bookx_genre_id)
                           VALUES (
                          '" . (int) $dup_products_id . "',
-                         '" . bookx_prepare_input((int) $bookx_assigned_genres->fields['bookx_genre_id']) . "')");
+                         '" . (int) $bookx_assigned_genres->fields['bookx_genre_id'] . "')");
 
         $bookx_assigned_authors = $db->Execute('SELECT bookx_author_id, bookx_author_type_id from ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS .
             ' WHERE products_id = "' . (int) $products_id . '"');
@@ -164,8 +164,8 @@ if(isset($_POST['products_id']) && isset($_POST['categories_id'])) {
                           (products_id, bookx_author_id, bookx_author_type_id)
                           values (
                          '" . (int) $dup_products_id . "',
-                         '" . bookx_prepare_input((int) $bookx_assigned_authors->fields['bookx_author_id']) . "',
-                         '" . bookx_prepare_input((int) $bookx_assigned_authors->fields['bookx_author_type_id']) . "')");
+                         '" . (int) $bookx_assigned_authors->fields['bookx_author_id'] . "',
+                         '" . (int) $bookx_assigned_authors->fields['bookx_author_type_id'] . "')");
 
 
         //////////////////////// EOF copy extra product type data ////////////////////////

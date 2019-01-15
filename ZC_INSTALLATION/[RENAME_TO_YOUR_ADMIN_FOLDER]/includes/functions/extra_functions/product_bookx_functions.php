@@ -451,19 +451,13 @@ function bookx_get_products_subtitle($products_id, $language_id) {
  * @param type $value The value received to insert in database
  * @return string
  */
-function bookx_prepare_input($value) {
-    if(isset($value)) {
-        switch ($value) {
-            case is_int($value):
-                return (int) $value;
-                break;
-            case zen_not_null($value):
-                return zen_db_prepare_input($value);
-            default:
-                return 'null';
-                break;
-        }
-    }
+function bookx_null_check($value) {
+    $value = zen_db_prepare_input($value);
+    if (empty($value)) {
+        return 'null';
+    } else {
+        return $value;
+    }  
 }
 
 /**
@@ -580,8 +574,8 @@ function pr($v,$dedug=null) {
     echo '</pre>';
 }
 
-function vd($v) {
-    echo '<pre>';
+function vd($v,$n=null) {
+    echo "<pre>$n";
     var_dump($v);
-    echo '</pre>';
+    echo "</pre>";
 }
