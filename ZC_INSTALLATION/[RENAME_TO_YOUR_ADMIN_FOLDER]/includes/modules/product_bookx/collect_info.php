@@ -1302,7 +1302,7 @@ echo TEXT_PRODUCTS_BOOKX_ISBN_DISPLAY . '<span id="isbn_display">' . $pInfo->isb
                         foreach ($product_assigned_genres as $product_assigned_genre) {
                             echo '<div class="drop_down_div">';
                             echo zen_draw_hidden_field ('assigned_genre_db_id[' . $genre_counter . ']', $product_assigned_genre['primary_id']);
-                            echo zen_draw_pull_down_menu ('bookx_genre_id[' . $genre_counter . ']', $genre_array, $product_assigned_genre['bookx_genre_id'], 'class="form-contorl"');
+                            echo zen_draw_pull_down_menu ('bookx_genre_id[' . $genre_counter . ']', $genre_array, $product_assigned_genre['bookx_genre_id'], 'class="form-control"');
                             echo '</div>';
                             $genre_counter++;
                         }
