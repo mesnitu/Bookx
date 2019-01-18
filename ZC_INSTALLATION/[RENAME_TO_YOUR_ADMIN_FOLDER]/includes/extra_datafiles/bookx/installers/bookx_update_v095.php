@@ -307,7 +307,6 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             products_id int(11) NOT NULL,
             bookx_family_id int(11) NOT NULL,
             PRIMARY KEY (primary_id),
-            UNIQUE KEY products_id (products_id),
             KEY bookx_family_id (bookx_family_id) USING BTREE,
             CONSTRAINT fk_bxt_families_id FOREIGN KEY (bookx_family_id) 
             REFERENCES product_bookx_families (bookx_family_id) 
