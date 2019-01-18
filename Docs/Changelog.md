@@ -6,9 +6,9 @@
  - [ ] display special BookX info for products during checkout process and on orders
  - [ ] Breadcrumbs do not yet give meaningful results, especially when using bookx filters
 
-## v1.0.1 DEV
+## v1.0.0 DEV
 
-> Version 1.0.1 is a complete review for BookX to work with Zencart v156 with php v7.3.
+> Version 1.0.0 is a complete review for BookX to work with Zencart v156 with php v7.3.
 > Due to the zencart update nature, it's not compatible with olders versions. (until futher notice)
 
 ### Admin Changes
@@ -18,6 +18,9 @@
  - Change: admin/modules/copy_to_confirm product_bookx.php is no longer needed
  - Change Installation method 
  - Improved Bookx Tools Layout
+ - Update: Add bookx families
+ - Add 2 more tables for books families and search
+ - Update: Add Configuration entry to support CEON URI module
  
 
 ## v0.9.5 BETA November, 2017
