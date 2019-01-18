@@ -33,9 +33,8 @@ admin_files=(
     bookx_publishers.php
     bookx_series.php
     bookx_tools.php
-    product_bookx.php
-    #since v1.0.0
-    bookx_families.php
+    #product_bookx.php
+    
     # files in admin/includes
     includes/auto_loaders/config.product_type_bookx.php
     includes/classes/observers/class.bookx_admin_observers.php
@@ -62,8 +61,6 @@ admin_files=(
     includes/languages/english/bookx_printing.php
     includes/languages/english/bookx_publishers.php
     includes/languages/english/bookx_series.php
-    #since v1.0.0
-    includes/languages/english/bookx_families.php
     includes/languages/english/product_bookx.php
     includes/languages/english/extra_definitions/product_bookx.php
     # files in admin/includes/languages/german
@@ -89,6 +86,8 @@ admin_files=(
     includes/extra_datafiles/bookx/installers/bookx_update_v095.php
     includes/extra_datafiles/bookx/plugin_check.json
     includes/classes/bookx/BookxFamilies.php
+    includes/languages/english/bookx_families.php
+    bookx_families.php
     )
 
 #files in catalog
