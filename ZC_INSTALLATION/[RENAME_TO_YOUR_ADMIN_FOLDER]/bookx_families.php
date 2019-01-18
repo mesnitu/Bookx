@@ -55,7 +55,9 @@ $action = (isset($_GET['action']) ? $_GET['action'] : '');
     <!-- body //-->
     <div class="container">
         <h1><?php echo HEADING_TITLE; ?></h1>
-        <p class="alert alert-info"><?php echo INFO_ABOUT; ?></p>        
+        <p class="alert alert-info"><?php echo INFO_ABOUT; ?></p>
+        <div class="alert alert-warning"><?php echo EXPECTED_DATABASE_FIELDS; ?></div>
+       
         </div>
 <!-- body_eof //-->
 

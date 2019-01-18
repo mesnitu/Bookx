@@ -15,5 +15,5 @@
  * @version $Id: [admin]/includes/languages/english/bookx_families.php 2019-01-02 mesnitu $
  */
 define('HEADING_TITLE', 'Books Families');
-define('INFO_ABOUT', 'This page will handle families csv import / export. While not set, use phpmyadmin ( or similiar) to import your families. <br>'
-    . 'To disable, set <b>BOOKX_APPLY_SPECIALS_UPDATE</b> to <b>false</b> in admin/extra_configures/bookx_extrafiles_folder.php. More Info soon!');
+define('INFO_ABOUT', 'This page will handle families csv import / export. While not set, use phpmyadmin ( or similiar) to import your families. <br>To disable, set <b>BOOKX_APPLY_SPECIALS_UPDATE</b> to <b>false</b> in admin/extra_configures/bookx_extrafiles_folder.php.');
+define('EXPECTED_DATABASE_FIELDS', 'Expected database fields for import are:<ul><li>bookx_family_id</li><li>bookx_family_name</li><li>bookx_family_discount( example: 10 would apply 10% off)</li><li>bookx_family_stock_online ( 1 or 0)</li></ul>');
