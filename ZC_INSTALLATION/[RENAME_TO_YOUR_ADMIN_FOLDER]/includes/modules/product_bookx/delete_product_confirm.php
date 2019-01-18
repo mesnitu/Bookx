@@ -54,12 +54,19 @@ if (!empty($cascaded_prod_id_for_delete) && !empty($cascaded_prod_cat_for_delete
   	
   	// addition for extra product fields
   	if (defined('TABLE_PRODUCT_EXTRA_FIELDS')) {
-  	      $db->Execute("delete from " . TABLE_PRODUCT_EXTRA_FIELDS . "
-                    where products_id = '" . (int)$product_id . "'");
-      }
-        	// eof addition for extra product fields
-
-
+        $db->Execute("delete from " . TABLE_PRODUCT_EXTRA_FIELDS . "
+                    where products_id = '" . (int) $product_id . "'");
+    }
+    // eof addition for extra product fields
+      
+    /**
+     * @since v1.0.0 
+     */
+    //require_once DIR_FS_ADMIN . DIR_WS_CLASSES . 'bookx/BookxFamilies.php';
+    if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
+        $objBookxFamily = new \Bookx\BookxFamilies();
+        $objBookxFamily->BookxDeleteFamilyProduct((int) $product_id);
+    }
     //--------------PRODUCT_TYPE_SPECIFIC_INSTRUCTIONS_GO__ABOVE__HERE--------------------------------------------------------
 
 

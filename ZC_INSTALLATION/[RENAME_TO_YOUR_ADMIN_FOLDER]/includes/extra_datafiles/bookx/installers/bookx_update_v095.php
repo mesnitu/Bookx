@@ -355,7 +355,8 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
 
     $update_095_msg .= $list_msg("Bookx Updated to version " . $bookx_version);
 
-
+    zen_register_admin_page('bookxFamilies', 'BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'FILENAME_BOOKX_FAMILIES', '', 'extras', 'Y', 91);
+    
     if (isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
 
         $messageStack->add_session('<ul style="line-height:1.5;">' . $update_095_msg . '</ul>', 'info');

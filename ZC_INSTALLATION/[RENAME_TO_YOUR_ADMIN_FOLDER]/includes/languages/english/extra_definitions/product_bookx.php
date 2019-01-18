@@ -118,3 +118,12 @@ define('BOOKX_MS_CONFIG_TYPE_BOOKX_MISSING','There is no configuration type "Boo
 
 define('BOOKX_MS_PRODUCT_LAYOUT_CONFIGS_NOT_INSTALLED','The layout configuration settings for Bookx could not be installed in the database.');
 define('BOOKX_MS_ADMIN_CONFIG_MENU_NOT_INSTALLED','Product Type BookX: Menu entry in menu "Configuration" could not be installed in the database.');
+
+/**
+ * since v1.0.0
+ * @todo check this languages files
+ */
+define('BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'BookX: Families');
+define('TEXT_PRODUCTS_BOOKX_FAMILY', 'Family');
+define('LABEL_BOOKX_FAMILY', 'Family(admin only)');
+define('LABEL_BOOKX_IGNORE_FAMILY_DISCOUNT', 'Ignore Discount');

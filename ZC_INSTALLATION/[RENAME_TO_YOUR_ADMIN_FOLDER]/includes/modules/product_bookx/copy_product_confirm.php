@@ -167,7 +167,13 @@ if(isset($_POST['products_id']) && isset($_POST['categories_id'])) {
                          '" . (int) $bookx_assigned_authors->fields['bookx_author_id'] . "',
                          '" . (int) $bookx_assigned_authors->fields['bookx_author_type_id'] . "')");
 
-
+        /**
+         * @since v1.0.0
+         */
+        if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
+            $objBookxFamily = new \Bookx\BookxFamilies('category_product_listing.php');
+            $objBookxFamily->BookxInsertFamilyProduct((int) $dup_products_id);
+        }
         //////////////////////// EOF copy extra product type data ////////////////////////
 
         $db->Execute("INSERT INTO " . TABLE_PRODUCTS_TO_CATEGORIES . " (products_id, categories_id)

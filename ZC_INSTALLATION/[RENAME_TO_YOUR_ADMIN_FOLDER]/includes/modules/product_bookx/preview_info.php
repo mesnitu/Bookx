@@ -24,7 +24,7 @@ if (!defined ('IS_ADMIN_FLAG')) {
 $languages = zen_get_languages();
 
 if (zen_not_null($_POST)) {
-
+   
     $pInfo = new objectInfo($_POST);
    
     $products_name = $_POST['products_name'];
@@ -41,7 +41,14 @@ if (zen_not_null($_POST)) {
     $pInfo->volume = $_POST['volume'];
     $pInfo->size = $_POST['size'];
     $pInfo->isbn_display = bookx_format_isbn_for_display($_POST['isbn']);
-
+    
+    /**
+     * @since v1.0.0
+     * This family obj is initiated in BookX admin observer -> bookx_notify_begin_admin_products
+     */
+    $pInfo->bookx_family = $objBookxFamily->family_name;
+    
+    
     /**
      * BookX data which has language sepcific names / descriptions to display
      */
@@ -145,13 +152,27 @@ $incl_dir->close ();
 
 /**
  * @todo see usability
- * @since version 1.0.1 adding a notifier
+ * @since version 1.0.1 adding a notifier to include files ?
  */
 $zco_notifier->notify ('NOTIFY_BOOKX_ADMIN_PRODUCT_PREVIEW_INFO', $pInfo);
 
 $form_action = (isset ($_GET['pID'])) ? 'update_product' : 'insert_product';
 ?>
-
+<style>
+    li.list-group-item {
+    display: flex;
+    padding: 0;
+    line-height: 2.5rem;
+}
+strong.display_preview_label {
+    width: 25%;
+    background: #eee;
+    padding-left: 1rem;
+    margin-right: 1rem;
+    border-right: 2px solid #ddd;
+    
+}
+</style>
 <div class="container">
 <?php 
 if (!isset ($_GET['read']) || ($_GET['read'] !== 'only')) {
@@ -166,7 +187,7 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
      * @todo I can't find the situation where GET read AND only occurs
      */
     if (isset ($_GET['read']) && ($_GET['read'] == 'only')) {
-
+        /*
         $pInfo->products_name = zen_get_products_name ($pInfo->products_id, $languages[$i]['id']);
         $pInfo->products_description = zen_get_products_description ($pInfo->products_id, $languages[$i]['id']);
         $pInfo->products_url = zen_get_products_url ($pInfo->products_id, $languages[$i]['id']);
@@ -182,30 +203,12 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
         $bookx_extra_attributes .= (!empty ($pInfo->printing) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->printing : '');
         $bookx_extra_attributes .= (!empty ($pInfo->size) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->size : '');
         $bookx_extra_attributes .= (!empty ($pInfo->condition) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->condition : '');
-
-        $pInfo->genres = '';
-        if (!empty ($bookx_genre_ids) && is_array ($bookx_genre_ids)) {
-            $pInfo->genres = array();
-            foreach ($bookx_genre_ids as $genre_id) {
-                $pInfo->genres[] = bookx_get_genre_description ($genre_id, $languages[$i]['id']);
-            }
-        }
-
-        $pInfo->authors = '';
-        if (!empty ($bookx_author_ids) && is_array ($bookx_author_ids)) {
-            $pInfo->authors = array();
-
-            foreach ($bookx_author_ids as $key => $author_id) {
-                /*
-                 * @todo check this line
-                 */
-                $pInfo->authors[] = array(bookx_get_genre_description ($author_id, $languages[$i]['id']),
-                    bookx_get_author_type_description ($bookx_author_type_ids[$key], $languages[$i]['id'])
-                );
-            }
-        }
-    } else {
+        */
         
+    } else {
+        /**
+         * @todo check if this code is still need it, since nothing will happen here. 
+         */
         $pInfo->products_name = zen_db_prepare_input ($products_name[$languages[$i]['id']]);
         $pInfo->products_description = zen_db_prepare_input ($products_description[$languages[$i]['id']]);
         $pInfo->products_url = zen_db_prepare_input ($products_url[$languages[$i]['id']]);
@@ -222,30 +225,71 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
         $bookx_extra_attributes .= (!empty ($pInfo->printing) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->printing : '');
         $bookx_extra_attributes .= (!empty ($pInfo->size) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->size : '');
         $bookx_extra_attributes .= (!empty ($pInfo->condition) ? (!empty ($bookx_extra_attributes) ? ' | ' : '') . $pInfo->condition : '');
+        
+        $pInfo->genres = '';
+        if (!empty ($bookx_genre_ids) && is_array ($bookx_genre_ids)) {
+            $pInfo->genres = array();
+            foreach ($bookx_genre_ids as $genre_id) {
+                $pInfo->genres[] = bookx_get_genre_description ($genre_id, $languages[$i]['id']);
+            }
         }
 
-    if (isset ($_GET['pID'])) {
-        $specials_price = $currencies->format (zen_get_products_special_price ($_GET['pID']));
-    }
-    ?>	
+        $pInfo->authors = '';
+        if (!empty($bookx_author_ids) && is_array($bookx_author_ids)) {
+            $pInfo->authors = array();
 
+            foreach ($bookx_author_ids as $key => $author_id) {
+                /*
+                 * @todo check this line
+                 */
+                $pInfo->authors[] = array(bookx_get_author_name($author_id),
+                    bookx_get_author_type_description ($bookx_author_type_ids[$key], $languages[$i]['id'])
+                );
+            }
+        }
+        }
+
+        if (isset($_GET['pID'])) {
+        $specials_price = zen_get_products_special_price($_GET['pID']);
+            if (zen_not_null($specials_price)) {
+                $specials_price = $currencies->format($specials_price);
+                $css_price = 'style="text-decoration: line-through;"';
+            }
+        }   
+    ?>	
+    
     <div class="row">
         <div class="panel panel-default">
             <!-- Default panel contents -->
             <div class="panel-heading">
                 <div class="row">
-                    <div class="col-sm-8 pageHeading">
+                    <div class="col-sm-6 pageHeading">
                     <?php $lng_icon = DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image']; ?>
                     <?php echo zen_image ($lng_icon, $languages[$i]['name']) . zen_output_string_protected ($pInfo->products_name); ?>
                         <small><?php echo (!empty ($pInfo->volume) ? '' . $pInfo->volume : '') . (!empty ($pInfo->products_subtitle) ? ' &ndash; ' . $pInfo->products_subtitle : ''); ?>
                         </small>
                     </div>
-                    <div class="col-sm-4 text-right pageHeading">
+                    <div class="col-sm-6 text-right pageHeading">
+                    
+                    <span <?php echo $css_price; ?>><?php echo $currencies->format($pInfo->products_price); ?></span>
                     <?php
-                    echo $currencies->format ($pInfo->products_price);
                     if ($specials_price) { ?>
                         <span class="text-danger"><?php echo $specials_price; ?></span>
-                    <?php } ?>
+                    <?php }
+                    /**
+                     * If $_POST['ignore_family_discount'] is not set don't show, don't apply any discounts
+                     */
+                    if(!isset($_POST['ignore_family_discount']) && $objBookxFamily->family_discount > 0 ) { 
+                        $_POST['ignore_family_discount'] = 'off';
+                        ?>
+                        <span class="text-info"><?php echo 'Family Discount: ' .$currencies->format($objBookxFamily->applyFamilyDiscount()); ?></span>
+                    <?php } else {
+                        //set this for update
+                        $_POST['ignore_family_discount'] = 'on';
+                    }
+                   
+                    ?>
+                     
                     </div>
                     <div class="clearfix"></div>
                         <div class="row">
@@ -288,20 +332,24 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
                 </div>
             
             <?php
+            /**
+             * display lamba
+             */
             $display = function ($label, $param) {
-                return '<strong>' . $label . ' </strong>' . (!empty($param) ? $param : '---');
+                return '<strong class="display_preview_label">' . $label . ' </strong>' . (!empty($param) ? '' . $param : '---');
             };
             ?>
                 <!-- List group -->
                 <ul class="list-group">
                     <li class="list-group-item"><?php echo $display(TABLE_HEADING_BOOKX_DATE_PUBLISHED, $pInfo->publishing_date); ?></li>
-                    <li class="list-group-item"><?php echo $display(LABEL_AUTHORS, $pInfo->publishing_date); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_AUTHORS, $pInfo->authors_display); ?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_BOOKX_GENRE ,$pInfo->genres_display); ?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_EXTRA_ATTRIBUTES, $bookx_extra_attributes); ?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_BOOKX_ISBN, $pInfo->isbn_display);?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_SERIES, $pInfo->series);?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_PUBLISHER, $pInfo->publisher); ?></li>
                     <li class="list-group-item"><?php echo $display(LABEL_IMPRINT, $pInfo->imprint); ?></li>
+                    <li class="list-group-item"><?php echo $display(LABEL_BOOKX_FAMILY, $pInfo->bookx_family); ?></li>
                 </ul>
             </div>
 

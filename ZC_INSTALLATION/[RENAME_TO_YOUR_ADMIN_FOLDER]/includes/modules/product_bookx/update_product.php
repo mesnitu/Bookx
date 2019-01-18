@@ -21,6 +21,7 @@
 if(!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
+
 if(isset($_GET['pID'])) {
     $products_id = zen_db_prepare_input($_GET['pID']);
 }
@@ -170,12 +171,23 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
                 zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION, $sql_data_array);
             }
         }
+        /*
+         * @since v1.0.0
+         */
+        if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
 
+            if (isset($_POST['bookx_family_id']) && $_POST['ignore_family_discount'] =='off') {
+                $objBookxFamily->BookxInsertFamilyProduct((int)$products_id);
+                $objBookxFamily->applyFamilyDiscount();
+            }
+        }
+     
+       
         ////    *END OF PRODUCT-TYPE-SPECIFIC INSERTS* ////////
         ///////////////////////////////////////////////////////
     }
     elseif($action == 'update_product') {
-
+        
         $sql_data_array['products_last_modified'] = 'now()';
         $sql_data_array['master_categories_id'] = ((int) $_POST['master_category'] > 0 ? (int) $_POST['master_category'] : (int) $_POST['master_categories_id']);
 
@@ -321,7 +333,18 @@ elseif($_POST['products_model'] . $_POST['products_url'] . $_POST['products_name
                 zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION, $sql_data_array, 'update', "products_id = '" . (int) $products_id . "' and languages_id = '" . (int) $language_id . "'");
             }
         }
-
+        
+        /*
+         * @since v1.0.0
+         */
+        if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
+            
+            if (isset($_POST['bookx_family_id']) && !isset($_POST['ignore_family_discount'])) {
+                $objBookxFamily->BookxUpdateFamilyProduct((int) $products_id);
+                $objBookxFamily->applyFamilyDiscount();
+            }
+        }
+        
 
         ////    *END OF PRODUCT-TYPE-SPECIFIC UPDATES* ////////
         ///////////////////////////////////////////////////////

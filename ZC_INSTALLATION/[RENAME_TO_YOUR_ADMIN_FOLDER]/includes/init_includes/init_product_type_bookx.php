@@ -34,10 +34,6 @@ if (strpos($_SERVER['PHP_SELF'], 'login.php')) {
 }
 
 // Test for existing installation
-//pr($_SESSION);
-//pr($_GET);
-//pr($_POST);
-
 if (!$login_page) {
     
     if (isset($_GET['action']) && ('bookx_remove' == $_GET['action'])) {

@@ -34,6 +34,8 @@ admin_files=(
     bookx_series.php
     bookx_tools.php
     product_bookx.php
+    #since v1.0.0
+    bookx_families.php
     # files in admin/includes
     includes/auto_loaders/config.product_type_bookx.php
     includes/classes/observers/class.bookx_admin_observers.php
@@ -60,6 +62,8 @@ admin_files=(
     includes/languages/english/bookx_printing.php
     includes/languages/english/bookx_publishers.php
     includes/languages/english/bookx_series.php
+    #since v1.0.0
+    includes/languages/english/bookx_families.php
     includes/languages/english/product_bookx.php
     includes/languages/english/extra_definitions/product_bookx.php
     # files in admin/includes/languages/german
@@ -84,6 +88,7 @@ admin_files=(
     includes/extra_datafiles/bookx/installers/bookx_update_v094.php
     includes/extra_datafiles/bookx/installers/bookx_update_v095.php
     includes/extra_datafiles/bookx/plugin_check.json
+    includes/classes/bookx/BookxFamilies.php
     )
 
 #files in catalog
@@ -163,7 +168,8 @@ if [ "$options" == "create" ]; then
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_configures
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/installers
-    
+    # v1.0.0 Add classes/bookx folder
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/bookx
     mkdir -p ${dst_dir}/includes/languages/german
     mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
     mkdir -p ${dst_dir}/includes/classes/observers

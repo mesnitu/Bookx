@@ -20,7 +20,11 @@
 if (!defined('IS_ADMIN_FLAG')) {
   die('Illegal Access');
 }
-pr($_GET, "COLLECT");
+
+//pr($_POST);
+//pr($_GET);
+//pr($objBookxFamily);
+
 $sql = 'SELECT configuration_group_id FROM ' . TABLE_CONFIGURATION_GROUP . ' WHERE configuration_group_title = "BookX";';
 
 $config_groups = $db->Execute($sql);
@@ -96,6 +100,7 @@ $parameters = array(
     'size' => '',
     'isbn' => '',
     'isbn_display' => '',
+    'bookx_family_id' => '0'
 );
 
 $pInfo = new objectInfo($parameters);
@@ -103,8 +108,16 @@ $pInfo = new objectInfo($parameters);
 $product_assigned_authors = array();
 $product_assigned_genres = array();
 
+/**
+ * @since v1.0.0
+ * This familie obj is initiated in BookX admin observer -> bookx_notify_begin_admin_products.
+ * setFamilies are set here for visualization, but they could be set on the observer. 
+ */
+//$objBookxFamily->setFamilies_list();
+
+
 if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
-    
+   
     $sql = 'SELECT pd.products_name, pd.products_description, pd.products_url, 
         p.products_id, p.products_quantity, p.products_model, p.manufacturers_id,
         p.products_image, p.products_price, p.products_virtual, p.products_weight,
@@ -148,7 +161,7 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
             );
         $assigned_authors->MoveNext();
     }
-
+    
     $assigned_genres = $db->Execute("SELECT * FROM " . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . " WHERE products_id = '" . (int)$_GET['pID'] . "'");
 
     while (!$assigned_genres->EOF) {
@@ -157,6 +170,17 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
             'bookx_genre_id' => $assigned_genres->fields['bookx_genre_id']);
         $assigned_genres->MoveNext();
     }
+    
+    /**
+     * @since v1.0.0
+     */
+    $pInfo->bookx_family_id = $objBookxFamily->family_id;
+    
+    $assigned_bookx_family[] = array(
+        'bookx_family_name' => $objBookxFamily->family_name,
+        'bookx_family_id' => $objBookxFamily->family_id);
+    
+   
 } elseif (zen_not_null($_POST)) {
     
     $pInfo->updateObjectInfo($_POST);
@@ -317,6 +341,18 @@ while (!$condition->EOF) {
     );
     $condition->MoveNext();
 }
+
+/**
+ * @since v1.0.0
+ */
+$families_array = array(array('id' => '', 'text' => TEXT_NONE));
+foreach ($objBookxFamily->families_list as $family) {
+    $families_array[] = array(
+        'id' => $family['bookx_family_id'],
+        'text' => $family['bookx_family_name']
+    );
+}
+
 
 $category_lookup = $db->Execute("SELECT *
                                  FROM " . TABLE_CATEGORIES . " c,
@@ -1010,6 +1046,9 @@ function determineBookxProductStatusMessage() {
         </div>
     </div>
     <?php
+    /**
+     * extra include
+     */
     if (isset ($extra_html)) {
         echo $extra_html; // this was possibly filled by an included file above
     }
@@ -1107,6 +1146,29 @@ function determineBookxProductStatusMessage() {
                 <?php echo zen_draw_input_field ('volume', $pInfo->volume, 'class="form-control"'); ?>
             </div>
         </div>
+        
+        
+        <?php
+        /**
+         * @TODO In future, series, authors, could be inserted on product insert
+         */
+        if (1 < count ($families_array)) { // no families defined 
+            ?>
+            <div class="form-group">
+                <?php echo zen_draw_label (TEXT_PRODUCTS_BOOKX_FAMILY, 'bookx_family_id', 'class="col-sm-3 control-label"'); ?>
+                <div class="col-sm-7 col-md-4">
+                    <?php echo zen_draw_pull_down_menu ('bookx_family_id', $families_array, $pInfo->bookx_family_id, 'class="form-control"'); ?>         </div>
+                 <div class="checkbox col-sm-2">
+        <label>
+          <?php
+            $checked = (isset($_POST['ignore_family_discount']) && $_POST['ignore_family_discount'] == 'on' ) ? true : false;
+            echo zen_draw_checkbox_field('ignore_family_discount', '', $checked) . LABEL_BOOKX_IGNORE_FAMILY_DISCOUNT; 
+            ?>
+        </label>
+      </div>
+            </div>
+        
+        <?php } // end if loop  ?>
 
         <!-- *** Field "Series" starts here *** -->
         <?php

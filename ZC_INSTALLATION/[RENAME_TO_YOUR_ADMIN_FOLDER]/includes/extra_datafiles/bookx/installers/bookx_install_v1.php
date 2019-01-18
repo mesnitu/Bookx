@@ -76,18 +76,19 @@ if($current_template == '' ) {
 
 }
 
-$admin_page_keys = array('configBookXTools',
-						'configProdTypeBookX',
-						'bookxAuthors',
-						'bookxAuthorTypes',
-						'bookxBinding',
-						'bookxConditions',
-						'bookxGenres',
-						'bookxImprints',
-						'bookxPrinting',
-						'bookxPublishers',
-						'bookxSeries',
-						'bookxProduct');
+$admin_page_keys = array(
+    'configBookXTools',
+    'configProdTypeBookX',
+    'bookxAuthors',
+    'bookxAuthorTypes',
+    'bookxBinding',
+    'bookxConditions',
+    'bookxGenres',
+    'bookxImprints',
+    'bookxPrinting',
+    'bookxPublishers',
+    'bookxSeries',
+    'bookxFamilies');
 
 
 // necessary BookX files
@@ -906,18 +907,19 @@ EOT;
 	         zen_register_admin_page('bookxPrinting', 'BOX_CATALOG_PRODUCT_BOOKX_PRINTING', 'FILENAME_BOOKX_PRINTING', '', 'extras', 'Y', 40);
 	         zen_register_admin_page('bookxPublishers', 'BOX_CATALOG_PRODUCT_BOOKX_PUBLISHERS', 'FILENAME_BOOKX_PUBLISHERS', '', 'extras', 'Y', 70);
 	         zen_register_admin_page('bookxSeries', 'BOX_CATALOG_PRODUCT_BOOKX_SERIES', 'FILENAME_BOOKX_SERIES', '', 'extras', 'Y', 90);
-	         zen_register_admin_page('bookxProduct', 'BOX_CATALOG_PRODUCT_BOOKX', 'FILENAME_BOOKX_PRODUCT', '', 'catalog', 'Y', 2);
-             
+             zen_register_admin_page('bookxFamilies', 'BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'FILENAME_BOOKX_FAMILIES', '', 'extras', 'Y', 91);
+	         //zen_register_admin_page('bookxProduct', 'BOX_CATALOG_PRODUCT_BOOKX', 'FILENAME_BOOKX_PRODUCT', '', 'catalog', 'Y', 2);
+            echo BOX_CATALOG_PRODUCT_BOOKX_SERIES;
              /**
               * @todo Check this query, no "product" key is present in TABLE_ADMIN_PAGES_TO_PROFILES
               */
-	         $sql = "SELECT profile_id FROM {$const['TABLE_ADMIN_PAGES_TO_PROFILES']} WHERE page_key = 'product'";
-	         $profile_ids = $db->Execute($sql);
-
-	         while (!$profile_ids->EOF) {
-	         	$db->Execute("REPLACE INTO {$const['TABLE_ADMIN_PAGES_TO_PROFILES']} (profile_id, page_key) VALUES ('{$profile_ids->fields['profile_id']}', 'bookxProduct')");
-	         	$profile_ids->MoveNext();
-	         }
+//	         $sql = "SELECT profile_id FROM {$const['TABLE_ADMIN_PAGES_TO_PROFILES']} WHERE page_key = 'product'";
+//	         $profile_ids = $db->Execute($sql);
+//
+//	         while (!$profile_ids->EOF) {
+//	         	$db->Execute("REPLACE INTO {$const['TABLE_ADMIN_PAGES_TO_PROFILES']} (profile_id, page_key) VALUES ('{$profile_ids->fields['profile_id']}', 'bookxProduct')");
+//	         	$profile_ids->MoveNext();
+//	         }
 
 	    } else {
 	        $messageStack->add_session(sprintf(BOOKX_MS_TABLE_DOESNT_EXIST, 'TABLE_ADMIN_PAGES'), 'warning');

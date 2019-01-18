@@ -16,6 +16,7 @@
 
 define('BOOKX_EXTRA_DATAFILES_FOLDER', DIR_FS_ADMIN . 'includes/extra_datafiles/bookx/');
 /**
- * @todo temp constant to define if git releases are checked and displayed or not
+ * @todo temp constants that later will go to configuration... or not
  */
 define('BOOKX_DISPLAY_GIT_RELEASES', true);
+define('BOOKX_APPLY_SPECIALS_UPDATE', true);

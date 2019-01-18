@@ -32,3 +32,10 @@ $autoLoadConfig[30][] = array('autoType'=>'classInstantiate',
 
 $autoLoadConfig[199][] = array('autoType' => 'init_script',
 			'loadFile' => 'init_product_type_bookx.php');
+
+/**
+ * @since v1.0.0
+ */
+$autoLoadConfig[199][] = array('autoType'=>'class',
+		'loadFile'=> 'bookx/BookxFamilies.php',
+		'classPath'=>DIR_WS_CLASSES);

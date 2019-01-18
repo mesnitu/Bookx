@@ -307,7 +307,7 @@ function bookx_get_products_subtitle($products_id, $language_id) {
                       WHERE products_id = "' . (int)$product_id . '"');
 
   		$db->Execute('DELETE FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . '
-                      WHERE products_id = "' . (int)$product_id . '"');
+                      WHERE products_id = "' . (int)$product_id . '"'); 
   	}
   }
 
@@ -457,7 +457,7 @@ function bookx_null_check($value) {
         return 'null';
     } else {
         return $value;
-    }  
+    }
 }
 
 /**
@@ -478,15 +478,16 @@ function bookx_check_missing_product_relations($bx_tables, $field_id, $delete = 
         foreach ($bx_tables as $table => $table2) {
             $check = $db->Execute("SELECT ".$field_id." FROM " . $table . " WHERE 
                 ".$field_id." NOT IN (SELECT ".$field_id." FROM " .$table2 . ");");
-           
-            $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in " . $table . "<br />" : $table . " all Good!<br />";
+         
+            $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in table[" . $table . "]<br />" : $table . " all Good!<br />";
             if ($delete == true && $check->Count() > 0) {
                 $msg .= ($check->Count() > 0) ? "Deleted " . $check->Count() . " in " . $table . "<br />" : "All Goodfff!";
                 $db->Execute("DELETE FROM " . $table . " WHERE 
-                ".$field_id." NOT IN (SELECT ".$field_id." FROM " . $table2 . ");");   
+                ".$field_id." NOT IN (SELECT ".$field_id." FROM " . $table2 . ");");
             }
         }
     }
+    
     return $msg;
 }
 
@@ -561,7 +562,6 @@ function bookx_update_plugin_release($now = true, $days = null) {
     file_put_contents($file, json_encode($objGit, JSON_PRETTY_PRINT));
     return $msg;
 }
-
 
 
 function pr($v,$dedug=null) {

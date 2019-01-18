@@ -201,9 +201,13 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
 
     $messageStack->add_session(bookx_check_missing_product_relations(
         array(
+            TABLE_PRODUCTS => TABLE_PRODUCTS_TO_CATEGORIES,
+            TABLE_PRODUCT_BOOKX_EXTRA => TABLE_PRODUCTS,
+            TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION => TABLE_PRODUCT_BOOKX_EXTRA,
             TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS => TABLE_PRODUCTS,
-            TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS => TABLE_PRODUCTS
-            ), 'products_id', false), 'success');
+            TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS => TABLE_PRODUCTS,
+            TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS => TABLE_PRODUCT_BOOKX_EXTRA
+            ), 'products_id', true), 'success');
 
     zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
 }

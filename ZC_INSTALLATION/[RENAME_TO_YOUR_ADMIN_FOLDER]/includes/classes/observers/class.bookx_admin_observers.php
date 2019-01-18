@@ -44,9 +44,13 @@ class bookxAdminObserver extends base {
   }
 
   function bookx_notify_begin_admin_products(&$class, $eventID, $paramsArray) {
-    global $type_handler;
+    global $type_handler, $objBookxFamily;
     // @TODO: this is just a quick fix to have language files in collect_info. Not sure yet how zc is pulling lang files
     if ($type_handler == 'product_bookx.php') {
+        
+      //require_once DIR_FS_ADMIN . DIR_WS_CLASSES . 'bookx/BookxFamilies.php';
+      $objBookxFamily = new \Bookx\BookxFamilies();
+      
       require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . FILENAME_BOOKX_PRODUCT . '.php');
     }
   }
