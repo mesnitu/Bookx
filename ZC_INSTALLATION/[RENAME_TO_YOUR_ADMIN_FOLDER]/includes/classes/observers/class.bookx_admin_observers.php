@@ -27,7 +27,9 @@ class bookxAdminObserver extends base {
     $zco_notifier->attach(
         $this, array('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT',
         //'NOTIFIER_CART_ADD_CART_END',
-        'NOTIFY_BEGIN_ADMIN_PRODUCTS'
+        'NOTIFY_BEGIN_ADMIN_PRODUCTS',
+        'NOTIFY_ADMIN_PROD_LISTING_ADD_THEADER',
+        'NOTIFY_ADMIN_PROD_LISTING_ADD_BOOKX_INFO'
             )
     );
   }
@@ -39,6 +41,12 @@ class bookxAdminObserver extends base {
         break;
       case 'NOTIFY_BEGIN_ADMIN_PRODUCTS':
         $this->bookx_notify_begin_admin_products($callingClass, $notifier, $paramsArray);
+        break;
+        case 'NOTIFY_ADMIN_PROD_LISTING_ADD_THEADER':
+        $this->notify_admin_prod_listing_add_theader($callingClass, $notifier, $paramsArray);
+        break;
+    case 'NOTIFY_ADMIN_PROD_LISTING_ADD_BOOKX_INFO':
+        $this->notify_admin_prod_listing_bookx_info($callingClass, $notifier, $paramsArray);
         break;
     }
   }
@@ -53,6 +61,20 @@ class bookxAdminObserver extends base {
       
       require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . FILENAME_BOOKX_PRODUCT . '.php');
     }
+  }
+  
+  function notify_admin_prod_listing_add_theader(&$class, $eventID, $paramsArray) {
+       
+       echo '<th>Isbn</th>';
+       echo '<th>Fam</th>';
+  }
+  function notify_admin_prod_listing_bookx_info(&$class, $eventID, $paramsArray) {
+       global $db;
+       
+       $product = $paramsArray;
+       
+       echo "<td class=\"hidden-md hidden-sm hidden-xs\">". bookx_get_isbn($product) . "</td>";
+       echo "<td class=\"hidden-md hidden-sm hidden-xs\">". bookx_get_family_name($product) . "</td>";
   }
   
   /**
