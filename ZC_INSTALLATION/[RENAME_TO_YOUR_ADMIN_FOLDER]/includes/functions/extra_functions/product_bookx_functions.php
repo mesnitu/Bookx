@@ -32,6 +32,27 @@ function bookx_get_products_subtitle($products_id, $language_id) {
 	}
 }
 
+function bookx_get_isbn($products_id) {
+	global $db;
+	$product = $db->Execute("select isbn
+                                  from " . TABLE_PRODUCT_BOOKX_EXTRA . "
+                                  where products_id = '" . (int)$products_id . "';");
+	if(!$product->EOF) {
+		return ($product->fields['isbn']) ?? '';
+	}
+}
+
+function bookx_get_family_name($products_id) {
+	global $db;
+	$product = $db->Execute("select bookx_family_name
+                                  from " . TABLE_PRODUCT_BOOKX_FAMILIES . " bf LEFT JOIN
+                                  " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " bftp on bf.bookx_family_id = bftp.bookx_family_id
+                                  where bftp.products_id = '" . (int)$products_id . "';");
+	if(!$product->EOF) {
+		return ($product->fields['bookx_family_name']) ?? '';
+	}
+}
+
 // Return the Authors URL
   function bookx_get_author_url($bookx_author_id) {
     global $db;

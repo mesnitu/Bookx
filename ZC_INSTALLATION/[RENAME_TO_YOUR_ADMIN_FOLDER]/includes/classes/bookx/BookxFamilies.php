@@ -36,6 +36,7 @@ class BookxFamilies
             $this->method = (empty($set_family_id_by)) ? 'new_product' : 'update_product';
             $this->setFamily_id($set_family_id_by);
             $this->setFamilyInfo();
+            
         } elseif (!empty($on_page)) {
             if ( $current_page == $on_page) {
                 //for copy product
@@ -47,6 +48,7 @@ class BookxFamilies
             $this->method = 'csv';
             // @todo csv import / export
         }
+       
     }
 
     function getFamilies_list()
@@ -72,9 +74,8 @@ class BookxFamilies
     function setFamilies_list()
     {
         global $db;
-        //$sql = "SELECT DISTINCT bf.bookx_family_id, bf.bookx_family_name FROM " . TABLE_PRODUCT_BOOKX_FAMILIES . " bf 
-        //LEFT JOIN " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " bftp on bf.bookx_family_id = bftp.bookx_family_id ORDER BY bf.bookx_family_name;";
-        $sql = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_FAMILIES . " ORDER BY bookx_family_name;";
+        
+        $sql = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_FAMILIES . " ORDER BY bookx_family_id;";
         $res = $db->Execute($sql);
         while (!$res->EOF) {
             $this->families_list[] = array(
@@ -124,6 +125,7 @@ class BookxFamilies
 
     function BookxInsertFamilyProduct($pID)
     {
+        $this->pID = $pID; // setting new generated pID
         $this->sqlBookxFamilyProduct($pID, 'insert');
     }
     function BookxDeleteFamilyProduct($pID)
@@ -145,6 +147,7 @@ class BookxFamilies
         } else {
             global $db;
             $products_id = $this->pID;
+            
             // Check if this product already has a special
             $sql = "SELECT products_id FROM " . TABLE_SPECIALS . " WHERE products_id = :products_id:";
             $sql = $db->bindVars($sql, ':products_id:', $products_id , 'integer');
@@ -211,11 +214,11 @@ class BookxFamilies
        
         $primary_id = $db->Execute("SELECT primary_id FROM " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " WHERE products_id = '" . (int) $pID . "';");
         
-        if ($primary_id->RecordCount() == 0) {
-            // check is it's a familiy insert on a product update
+        if ($primary_id->RecordCount() == 0 && !empty($this->family_id)) {
+            // check is it's a familiy insert on a product update with a family_id. Else it could mess a delete option
             $option = 'insert';
         }
-
+       
         switch ($option) {
             case 'insert':
                 $sql = "INSERT INTO " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " (products_id, bookx_family_id)
@@ -233,6 +236,7 @@ class BookxFamilies
                 $res = $db->Execute($sql);
                 break;
             case 'delete':
+                
                 $sql = "DELETE FROM " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " WHERE products_id = :products_id:;";
                 $sql = $db->bindVars($sql, ':products_id:', (int) $pID , 'integer'); 
                 $res = $db->Execute($sql);
@@ -247,11 +251,5 @@ class BookxFamilies
         
     }
 
-    
-
-    private function apply_discount($param)
-    {
-        
-    }
 
 }

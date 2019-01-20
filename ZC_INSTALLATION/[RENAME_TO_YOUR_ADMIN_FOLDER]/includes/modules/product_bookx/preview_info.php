@@ -282,7 +282,8 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
                     if(!isset($_POST['ignore_family_discount']) && $objBookxFamily->family_discount > 0 ) { 
                         $_POST['ignore_family_discount'] = 'off';
                         ?>
-                        <span class="text-info"><?php echo 'Family Discount: ' .$currencies->format($objBookxFamily->applyFamilyDiscount()); ?></span>
+                        <span class="text-info">
+                            <?php echo "W/Fam Disc[".$objBookxFamily->family_discount."%]" .$currencies->format($objBookxFamily->applyFamilyDiscount()); ?></span>
                     <?php } else {
                         //set this for update
                         $_POST['ignore_family_discount'] = 'on';
@@ -293,11 +294,11 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
                     </div>
                     <div class="clearfix"></div>
                         <div class="row">
-                            <div class="alert alert-warning">
+                            <div class="center-block">
                                 <?php
                                 $display_warnings = function ($var, $condition, $message) {
                                     if ($var == $condition) {
-                                        return '<div class="errorText">' . $message . '</div>';
+                                        return '<p class="clearfix"><span class="text-warning pull-right">' . $message . '</span></p>';
                                     }
                                 };
                                 echo $display_warnings($pInfo->products_virtual, 1, TEXT_VIRTUAL_PREVIEW);

@@ -220,6 +220,7 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
         <meta charset="<?php echo CHARSET; ?>">
         <title><?php echo TITLE; ?></title>
         <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
+        <link rel="stylesheet" type="text/css" href="includes/extra_datafiles/bookx/libs/prism.css">
         <link rel="stylesheet" type="text/css" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
         <style>
             body {
@@ -278,7 +279,38 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
             .container {
                 line-height: 1.6;
             }
+            .docs {
+                height: 90vh;
+                overflow: scroll;
+                font-size: 12px;
+                background-color: white;
+                line-height: 1.45;
+                color: #333;
 
+            }
+            .docs blockquote {
+                font-size: 1.25em;
+                background: #f5f5f5;
+            }
+            .docs p {margin-bottom: 1.25em;}
+            .docs h1,.docs h2,.docs h3, .docs h4,.docs h5 {
+                margin: 2.75rem 0 1rem;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 400;
+                line-height: 1.15;
+            }
+            .docs h1 {
+                margin-top: 0;
+                font-size: 3.052em;
+            }
+            .docs h2 {font-size: 2.441em;}
+
+            .docs h3 {font-size: 1.953em;}
+
+            .docs h4 {font-size: 1.563em;}
+
+            .docs h5 {font-size: 1.25em;}
+            
             @media screen and (max-width: 810px) {
                 #section1, #section2, #section3, #section41, #section42  {
                     /*     margin-left: 150px;*/
@@ -286,9 +318,10 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
             }
         </style>
         <script src="includes/general.js"></script>
+        
     </head>
-<!--    <body id="bookxtolls" data-spy="scroll" data-target="#myScrollspy" data-offset="20"> -->
-    <body> 
+<body id="bookxtolls" data-spy="scroll" data-target="#myScrollspy" data-offset="20">
+    
         <!-- header //-->
 <?php require(DIR_WS_INCLUDES . 'header.php'); ?>
         <!-- header_eof //-->
@@ -448,7 +481,7 @@ if ($action == 'bookx_install_options') {
                     <li><a href="#sectionGitReleases">Git Releases Check</a></li>
                     <li><a href="#sectionMissingRelations">Fix Missing Relations</a></li>
                     <li><a href="#section4">Section 4</a></li>
-                    <li><a href="#section5">Section 5</a></li>
+                    <li><a href="#sectionDocs">Documentation</a></li>
                     <!--
                     <li class="dropdown">
                       <a class="dropdown-toggle" data-toggle="dropdown" href="#">Docs<span class="caret"></span></a>
@@ -485,7 +518,7 @@ if ($action == 'bookx_install_options') {
                 /**
                  * @example section tpl_panels:
                  * <?php tpl_panel('open','section_id', 'Title');?>
-                 * <?php ... content;?>
+                 *  ... content
                  * <?php tpl_panel('close');?>
                  */
                 ?>
@@ -795,8 +828,21 @@ if ($action == 'bookx_install_options') {
                         <p>Try to scroll this section and look at the navigation list while scrolling!</p>
                         <?php tpl_panel('close'); ?>
 
-                        <?php tpl_panel('open', 'section5', 'section 5'); ?>
-                        <p>Try to scroll this section and look at the navigation list while scrolling!</p>
+                        <?php tpl_panel('open', 'sectionDocs', 'Documetation'); ?>
+                        
+                        <?php if ($action == 'loadDocumentation') {
+                            echo '<div class="docs">';
+                            require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/Parsedown.php';
+                            $parsedown = new Parsedown();
+                            $text = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER . 'Documentation.md');
+                            echo Parsedown::instance()
+                                ->setUrlsLinked(true)
+                                ->text($text);
+                             echo '</div>';
+                            } else { ?> 
+                        <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS, 'action=loadDocumentation#sectionDocs'); ?>" class="btn btn-default btn-sm">Load DOcumetation</a> 
+                            <?php } ?>
+                        
                         <?php tpl_panel('close'); ?>
                     <?php } // ends bookx tools panels ?>
                 </div><!-- right div_eof //--> 
@@ -806,6 +852,7 @@ if ($action == 'bookx_install_options') {
         <!-- footer //-->
                     <?php require(DIR_WS_INCLUDES . 'footer.php'); ?>
         <!-- footer_eof //-->
+       <script src="includes/extra_datafiles/bookx/libs/prism.js"></script>
         <script>
             $(document).ready(function () {
 
@@ -813,7 +860,7 @@ if ($action == 'bookx_install_options') {
                     e.preventDefault();
                     $('html,body').animate({scrollTop: $(this.hash).offset().top});
                 });
-
+                
                 /**    
                  $(document.body).on('change',"#confMetaTags",function (e) { 
                  var optVal= $("#confMetaTags option:selected").val();
@@ -830,6 +877,7 @@ if ($action == 'bookx_install_options') {
                  */
             });
         </script>
+        
     </body>
 </html>
 <?php
