@@ -8,7 +8,7 @@ windows() { [[ -n "$WINDIR" ]]; }
 #admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
 #tpl_dir_name=NAME_OF_YOUR_TEMPLATE
 
-src_dir="c:\xampp\htdocs\vhosts\bookx-zc155f\ZC_INSTALLATION"
+src_dir="c:\xampp\htdocs\vhosts\Bookx\ZC_INSTALLATION"
 dst_dir="c:\xampp\htdocs\vhosts\zencart"
 admin_dir_name="zenadmin"
 tpl_dir_name="responsive_classic"
