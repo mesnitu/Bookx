@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
@@ -14,22 +15,26 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [admin]/includes/extra_datafiles/bookx_type_filenames.php 2016-02-02 philou $
+ * @version BookX V v1.0.0
+ * @version $Id: [admin]/includes/extra_datafiles/bookx_type_filenames.php 2019-01-19 mesnitu $
  */
-
-
 if (!defined('IS_ADMIN_FLAG')) {
-  die('Illegal Access');
+    die('Illegal Access');
 }
-  define('FILENAME_BOOKX_PRODUCT', 'product_bookx');
-  define('FILENAME_BOOKX_TOOLS', 'bookx_tools');
-  define('FILENAME_BOOKX_AUTHORS', 'bookx_authors');
-  define('FILENAME_BOOKX_AUTHOR_TYPES', 'bookx_author_types');
-  define('FILENAME_BOOKX_BINDING', 'bookx_binding');
-  define('FILENAME_BOOKX_CONDITIONS', 'bookx_conditions');
-  define('FILENAME_BOOKX_GENRES', 'bookx_genres');
-  define('FILENAME_BOOKX_IMPRINTS', 'bookx_imprints');
-  define('FILENAME_BOOKX_PRINTING', 'bookx_printing');
-  define('FILENAME_BOOKX_PUBLISHERS', 'bookx_publishers');
-  define('FILENAME_BOOKX_SERIES', 'bookx_series');
+
+define('FILENAME_BOOKX_PRODUCT', 'product_bookx');
+define('FILENAME_BOOKX_TOOLS', 'bookx_tools');
+define('FILENAME_BOOKX_AUTHORS', 'bookx_authors');
+define('FILENAME_BOOKX_AUTHOR_TYPES', 'bookx_author_types');
+define('FILENAME_BOOKX_BINDING', 'bookx_binding');
+define('FILENAME_BOOKX_CONDITIONS', 'bookx_conditions');
+define('FILENAME_BOOKX_GENRES', 'bookx_genres');
+define('FILENAME_BOOKX_IMPRINTS', 'bookx_imprints');
+define('FILENAME_BOOKX_PRINTING', 'bookx_printing');
+define('FILENAME_BOOKX_PUBLISHERS', 'bookx_publishers');
+define('FILENAME_BOOKX_SERIES', 'bookx_series');
+
+/**
+ * @since v1.0.0
+ */
+define('FILENAME_BOOKX_FAMILIES', 'bookx_families');

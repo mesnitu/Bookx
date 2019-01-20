@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [admin]/bookx_authors.php 2016-02-02 philou $
+ * @version BookX V 1.0.1
+ * @version $Id: [admin]/bookx_authors.php 2018-12-28 mesnitu $
  */
 
 /**
@@ -29,18 +29,22 @@
   require('includes/application_top.php');
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
-
+  
+  //pr($sanitizer);
   if (zen_not_null($action)) {
     switch ($action) {
       case 'insert':
       case 'save':
-        if (isset($_GET['mID'])) $bookx_author_id = zen_db_prepare_input($_GET['mID']);
-        $author_name = zen_db_prepare_input($_POST['author_name']);
-        $author_image_copyright = zen_db_prepare_input($_POST['author_image_copyright']);
-        $author_url = str_replace('http://', '', zen_db_prepare_input($_POST['author_url']));
-
-        $author_sort_order = zen_db_prepare_input($_POST['author_sort_order']);
-        $author_default_type = zen_db_prepare_input($_POST['author_default_type']);
+        
+        if (isset($_GET['mID'])) {
+            $bookx_author_id = zen_db_prepare_input($_GET['mID']);
+        }
+        $author_name =  bookx_null_check($_POST['author_name']);
+        $author_image_copyright =  bookx_null_check($_POST['author_image_copyright']);
+        $author_url = str_replace('http://', '',  bookx_null_check($_POST['author_url']));
+        
+        $author_sort_order = bookx_null_check($_POST['author_sort_order']);
+        $author_default_type =  bookx_null_check($_POST['author_default_type']);
 
         $sql_data_array = array('author_name' => $author_name,
         						'author_sort_order' => (int)$author_sort_order,
@@ -217,39 +221,53 @@
 <!-- header_eof //-->
 
 <!-- body //-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6"><h1 ><?php echo HEADING_TITLE; ?></h1></div>
+    
+   
+    <div class="col-xs-6">
+       <?php echo zen_draw_form('search', FILENAME_BOOKX_AUTHORS, '', 'get', 'class="form-inline"'); ?>
+         <div class="form-group">
+            <?php echo zen_draw_label(HEADING_TITLE_SEARCH_DETAIL, 'search', 'class="sr-only"'); ?>
+                <?php
+		   echo zen_draw_input_field('search', '','class="form-control" placeholder="' . HEADING_TITLE_SEARCH_DETAIL . '"') . zen_hide_session_id();
+           // show reset search
+		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
+		      echo '<a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS) . '" class="btn btn-primary" role="button">Reset</a>';
+		    }
+            
+		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
+		      $keywords = zen_db_input(zen_db_prepare_input($_GET['search'])); ?>
+             <div class="alert alert-success" role="alert"><?php echo TEXT_INFO_SEARCH_DETAIL_FILTER . $keywords; ?></div>
+		    <?php } ?>
+        </div>
+        </form>
+    </div>
+     
+ </div> <!-- row-->
 <table border="0" width="100%" cellspacing="2" cellpadding="2">
   <tr>
 <!-- body_text //-->
-    <td width="100%" valign="top"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+    <td width="100%" valign="top">
+        <table border="0" width="100%" cellspacing="0" cellpadding="2">
       <tr>
-        <td width="100%">
-        <?php
-            echo zen_draw_form('search', FILENAME_BOOKX_AUTHORS, '', 'get');
-			// show reset search
-		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
-		      echo '<a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS) . '">' . zen_image_button('button_reset.gif', IMAGE_RESET) . '</a>&nbsp;&nbsp;';
-		    }
-		    echo HEADING_TITLE_SEARCH_DETAIL . ' ' . zen_draw_input_field('search') . zen_hide_session_id();
-		    if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
-		      $keywords = zen_db_input(zen_db_prepare_input($_GET['search']));
-		      echo '<br />' . TEXT_INFO_SEARCH_DETAIL_FILTER . $keywords;
-		    }
-		    echo '</form>';
-    ?>
-        <table border="0" width="100%" cellspacing="0" cellpadding="0">
+        <td><table class="table">
           <tr>
-            <td class="pageHeading"><?php echo HEADING_TITLE; ?></td>
-            <td class="pageHeading" align="right"><?php echo zen_draw_separator('pixel_trans.gif', HEADING_IMAGE_WIDTH, HEADING_IMAGE_HEIGHT); ?></td>
-          </tr>
-        </table></td>
-      </tr>
-      <tr>
-        <td><table border="0" width="100%" cellspacing="0" cellpadding="0">
-          <tr>
-            <td valign="top"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+            <td valign="top">
+                <table class="table table-hover">
               <tr class="dataTableHeadingRow">
-                <td class="dataTableHeadingContent"><?php echo TABLE_HEADING_AUTHOR; ?></td>
-                <td class="dataTableHeadingContent"><?php echo TABLE_HEADING_SORT_ORDER; ?></td>
+                <td class="dataTableHeadingContent">
+                    <?php echo TABLE_HEADING_AUTHOR; ?>
+                    <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order', 'page')) . 'list_order=by_name_asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order'] == 'by_name_asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                    <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order', 'page')) . 'list_order=by_name_desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order'] == 'by_name_desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
+                
+                </td>
+                <td class="dataTableHeadingContent">
+                    <?php echo TABLE_HEADING_SORT_ORDER; ?>
+                    <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order', 'page')) . 'list_order=by_sort_order_asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order'] == 'by_sort_order_asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                    <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order', 'page')) . 'list_order=by_sort_order_desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order'] == 'by_sort_order_desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
+                </td>
                 <td class="dataTableHeadingContent" align="right"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
               </tr>
 <?php
@@ -257,11 +275,31 @@
 		$search = zen_db_prepare_input($_GET['search']);
 		$author_query_raw = 'SELECT * FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' WHERE author_name LIKE "%' . zen_db_input($search) . '%" ORDER BY author_sort_order, author_name';
 	} else {
-		$author_query_raw = 'SELECT * FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ORDER BY author_sort_order, author_name';
+        
+        switch ($_GET['list_order']) {
+          case 'by_sort_order_asc':
+            $disp_order = "author_sort_order ASC";
+            break;
+        case 'by_sort_order_desc':
+            $disp_order = "author_sort_order DESC";
+            break;
+        case 'by_name_asc':
+            $disp_order = "author_name ASC";
+            break;
+        case 'by_name_desc':
+            $disp_order = "author_name DESC";
+            break;
+          default:
+              $disp_order = "author_sort_order, author_name";
+            break;
+        }
+        
+		$author_query_raw = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS . " ORDER BY ". $disp_order ."";
 	}
+   
   $author_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $author_query_raw, $author_query_numrows);
   $author = $db->Execute($author_query_raw);
-
+  
   $author_types_array = array(array('id' => '', 'text' => TEXT_NONE));
   $author_types = $db->Execute('SELECT at.bookx_author_type_id, atd.type_description
                                 FROM ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES . ' at
@@ -305,7 +343,8 @@
   }
 ?>
               <tr>
-                <td colspan="3"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+                <td colspan="3">
+                    <table border="0" width="100%" cellspacing="0" cellpadding="2">
                   <tr>
                     <td class="smallText" valign="top"><?php echo $author_split->display_count($author_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_AUTHORS); ?></td>
                     <td class="smallText" align="right"><?php echo $author_split->display_links($author_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></td>
@@ -344,10 +383,10 @@
         }
       }
       $dir->close();
-
+    
       $default_directory = 'bookx_authors/';
 
-      $contents[] = array('text' => '<BR />' . TEXT_AUTHOR_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
+      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
       $contents[] = array('text' => '<br />' . TEXT_AUTHOR_IMAGE_MANUAL . '&nbsp;' . zen_draw_input_field('author_image_manual'));
 
       $contents[] = array('text' => '<br>' . TEXT_AUTHOR_IMAGE_COPYRIGHT . '&nbsp;' . zen_draw_input_field('author_image_copyright', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_image_copyright')));
@@ -364,13 +403,15 @@
 
 
       $contents[] = array('text' => '<br>' . TEXT_AUTHOR_DESCRIPTION . $author_description_textarea);
-
-      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_SORT_ORDER . '<br>' . zen_draw_input_field('author_sort_order'));
+      $default_value = ($author_sort_order) ?? '0';
+      $contents[] = array('text' => '<br />' . TEXT_AUTHOR_SORT_ORDER . '<br>' . zen_draw_input_field('author_sort_order', $default_value),'');
 
       $contents[] = array('align' => 'center', 'text' => '<br>' . zen_image_submit('button_save.gif', IMAGE_SAVE) . ' <a href="' . zen_href_link(FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . '&mID=' . $_GET['mID']) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
+       
       break;
       
     case 'edit':
+       
       $heading[] = array('text' => '<b>' . TEXT_HEADING_EDIT_AUTHOR . '</b>');
 
       $contents = array('form' => zen_draw_form('author', FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . '&mID=' . $aInfo->bookx_author_id . '&action=save' . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : ''), 'post', 'enctype="multipart/form-data"'));
@@ -387,7 +428,8 @@
         }
       }
       $dir->close();
-      $default_directory = substr( $aInfo->author_image, 0,strpos( $aInfo->author_image, '/')+1);
+      sort($dir_info);
+      $default_directory = substr($aInfo->author_image, 0,strpos($aInfo->author_image, '/')+1);
       if ('' == $aInfo->author_image) {
       	$default_directory = 'bookx_authors/';
       }
@@ -548,6 +590,7 @@
 <!-- body_text_eof //-->
   </tr>
 </table>
+</div>
 <!-- body_eof //-->
 
 <!-- footer //-->

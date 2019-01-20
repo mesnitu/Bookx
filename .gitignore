@@ -1,3 +1,4 @@
+sql_update.txt
 /vendors
 *.bak
 *.old
@@ -9,6 +10,7 @@ clover.xml
 .vscode
 
 ### NetBeans ###
+nbproject
 nbproject/private/
 build/
 nbbuild/

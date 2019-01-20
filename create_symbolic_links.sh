@@ -18,6 +18,8 @@ mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/observers
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german/extra_definitions
+# Adds Installer Folder
+mkdir -p ${dst_dir}/${admin_dir_name}/includes/includes/installers/bookx
 mkdir -p ${dst_dir}/includes/languages/german
 mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
 mkdir -p ${dst_dir}/includes/classes/observers
@@ -56,13 +58,13 @@ ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/functions/extra_funct
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/init_includes/init_product_type_bookx.php ${dst_dir}/${admin_dir_name}/includes/init_includes/init_product_type_bookx.php
 
 # files in admin/includes/modules/product_bookx
+ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/preview_info_meta_tags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/preview_info_meta_tags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info_metatags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info_metatags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/copy_to_confirm.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/copy_to_confirm.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/delete_product_confirm.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/delete_product_confirm.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/preview_info.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/preview_info.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/update_product.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/update_product.php
-
 
 # files in admin/includes/languages/english
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/languages/english/bookx_author_types.php ${dst_dir}/${admin_dir_name}/includes/languages/english/bookx_author_types.php

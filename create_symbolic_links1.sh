@@ -2,19 +2,25 @@
 
 windows() { [[ -n "$WINDIR" ]]; }
 
-# version BookX 0.9.5 BETA
+# version BookX 0.9.6 BETA
 #src_dir=/FULL_PATH_TO_YOUR_BOOKX_INSTALLATION/bookX/ZC_INSTALLATION
 #dst_dir=/FULL_PATH_TO_YOUR_ZENCART_INSTALLATION/zen-cart
 #admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
 #tpl_dir_name=NAME_OF_YOUR_TEMPLATE
 
-src_dir="c:\xampp\htdocs\vhosts\zenbookx.local\bookx-zc155f\ZC_INSTALLATION"
-dst_dir="c:\xampp\htdocs\vhosts\zenbookx.local"
+src_dir="c:\xampp\htdocs\vhosts\Bookx\ZC_INSTALLATION"
+dst_dir="c:\xampp\htdocs\vhosts\zencart"
 admin_dir_name="zenadmin"
 tpl_dir_name="responsive_classic"
 
 admin_path=${dst_dir}\\${admin_dir_name}
-echo $admin_path
+
+echo
+echo "Source Directory: $src_dir"
+echo "Destination Directory: $dst_dir"
+echo "Admin Path: $admin_path"
+echo "Template Directory Name: $tpl_dir_name"
+echo
 
 admin_files=(
     bookx_author_types.php 
@@ -27,7 +33,8 @@ admin_files=(
     bookx_publishers.php
     bookx_series.php
     bookx_tools.php
-    product_bookx.php
+    #product_bookx.php
+    
     # files in admin/includes
     includes/auto_loaders/config.product_type_bookx.php
     includes/classes/observers/class.bookx_admin_observers.php
@@ -39,9 +46,10 @@ admin_files=(
     # files in admin/includes/modules/product_bookx
     includes/modules/product_bookx/collect_info_metatags.php
     includes/modules/product_bookx/collect_info.php
-    includes/modules/product_bookx/copy_to_confirm.php
+    includes/modules/product_bookx/copy_product_confirm.php
     includes/modules/product_bookx/delete_product_confirm.php
     includes/modules/product_bookx/preview_info.php
+    includes/modules/product_bookx/preview_info_meta_tags.php
     includes/modules/product_bookx/update_product.php
     # files in admin/includes/languages/english
     includes/languages/english/bookx_author_types.php
@@ -67,6 +75,25 @@ admin_files=(
     includes/languages/german/bookx_series.php
     includes/languages/german/product_bookx.php
     includes/languages/german/extra_definitions/product_bookx.php
+    #since v1.0.0
+    includes/extra_configures/bookx_extrafiles_folder.php
+    includes/extra_datafiles/bookx/installers/bookx_install_v1.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v09.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v091.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v092.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v093.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v094.php
+    includes/extra_datafiles/bookx/installers/bookx_update_v095.php
+	includes/extra_datafiles/bookx/libs/Parsedown.php
+    includes/extra_datafiles/bookx/plugin_check.json
+    includes/extra_datafiles/bookx/Documentation.md
+	includes/extra_datafiles/bookx/libs/Parsedown.php
+    includes/extra_datafiles/bookx/libs/prism.css
+    includes/extra_datafiles/bookx/libs/prism.js
+    includes/classes/bookx/BookxFamilies.php
+	includes/classes/bookx/BookxDinamicMetaTags.php
+    includes/languages/english/bookx_families.php
+    bookx_families.php
     )
 
 #files in catalog
@@ -107,29 +134,33 @@ catalog_files=(
     includes/templates/template_default/templates/tpl_bookx_products_next_previous.php
 )
 
-echo "== Options ================="
-echo "-> Create symlinks ----- [0]"
-echo "-> Delete symlinks ----- [1]"
+echo "== Options ==============================="
+echo "-> Create symlinks -------------- [create]"
+echo "-> Delete symlinks -------------- [delete]"
+echo "-> Copy Files (for install) ----- [copy]"
 
 while true; do
     
-    read -e -p "Option [(0)/(1)]: " options
+    read -e -p "Option [type option]: " options
     
     if [ -z "$options" ]; then
 	    echo -n ""
         #echo $options
     else
-        if [ "$options" == "0" ]; then
+        if [ "$options" == "create" ]; then
             echo "-> Create symlinks: $options"        
         fi
-	    if [ "$options" == "1" ]; then
+	    if [ "$options" == "delete" ]; then
+            echo "-> Delete symlinks: $options"
+        fi
+		if [ "$options" == "copy" ]; then
             echo "-> Delete symlinks: $options"
         fi
         break;
     fi
 done
 
-if [ "$options" == "0" ]; then
+if [ "$options" == "create" ]; then
 
     #create folders first
     umask 000
@@ -137,6 +168,14 @@ if [ "$options" == "0" ]; then
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german/extra_definitions
+    
+    # v1.0.0 Adds Installer and bookx folder to extra_datafiles
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_configures
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/installers
+	mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/libs
+    # v1.0.0 Add classes/bookx folder
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/bookx
     mkdir -p ${dst_dir}/includes/languages/german
     mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
     mkdir -p ${dst_dir}/includes/classes/observers
@@ -172,7 +211,7 @@ if [ "$options" == "0" ]; then
     else
         ln -sf ${src_dir}/includes/templates/[YOUR-TEMPLATE]/css/stylesheet_bookx.css ${dst_dir}/includes/templates/${tpl_dir_name}/css/stylesheet_bookx.css     
     fi
-else
+elif [ "$options" == "delete" ]; then
     for i in "${admin_files[@]}"; do
         rm -v ${admin_path}/"$i"
         #echo "Delete admin files $i"
@@ -184,4 +223,11 @@ else
     rm -v ${dst_dir}/includes/templates/${tpl_dir_name}/css/stylesheet_bookx.css
     #echo "Delete template files"
     echo "Done"
+else 
+	echo "not yet done copy files"
+fi
+
+read -e -p "Done! Review or Click to Exit" exit
+if [ -z "$exit" ]; then
+	cmd <<< "exit"
 fi
