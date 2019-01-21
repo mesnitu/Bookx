@@ -154,19 +154,19 @@ $objBookxFamily->setFamilies_list();
     <!-- body //-->
     <div class="container">
         <h1><?php echo HEADING_TITLE; ?></h1>
-        <p class="alert alert-info"><?php echo FAMLIES_ABOUT_INFO; ?></p>
+        <p class="alert alert-info"><?php echo BOOKX_INFO_FAMLIES_ABOUT; ?></p>
         <div class="well">
             <?php 
             echo zen_draw_form('families_import', FILENAME_BOOKX_FAMILIES,'action=replace', 'post', 'enctype="multipart/form-data"'); ?>
             <div class="form-group">
             <label for="families_csv">File input</label>
             
-            <?php echo zen_draw_file_field ('file_csv', true, 'id ="families_csv" class="form-control"'); ?>
-            <div class="help-block"><?php echo FAMLIES_EXPECTED_CSV_FIELDS_INFO; ?></div>
+            <?php echo zen_draw_file_field ('file_csv', true, 'id ="families_csv" class="form-control" required'); ?>
+            <div class="help-block"><?php echo BOOKX_INFO_FAMLIES_EXPECTED_CSV_FIELDS; ?></div>
             </div>
             
             
-            <button type="submit" class="btn btn-primary btn-sm"><?php echo SUBMIT_FAMILIES; ?></button>
+            <button type="submit" class="btn btn-primary btn-sm"><?php echo BUTTON_SUBMIT_FAMILIES; ?></button>
         </div>
         <div class="table-responsive">
         <table class="table table-hover">
