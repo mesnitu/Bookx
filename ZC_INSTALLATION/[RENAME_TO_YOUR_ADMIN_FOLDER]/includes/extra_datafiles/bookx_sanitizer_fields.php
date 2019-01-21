@@ -13,11 +13,13 @@ $group = array(
 $sanitizer->addSimpleSanitization('PRODUCT_DESC_REGEX', $group);
 
 $group = array(
+    'bookx_author_id',
     'bookx_binding_id',
     'bookx_publisher_id', 
     'bookx_series_id', 
     'bookx_imprint_id',
     'bookx_printing_id',
+    'bookx_family_id',
     'blank_bookx_author_id',
     'blank_bookx_genre_id',
     'blank_bookx_author_type_id',
