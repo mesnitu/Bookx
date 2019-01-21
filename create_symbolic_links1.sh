@@ -93,6 +93,7 @@ admin_files=(
     includes/classes/bookx/BookxFamilies.php
 	includes/classes/bookx/BookxDinamicMetaTags.php
     includes/languages/english/bookx_families.php
+    includes/languages/german/bookx_families.php
     bookx_families.php
     )
 
