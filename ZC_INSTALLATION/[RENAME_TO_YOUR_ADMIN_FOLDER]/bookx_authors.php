@@ -25,7 +25,7 @@
  *
  */
 require('includes/application_top.php');
-
+                        
 $action = (isset($_GET['action']) ? $_GET['action'] : '');
 $sort_order = (isset($_GET['list_order'])) ? '&list_order=' . $_GET['list_order'] : '';
 //pr($action);
@@ -87,36 +87,43 @@ if (zen_not_null($action)) {
                 
             } elseif($_POST['author_image_manual'] == '' && $_POST['author_image_url']) {
                 
-                
                 $dest = DIR_FS_CATALOG_IMAGES . $_POST['img_dir'];
-                
                 $url = trim($_POST['author_image_url']);
-                
                 $clean_author_name = cleanImageName($author_name, 'lower') . '_' .$bookx_author_id;
                 
                 $temp_img = BOOKX_TEMP_FOLDER . $clean_author_name . '.jpg';
                 
                 download_img_from_url($url, $temp_img);
-                
-                $resize = true;
-                
-                if ($resize == true) {
-                    // to temp folder         
+                /**
+                 * On replacing a image with the same path/name, there's a catch ... browser cache
+                 */
+                if (BOOKX_RESIZE_IMAGES == true) {
+                    
                     include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResize.php';
                     include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResizeException.php';
-                    $image = new \Gumlet\ImageResize($temp_img);
-                    $image->resizeToLongSide(500);
-                    $image->save($dest. $clean_author_name . '.jpg');
-                    
+
+                    try {  
+                        $image = new \Gumlet\ImageResize($temp_img);
+                        $image->resizeToHeight(BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, $allow_enlarge = true);
+                        $image->save($dest . $clean_author_name . '.jpg');                    
+                        
+                    } catch (\Gumlet\ImageResizeException $e) {
+                        $messageStack->add_session('Could not resize image ' . $e->getMessage(), 'error');
+                    }
                 } else {
-                    copy($temp_img, $dest);
+                    if (filesize($temp_img) > 0) {
+                        copy($temp_img, $dest);
+                        
+                    } else {
+                        $messageStack->add_session('Could not resize image with filesize ' .filesize($temp_img) , 'caution');
+                    }
                 }
                 @unlink($temp_img);
-                $db->Execute("update " . TABLE_PRODUCT_BOOKX_AUTHORS . "
-	                      set author_image = '" . $_POST['img_dir'] . $clean_author_name . '.jpg' . "'
-	                      where bookx_author_id = '" . (int) $bookx_author_id . "'");
-               
-                 
+                $sql ="UPDATE " . TABLE_PRODUCT_BOOKX_AUTHORS . "
+	                      SET author_image = '" . $_POST['img_dir'] . $clean_author_name . '.jpg' . "'
+	                      WHERE bookx_author_id = '" . (int) $bookx_author_id . "'";
+                $db->Execute($sql);
+                clearstatcache(); 
             } else {
                 $author_image = new upload('author_image');
                 $author_image->set_destination(DIR_FS_CATALOG_IMAGES . $_POST['img_dir']);
@@ -129,7 +136,7 @@ if (zen_not_null($action)) {
 	                          where bookx_author_id = '" . (int) $bookx_author_id . "'");
                     } else {
                         $db->Execute("update " . TABLE_PRODUCT_BOOKX_AUTHORS . "
-	                          set author_image = ''
+	                          set author_image = 'null'
 	                          where bookx_author_id = '" . (int) $bookx_author_id . "'");
                     }
                 }
@@ -606,7 +613,12 @@ switch ($action) {
         if ('' == $aInfo->author_image) {
             $default_directory = 'bookx_authors/';
         }
-
+        $contents[] = array(
+            'text' => $wrap(array(
+                'url download',
+                'author_image_url'
+                ), zen_draw_input_field('author_image_url', '', $form_control))
+        );
         $contents[] = array(
             'text' => $wrap(array(
                 TEXT_AUTHOR_IMAGE_DIR, 
