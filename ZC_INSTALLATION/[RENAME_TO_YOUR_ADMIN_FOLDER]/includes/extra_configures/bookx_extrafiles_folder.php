@@ -21,3 +21,5 @@ define('BOOKX_EXTRA_DATAFILES_FOLDER', DIR_FS_ADMIN . 'includes/extra_datafiles/
 define('BOOKX_DISPLAY_GIT_RELEASES', true);
 
 define('BOOKX_APPLY_SPECIALS_UPDATE', true);
+
+define('BOOKX_TEMP_FOLDER', DIR_FS_ADMIN . 'temp/');

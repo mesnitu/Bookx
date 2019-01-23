@@ -39,6 +39,7 @@ if (zen_not_null($action)) {
         case 'insert':
             $sort_order = '&list_order=by_aID_desc';
             unset($_GET['list_order']);
+            
         case 'save':
             
             if (isset($_GET['mID'])) {
@@ -69,6 +70,8 @@ if (zen_not_null($action)) {
 
                 $bookx_author_id = zen_db_insert_id();
                 
+                
+                
             } elseif ($action == 'save') {
                 /* $update_sql_data = array('last_modified' => 'now()');
                   $sql_data_array = array_merge($sql_data_array, $update_sql_data); */
@@ -81,6 +84,39 @@ if (zen_not_null($action)) {
                 $db->Execute("update " . TABLE_PRODUCT_BOOKX_AUTHORS . "
 	                      set author_image = '" . $author_image_name . "'
 	                      where bookx_author_id = '" . (int) $bookx_author_id . "'");
+                
+            } elseif($_POST['author_image_manual'] == '' && $_POST['author_image_url']) {
+                
+                
+                $dest = DIR_FS_CATALOG_IMAGES . $_POST['img_dir'];
+                
+                $url = trim($_POST['author_image_url']);
+                
+                $clean_author_name = cleanImageName($author_name, 'lower') . '_' .$bookx_author_id;
+                
+                $temp_img = BOOKX_TEMP_FOLDER . $clean_author_name . '.jpg';
+                
+                download_img_from_url($url, $temp_img);
+                
+                $resize = true;
+                
+                if ($resize == true) {
+                    // to temp folder         
+                    include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResize.php';
+                    include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResizeException.php';
+                    $image = new \Gumlet\ImageResize($temp_img);
+                    $image->resizeToLongSide(500);
+                    $image->save($dest. $clean_author_name . '.jpg');
+                    
+                } else {
+                    copy($temp_img, $dest);
+                }
+                @unlink($temp_img);
+                $db->Execute("update " . TABLE_PRODUCT_BOOKX_AUTHORS . "
+	                      set author_image = '" . $_POST['img_dir'] . $clean_author_name . '.jpg' . "'
+	                      where bookx_author_id = '" . (int) $bookx_author_id . "'");
+               
+                 
             } else {
                 $author_image = new upload('author_image');
                 $author_image->set_destination(DIR_FS_CATALOG_IMAGES . $_POST['img_dir']);
@@ -470,7 +506,12 @@ switch ($action) {
         $dir->close();
 
         $default_directory = 'bookx_authors/';
-
+        $contents[] = array(
+            'text' => $wrap(array(
+                'url download',
+                'author_image_url'
+                ), zen_draw_input_field('author_image_url', '', $form_control))
+        );
         $contents[] = array(
             'text' => $wrap(array(
                 TEXT_AUTHOR_IMAGE_DIR,
@@ -483,6 +524,7 @@ switch ($action) {
                 'author_image_manual'
                 ), zen_draw_input_field('author_image_manual', '', $form_control))
         );
+        
         $contents[] = array(
             'text' => $wrap(array(
                 TEXT_AUTHOR_IMAGE_COPYRIGHT,

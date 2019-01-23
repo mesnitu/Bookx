@@ -529,6 +529,7 @@ function check_git_release_for($url, $compare = false, $install = null) {
 
     $output = curl_exec($cInit);
     $response = curl_getinfo($cInit, CURLINFO_HTTP_CODE);
+    
     if ($response == "200") {
         $result = json_decode($output, true);
     } else {
@@ -551,6 +552,58 @@ function check_git_release_for($url, $compare = false, $install = null) {
     curl_close($cInit);
 
     return $info;
+}
+
+function download_img_from_url($url, $imageName) {
+    
+    
+    
+    if (!file_exists($imageName)) {
+       
+        $ch = curl_init($url);
+        $fp = fopen($imageName, 'wb');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        //curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
+    } 
+}
+
+function cleanImageName($post_name, $type = null)
+{
+    
+    $r = array(' ', '-', '.');
+
+    if (class_exists('CeonURIMappingAdmin')) {
+
+        require_once(DIR_FS_CATALOG . DIR_WS_CLASSES . 'class.CeonURIMappingAdmin.php');
+        $handleUri = new CeonURIMappingAdmin();
+        
+        $lang_code = $_SESSION['languages_code'];
+
+        $name = $handleUri->_convertStringForURI(trim($post_name), $lang_code);
+        //some extra string checks
+        
+        if ($type == 'lower') {
+            //for file names
+            $post_name = str_replace($r, '_', strtolower($name));
+            return $post_name;
+        } else {
+            // for Folders Name
+            $post_name = str_replace($r, '', ucwords($name, '-'));
+            return $post_name;
+        }
+    } elseif (extension_loaded('intl')) {
+        
+        $t = str_replace($r, '_', $post_name);
+        return transliterator_transliterate('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();', $t);
+        
+    } else {
+        return null;
+    }
 }
 
 function bookx_update_plugin_release($now = true, $days = null) {
@@ -585,7 +638,9 @@ function bookx_update_plugin_release($now = true, $days = null) {
 }
 
 
-function pr($v,$dedug=null) {
+
+
+function pr($v,$die=null, $dedug=null) {
     echo '<pre>';
     echo $vn;
     print_r($v);
@@ -593,7 +648,9 @@ function pr($v,$dedug=null) {
         debug_print_backtrace();
     }
     echo '</pre>';
+    if($die) die();
 }
+
 
 function vd($v,$n=null) {
     echo "<pre>$n";
