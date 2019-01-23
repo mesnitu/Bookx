@@ -85,6 +85,9 @@ admin_files=(
     includes/extra_datafiles/bookx/installers/bookx_update_v094.php
     includes/extra_datafiles/bookx/installers/bookx_update_v095.php
 	includes/extra_datafiles/bookx/libs/Parsedown.php
+    includes/extra_datafiles/bookx/libs/ImageResize/ImageResize.php
+    includes/extra_datafiles/bookx/libs/ImageResize/ImageResizeException.php
+    includes/extra_datafiles/bookx/libs/ImageResize/License.md
     includes/extra_datafiles/bookx/plugin_check.json
     includes/extra_datafiles/bookx/Documentation.md
 	includes/extra_datafiles/bookx/libs/Parsedown.php
@@ -175,6 +178,8 @@ if [ "$options" == "create" ]; then
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/installers
 	mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/libs
+    mkdir -p ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx/ImageResize
+    
     # v1.0.0 Add classes/bookx folder
     mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/bookx
     mkdir -p ${dst_dir}/includes/languages/german
