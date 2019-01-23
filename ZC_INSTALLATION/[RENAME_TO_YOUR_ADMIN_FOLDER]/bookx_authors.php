@@ -100,7 +100,9 @@ if (zen_not_null($action)) {
             }
 
             $author_description_array = $_POST['author_description'];
-
+            
+            $languages = zen_get_languages();
+            
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
                 $language_id = $languages[$i]['id'];
 
@@ -320,16 +322,10 @@ if (isset($_GET['search']) && zen_not_null($_GET['search'])) {
                         </thead>
                         <tbody>
 <?php
+
 $disp_order = "author_sort_order, author_name";
 
-if (isset($_GET['search'])) {
-
-    $search = zen_db_prepare_input($_GET['search']);
-    $author_query_raw = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS . " WHERE author_name LIKE '%" . zen_db_input($search) . "%' ORDER BY " . $disp_order . "";
-    
-} else {
-
-    if (isset($_GET['list_order'])) {
+if (isset($_GET['list_order'])) {
 
         switch ($_GET['list_order']) {
             case 'by_sort_order_asc':
@@ -350,6 +346,11 @@ if (isset($_GET['search'])) {
                 break;
         }
     }
+
+if (isset($_GET['search'])) {
+    $search = zen_db_prepare_input($_GET['search']);
+    $author_query_raw = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS . " WHERE author_name LIKE '%" . zen_db_input($search) . "%' ORDER BY " . $disp_order . "";  
+} else {
 
     $author_query_raw = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_AUTHORS . " ORDER BY " . $disp_order . "";
 }
@@ -372,7 +373,7 @@ while (!$author_types->EOF) {
 }
 
 while (!$author->EOF) {
-
+    
     if ((!isset($_GET['mID']) || (isset($_GET['mID']) && ($_GET['mID'] == $author->fields['bookx_author_id']))) && 
         !isset($aInfo) && (substr($action, 0, 3) != 'new')) {
         $author_products = $db->Execute("SELECT COUNT(DISTINCT p.products_id) AS products_count
