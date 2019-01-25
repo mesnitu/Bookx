@@ -211,6 +211,9 @@ class DownloadImage
             if ($this->download == true) {
                 foreach ($this->url as $key => $url) {
                     $this->downloadImage($url, $this->temp_filename[$i]);
+                    if (filesize($this->temp_filename[$i]) == 0) {
+                        throw new BookxException('Something went wrong with download. Filesize is 0. Maybe a wrong SSL certificate or redirection');
+                    }
                     $i++;
                 }
             }
