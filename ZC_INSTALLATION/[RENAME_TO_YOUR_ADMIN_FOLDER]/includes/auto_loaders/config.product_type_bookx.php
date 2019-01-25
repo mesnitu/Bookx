@@ -39,3 +39,7 @@ $autoLoadConfig[199][] = array('autoType' => 'init_script',
 $autoLoadConfig[199][] = array('autoType'=>'class',
 		'loadFile'=> 'bookx/BookxFamilies.php',
 		'classPath'=>DIR_WS_CLASSES);
+
+$autoLoadConfig[100][] = array('autoType'=>'class',
+		'loadFile'=> 'bookx/BookxExceptions.php',
+		'classPath'=>DIR_WS_CLASSES);
