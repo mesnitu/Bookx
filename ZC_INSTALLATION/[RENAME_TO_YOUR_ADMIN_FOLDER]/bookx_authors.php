@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
@@ -86,44 +87,36 @@ if (zen_not_null($action)) {
 	                      where bookx_author_id = '" . (int) $bookx_author_id . "'");
                 
             } elseif($_POST['author_image_manual'] == '' && $_POST['author_image_url']) {
-                
-                $dest = DIR_FS_CATALOG_IMAGES . $_POST['img_dir'];
-                $url = trim($_POST['author_image_url']);
-                $clean_author_name = cleanImageName($author_name, 'lower') . '_' .$bookx_author_id;
-                
-                $temp_img = BOOKX_TEMP_FOLDER . $clean_author_name . '.jpg';
-                
-                download_img_from_url($url, $temp_img);
+               
+                require_once DIR_WS_CLASSES . 'Bookx/BookxDownloadImages.php';
                 /**
                  * On replacing a image with the same path/name, there's a catch ... browser cache
                  */
-                if (BOOKX_RESIZE_IMAGES == true) {
-                    
-                    include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResize.php';
-                    include BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/ImageResize/ImageResizeException.php';
-
-                    try {  
-                        $image = new \Gumlet\ImageResize($temp_img);
-                        $image->resizeToHeight(BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, $allow_enlarge = true);
-                        $image->save($dest . $clean_author_name . '.jpg');                    
-                        
-                    } catch (\Gumlet\ImageResizeException $e) {
-                        $messageStack->add_session('Could not resize image ' . $e->getMessage(), 'error');
-                    }
-                } else {
-                    if (filesize($temp_img) > 0) {
-                        copy($temp_img, $dest);
-                        
-                    } else {
-                        $messageStack->add_session('Could not resize image with filesize ' .filesize($temp_img) , 'caution');
-                    }
+                
+                try {
+                    $urlImg = new Bookx\DownloadImage($resize = true, $width = BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH);
+                    //$urlImg->setTransliterate(null);
+                    //$urlImg->setReplace_patterns('a,ç,?');
+                    $urlImg->setImage_name($author_name . '_' . $bookx_author_id, 'lower');
+                    $clean_author_name = $urlImg->getImage_name()[0];
+                    $urlImg->setDest_folder($_POST['img_dir']);
+                    $urlImg->setUrl($_POST['author_image_url']);
+                    $urlImg->process();
+                } catch (\Bookx\BookxException $ex) {
+                    $messageStack->add($ex->getMessage(), 'error');
+                } finally {
+                    @unlink($urlImg->temp_filename[0]);
+                    unset($urlImg);
+                    clearstatcache();
                 }
-                @unlink($temp_img);
-                $sql ="UPDATE " . TABLE_PRODUCT_BOOKX_AUTHORS . "
+                if ($clean_author_name[0] !=='') {
+                    $sql ="UPDATE " . TABLE_PRODUCT_BOOKX_AUTHORS . "
 	                      SET author_image = '" . $_POST['img_dir'] . $clean_author_name . '.jpg' . "'
 	                      WHERE bookx_author_id = '" . (int) $bookx_author_id . "'";
-                $db->Execute($sql);
-                clearstatcache(); 
+                    $db->Execute($sql);
+                }
+                
+                
             } else {
                 $author_image = new upload('author_image');
                 $author_image->set_destination(DIR_FS_CATALOG_IMAGES . $_POST['img_dir']);
