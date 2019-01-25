@@ -95,6 +95,8 @@ admin_files=(
     includes/extra_datafiles/bookx/libs/prism.js
     includes/classes/bookx/BookxFamilies.php
 	includes/classes/bookx/BookxDinamicMetaTags.php
+    includes/classes/bookx/BookxDownloadImages.php
+    includes/classes/bookx/BookxExceptions.php
     includes/languages/english/bookx_families.php
     includes/languages/german/bookx_families.php
     bookx_families.php
