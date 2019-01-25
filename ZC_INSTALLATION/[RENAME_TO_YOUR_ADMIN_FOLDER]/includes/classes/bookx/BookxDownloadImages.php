@@ -19,6 +19,7 @@
  */
 
 namespace Bookx;
+use Bookx\BookxException;
 
 /**
  * Description of BookxDownloadImages
@@ -46,7 +47,6 @@ class DownloadImage
         if (!file_exists(self::temp_folder)) {
             throw new BookxException('Temp Folder doesn\'t exist');
         }
-
         if ($this->transliterate == true && !class_exists('CeonURIMappingAdmin') && !extension_loaded('intl')) {
             throw new BookxException('No way to clean Img / Folder names');
         }
@@ -175,11 +175,10 @@ class DownloadImage
 
         $i = 0;
         foreach ($this->image_name as $key => $name) {
-            if (empty($name)) {
-
+           
+            if (empty($name) || substr($name, 0, 4) == 'null') {
                 throw new BookxException('Image name cannot be empty');
             }
-
             if (($this->file_ext[$i] !== 'jpg') &&
                 ($this->file_ext[$i] !== 'png') &&
                 ($this->file_ext[$i] !== 'gif')) {
@@ -188,8 +187,9 @@ class DownloadImage
             if (empty($this->dest_folder[$i])) {
                 throw new BookxException('Destination Folder cannot be empty');
             }
-
-            $this->temp_filename[] = self::temp_folder . $name . '.' . $this->file_ext[$i];
+            $file = self::temp_folder . $name . '.' . $this->file_ext[$i];
+            $this->temp_filename[] = $file;
+            
             $folder = DIR_FS_CATALOG_IMAGES . $this->dest_folder[$i];
             $this->dest_filename[] = $folder . '/' . $name . '.' . $this->file_ext[$i];
 
@@ -197,7 +197,6 @@ class DownloadImage
                 umask(000);
                 mkdir($folder, '0755', true);
             }
-
             $i++;
         }
         return true;
@@ -242,7 +241,7 @@ class DownloadImage
 
     private function downloadImage($url, $filename)
     {
-
+        
         if (!file_exists($filename)) {
 
             $ch = curl_init($url);
@@ -267,7 +266,7 @@ class DownloadImage
         try {
             $i = 0;
             foreach ($this->temp_filename as $key => $filename) {
-
+                
                 $image = new \Gumlet\ImageResize($filename);
                 $image->resizeToWidth($this->width, $allow_enlarge = true);
                 $image->save($this->dest_filename[$i]);
@@ -293,7 +292,7 @@ class DownloadImage
             
         } elseif (extension_loaded('intl') && !class_exists('CeonURIMappingAdmin')) {
 
-            $name = transliterator_transliterate('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC;', $post_name);
+            $name = transliterator_transliterate('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC;', trim($post_name));
             
         } else {
             $error = true;

@@ -87,13 +87,13 @@ if (zen_not_null($action)) {
 	                      where bookx_author_id = '" . (int) $bookx_author_id . "'");
                 
             } elseif($_POST['author_image_manual'] == '' && $_POST['author_image_url']) {
-               
+                
                 require_once DIR_WS_CLASSES . 'Bookx/BookxDownloadImages.php';
                 /**
                  * On replacing a image with the same path/name, there's a catch ... browser cache
                  */
                 
-                try {
+                try { 
                     $urlImg = new Bookx\DownloadImage($resize = true, $width = BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH);
                     //$urlImg->setTransliterate(null);
                     //$urlImg->setReplace_patterns('a,ç,?');
@@ -103,20 +103,21 @@ if (zen_not_null($action)) {
                     $urlImg->setUrl($_POST['author_image_url']);
                     $urlImg->process();
                 } catch (\Bookx\BookxException $ex) {
-                    $messageStack->add($ex->getMessage(), 'error');
+                    $messageStack->add_session($ex->getMessage(), 'error');
+                    $error = true;
                 } finally {
                     @unlink($urlImg->temp_filename[0]);
                     unset($urlImg);
                     clearstatcache();
                 }
-                if ($clean_author_name[0] !=='') {
+                if ($clean_author_name[0] !=='' && $error == false) {
                     $sql ="UPDATE " . TABLE_PRODUCT_BOOKX_AUTHORS . "
 	                      SET author_image = '" . $_POST['img_dir'] . $clean_author_name . '.jpg' . "'
 	                      WHERE bookx_author_id = '" . (int) $bookx_author_id . "'";
+                   
                     $db->Execute($sql);
                 }
-                
-                
+     
             } else {
                 $author_image = new upload('author_image');
                 $author_image->set_destination(DIR_FS_CATALOG_IMAGES . $_POST['img_dir']);
