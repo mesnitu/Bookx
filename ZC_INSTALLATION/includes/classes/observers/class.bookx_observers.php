@@ -141,7 +141,6 @@ class productTypeFilterObserver extends base {
 
 	   	$zco_notifier->attach($this, array('NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
 	   									  ,'NOTIFY_MODULE_PRODUCT_LISTING_RESULTCOUNT'
-	   									  ,'NOTIFY_TEMPLATE_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN'
 	   	                                  ,'NOTIFY_TPL_TABULAR_DISPLAY_START'
 	   	                                  /*,'NOTIFY_TEMPLATE_PRODUCT_LISTING_COLUMNAR_DISPLAY_BEGIN'*/
 	   									  ,'NOTIFY_HEADER_START_INDEX_MAIN_TEMPLATE_VARS'
@@ -171,7 +170,6 @@ class productTypeFilterObserver extends base {
 				$this->check_pType_filters_and_reset($callingClass, $notifier, $paramsArray);
 			break;
 
-			case 'NOTIFY_TEMPLATE_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN':
 			case 'NOTIFY_TPL_TABULAR_DISPLAY_START': // This notifier was added in ZC v.1.5.5
 			//case 'NOTIFY_TEMPLATE_PRODUCT_LISTING_COLUMNAR_DISPLAY_BEGIN':
 				$this->insert_extra_bookx_attributes($callingClass, $notifier, $paramsArray);
