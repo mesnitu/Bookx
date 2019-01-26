@@ -1188,7 +1188,7 @@ class shoppingCart extends base {
   function get_products($check_for_valid_cart = false) {
     global $db;
     
-/**** begin addition bookx 1 of 1 ****/
+    /**** begin addition bookx 1 of 1 ****/
     global $products_array;
     /**** end addition bookx 1 of 1 ****/
 
