@@ -10,5 +10,6 @@ class BookxDinamicMetaTags
     function __construct($on_page = null)
     {
         
+        
     }
 }
