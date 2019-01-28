@@ -106,6 +106,7 @@ admin_files=(
 catalog_files=(
     includes/auto_loaders/config.bookx.php
     includes/classes/observers/class.bookx_observers.php
+    includes/classes/observers/class.bookx_observers_canonical.php
     includes/extra_configures/bookx_defines_and_configures.php
     includes/extra_datafiles/bookx_type_database_names.php
     includes/functions/extra_functions/functions_product_type_bookx.php
