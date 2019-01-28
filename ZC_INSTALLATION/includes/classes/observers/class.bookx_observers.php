@@ -2,7 +2,7 @@
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5
+ * shop system. Tested for compatibility on ZC v. 1.56
  *
  * For latest version and support visit:
  * https://sourceforge.net/p/zencartbookx
@@ -14,59 +14,66 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [ZC INSTALLATION]/includes/classes/observers/class.bookx_observers.php 2016-02-02 philou $
+ * @version BookX V 1.0.0
+ * @version $Id: [ZC INSTALLATION]/includes/classes/observers/class.bookx_observers.php 2019-01-30 mesnitu $
  */
 
 /***
- * Some observers for the product type bookx  which insert variables into the script flow
+ * Some observers for the product type bookx which insert variables into the script flow
  */
 class productTypeFilterObserver extends base {
-	var $flag_show_product_bookx_listing_subtitle = false;
-	var $flag_show_product_bookx_listing_pages = false;
-	var $flag_show_product_bookx_listing_printing = false;
-	var $flag_show_product_bookx_listing_binding = false;
-	var $flag_show_product_bookx_listing_size = false;
-	var $flag_show_product_bookx_listing_isbn = false;
-	var $flag_show_product_bookx_listing_model = false;
-	var $flag_show_product_bookx_listing_volume = false;
-	var $flag_show_product_bookx_listing_publishing_date = false;
-
-	var $flag_show_product_bookx_listing_publisher = false;
-	var $flag_show_product_bookx_listing_publisher_as_link = false;
-	var $flag_show_product_bookx_listing_publisher_image = false;
-	var $flag_show_product_bookx_listing_publisher_url = false;
-	var $flag_show_product_bookx_listing_publisher_description = false;
-
-	var $flag_show_product_bookx_listing_imprint = false;
-	var $flag_show_product_bookx_listing_imprint_as_link = false;
-	var $flag_show_product_bookx_listing_imprint_image = false;
-	var $flag_show_product_bookx_listing_imprint_description = false;
-	var $flag_show_product_bookx_listing_series = false;
-	var $flag_show_product_bookx_listing_series_as_link = false;
-	var $flag_show_product_bookx_listing_series_image = false;
-	var $flag_show_product_bookx_listing_series_description = false;
-	var $flag_show_product_bookx_listing_authors = false;
-	var $flag_show_product_bookx_listing_authors_with_type_below_sort_order = false;
-	var $flag_show_product_bookx_listing_authors_as_link = false;
-	var $flag_show_product_bookx_listing_authors_image = false;
-	var $flag_show_product_bookx_listing_authors_url = false;
-	var $flag_show_product_bookx_listing_authors_description = false;
-	var $flag_show_product_bookx_listing_author_type = false;
-	var $flag_show_product_bookx_listing_author_type_image = false;
-	var $flag_show_product_bookx_listing_genres = false;
-	var $flag_show_product_bookx_listing_genres_as_link = false;
-	var $flag_show_product_bookx_listing_genre_image = false;
-	var $flag_show_product_bookx_listing_condition = false;
-	var $flag_group_product_bookx_listing_by_availability = false;
-
+    
+    var $flag_group = array(
+        'by_availability' => false);
+    
+    var $flag_show = array(
+                'subtitle' => false,
+                'pages' => false,
+                'printing' => false,
+                'binding' => false,
+                'size' => false,
+                'isbn' => false,
+                'model' => false,
+                'volume' => false,
+                'publish_date' => false,
+                'publisher' => false,
+                'publisher_as_link' => false,
+                'publisher_image' => false,
+                'publisher_url' => false,
+                'publisher_description' => false,
+                'imprint' => false,
+                'imprint_as_link' => false,
+                'imprint_image' => false,
+                'imprint_description' => false,
+                'series' => false,
+                'series_as_link' => false,
+                'series_image' => false,
+                'series__description' => false,
+                'authors' => false,
+                'authors_with_type_below_sort_order' => false,
+                'authors_as_link' => false,
+                'authors_image' => false,
+                'authors_url' => false,
+                'authors_description' => false,
+                'author_type' => false,
+                'author_type_image' => false,
+                'author_type__description' => false,
+                'genres' => false,
+                'genres_as_link' => false,
+                'genres_image' => false,
+                'condition' => false    
+            );
+    
+    /**
+     * Unused ?
 	var $flag_show_product_bookx_filter_author = false;
-	var $flag_show_product_bookx_filter_autho_typer = false;
+	var $flag_show_product_bookx_filter_autho_type = false;
 	var $flag_show_product_bookx_filter_publisher = false;
 	var $flag_show_product_bookx_filter_imprint = false;
 	var $flag_show_product_bookx_filter_series = false;
 	var $flag_show_product_bookx_filter_genre = false;
-
+    */
+    
 	var $flag_show_product_bookx_filter_author_extra_info = false;
 	var $flag_show_product_bookx_filter_author_type_extra_info = false;
 	var $flag_show_product_bookx_filter_publisher_extra_info  = false;
@@ -87,58 +94,22 @@ class productTypeFilterObserver extends base {
 
 	var $filtered_values_loaded = false;
 
-	function loadFilterValues() {
-		if(!$this->filtered_values_loaded) {
-			// Bookx specific flags
-			$this->flag_show_product_bookx_listing_subtitle = bookx_get_show_product_switch('subtitle', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_pages = bookx_get_show_product_switch('pages', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_printing = bookx_get_show_product_switch('printing', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_binding = bookx_get_show_product_switch('binding', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_size = bookx_get_show_product_switch('size', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_isbn = bookx_get_show_product_switch('isbn', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_model = bookx_get_show_product_switch('model', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_volume = bookx_get_show_product_switch('volume', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_publishing_date = bookx_get_show_product_switch('publish_date', 'SHOW_', '_LISTING');
+	function loadFilterValues()
+    {
+        // Bookx specific flags
+        if (!$this->filtered_values_loaded) {
+            foreach ($this->flag_show as $key => $value) {
+                $this->flag_show[$key] = bookx_get_show_product_switch($key, 'SHOW_', '_LISTING');
+            }
+            // at the moment just one group value 
+            $this->flag_group['by_availability'] = bookx_get_show_product_switch('by_availability', 'GROUP_', '_LISTING');
+            $this->filtered_values_loaded = true;
+        }
+    }
 
-			$this->flag_show_product_bookx_listing_publisher = bookx_get_show_product_switch('publisher', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_publisher_as_link = bookx_get_show_product_switch('publisher_as_link', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_publisher_image = bookx_get_show_product_switch('publisher_image', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_publisher_url = bookx_get_show_product_switch('publisher_url', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_publisher_description = bookx_get_show_product_switch('publisher_description', 'SHOW_', '_LISTING');
-
-			$this->flag_show_product_bookx_listing_imprint = bookx_get_show_product_switch('imprint', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_imprint_as_link = bookx_get_show_product_switch('imprint_as_link', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_imprint_image = bookx_get_show_product_switch('imprint_image', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_imprint_description = bookx_get_show_product_switch('imprint_description', 'SHOW_', '_LISTING');
-
-			$this->flag_show_product_bookx_listing_series = bookx_get_show_product_switch('series', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_series_as_link = bookx_get_show_product_switch('series_as_link', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_series_image = bookx_get_show_product_switch('series_image', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_series_description = bookx_get_show_product_switch('series_description', 'SHOW_', '_LISTING');
-
-			$this->flag_show_product_bookx_listing_authors = bookx_get_show_product_switch('authors', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_authors_with_type_below_sort_order = bookx_get_show_product_switch('authors_with_type_below_sort_order', 'SHOW_', '_LISTING');
-
-			$this->flag_show_product_bookx_listing_authors_as_link = bookx_get_show_product_switch('authors_as_link', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_authors_image = bookx_get_show_product_switch('authors_image', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_authors_url = bookx_get_show_product_switch('authors_url', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_authors_description = bookx_get_show_product_switch('authors_description', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_author_type = bookx_get_show_product_switch('author_type', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_author_type_image = bookx_get_show_product_switch('author_type_image', 'SHOW_', '_LISTING');
-
-			$this->flag_show_product_bookx_listing_genres = bookx_get_show_product_switch('genres', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_genres_as_link = bookx_get_show_product_switch('genres_as_link', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_genre_image = bookx_get_show_product_switch('genre_image', 'SHOW_', '_LISTING');
-			$this->flag_show_product_bookx_listing_condition = bookx_get_show_product_switch('condition', 'SHOW_', '_LISTING');
-			$this->flag_group_product_bookx_listing_by_availability = bookx_get_show_product_switch('by_availability', 'GROUP_', '_LISTING');
-
-			$this->filtered_values_loaded = true;
-		}
-	}
-
-	function productTypeFilterObserver() {
+    function __construct() {
 	   	global $zco_notifier;
-
+       
 	   	$zco_notifier->attach($this, array('NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
 	   									  ,'NOTIFY_MODULE_PRODUCT_LISTING_RESULTCOUNT'
 	   	                                  ,'NOTIFY_TPL_TABULAR_DISPLAY_START'
@@ -247,34 +218,34 @@ class productTypeFilterObserver extends base {
 
  */
 	$this->loadFilterValues();
-
-		if ($this->flag_show_product_bookx_listing_subtitle) {
+   
+    if ($this->flag_show['subtitle']) {
 			$additional_fields .= ', bed.products_subtitle';
 			$join_bx_extra = true;
 			$join_bx_extra_desc = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_pages) {
+		if ($this->flag_show['pages']) {
 			$additional_fields .= ', be.pages';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_size) {
+		if ($this->flag_show['size']) {
 			$additional_fields .= ', be.size';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_isbn) {
+		if ($this->flag_show['isbn']) {
 			$additional_fields .= ', CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_volume) {
+		if ($this->flag_show['volume']) {
 			$additional_fields .= ', be.volume';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_publishing_date) {
+		if ($this->flag_show['publish_date']) {
 			//$additional_fields .= ', IF(DAYOFMONTH(be.publishing_date), DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '"), DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")) AS publishing_date';
 			$additional_fields .= ', CASE WHEN DAYOFMONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '")
 										  WHEN MONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")
@@ -283,19 +254,19 @@ class productTypeFilterObserver extends base {
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_printing) {
+		if ($this->flag_show['printing']) {
 			$additional_fields .= ', printd.printing_description';
 			$additional_joins .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' printd ON printd.bookx_printing_id = be.bookx_printing_id AND printd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_binding) {
+		if ($this->flag_show['binding']) {
 			$additional_fields .= ', bindd.binding_description';
 			$additional_joins .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bindd ON bindd.bookx_binding_id = be.bookx_binding_id AND bindd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_condition) {
+		if ($this->flag_show['condition']) {
 			$additional_fields .= ', conditd.condition_description';
 			$additional_joins .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' conditd ON conditd.bookx_condition_id = be.bookx_condition_id AND conditd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
 			$join_bx_extra = true;
@@ -303,8 +274,8 @@ class productTypeFilterObserver extends base {
 
 		//** author
 		$additional_author_join_condition = '';
-		if ($this->flag_show_product_bookx_listing_authors) {
-			if ($this->flag_show_product_bookx_listing_author_type ) {
+		if ($this->flag_show['authors']) {
+			if ($this->flag_show['author_type'] ) {
 				$additional_fields .= ', GROUP_CONCAT(DISTINCT CONCAT_WS("", IF("" = IFNULL(batd.type_description,""), "", CONCAT_WS("", "<span class=\"bookxLabel\">", batd.type_description , ": </span>")), ba.author_name) ORDER BY bat.type_sort_order ASC SEPARATOR " &middot; ") AS authors';
 				$join_author_type = true;
 
@@ -314,102 +285,104 @@ class productTypeFilterObserver extends base {
 			$join_author = true;
 			$join_bx_extra = true;
 
-			if ($this->flag_show_product_bookx_listing_authors_with_type_below_sort_order ) {
+			if ($this->flag_show['authors_with_type_below_sort_order'] ) {
 				$join_author_type = true;
-				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show_product_bookx_listing_authors_with_type_below_sort_order . '" ';
+				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show['authors_with_type_below_sort_order'] . '" ';
 			}
 		}
 
-		if ($this->flag_show_product_bookx_listing_authors_image) {
+		if ($this->flag_show['authors_image']) {
 			$additional_fields .= ', ba.author_image';
 			$join_author = true;
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_authors_url) {
+		if ($this->flag_show['authors_url']) {
 			$additional_fields .= ', ba.author_url';
 			$join_author = true;
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_authors_description) {
+		if ($this->flag_show['authors_description']) {
 			$additional_fields .= ', bad.author_description';
 			$join_author = true;
 			$join_bx_extra = true;
 		}
 
 		//**** publisher
-		if ($this->flag_show_product_bookx_listing_publisher) {
+        pr($this->flag_show['publisher']);
+		if ($this->flag_show['publisher']) {
 			$additional_fields .= ', bp.publisher_name';
 			$join_publisher = true;
 			$join_bx_extra = true;
 		}
 
-		/*if ($this->flag_show_product_bookx_listing_publisher_as_link) {
+		/*
+         if ($this->flag_show['publisher_as_link']) {
 		 $additional_fields .= ', IF("" = IFNULL(bp.publisher_name,""), "", CONCAT_WS("","<a href=\���' . zen_href_link(FILENAME_DEFAULT, '&bookxfilter=bookx_publisher&bookx_bookx_publisher_id=') .'", bp.bookx_publisher_id, " class=\'bookx_searchlink\'>", bp.publisher_name, "</a>")) AS publisher_searchlink';
 		$join_publisher = true;
 		}*/
-		if ($this->flag_show_product_bookx_listing_publisher_image) {
+		if ($this->flag_show['publisher_image']) {
 			$additional_fields .= ', bp.publisher_image';
 			$join_publisher = true;
 			$join_bx_extra = true;
 		}
-
-		if ($this->flag_show_product_bookx_listing_publisher_url) {
+        pr($this->flag_show['publisher_url']);
+		if ($this->flag_show['publisher_url']) {
 			$additional_fields .= ', bpd.publisher_url';
 			$join_publisher = true;
 			$join_bx_extra = true;
 		}
-
-		if ($this->flag_show_product_bookx_listing_publisher_description) {
+        
+		if ($this->flag_show['publisher_description']) {
 			$additional_fields .= ', bpd.publisher_description';
 			$join_publisher = true;
 			$join_bx_extra = true;
 		}
 
 
-		if ($this->flag_show_product_bookx_listing_imprint) {
+		if ($this->flag_show['imprint']) {
 			$additional_fields .= ', bi.imprint_name';
 			$join_imprint = true;
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_imprint_image) {
+		if ($this->flag_show['imprint_image']) {
 			$additional_fields .= ', bi.imprint_image';
 			$join_imprint = true;
 			$join_bx_extra = true;
 		}
 
 
-		if ($this->flag_show_product_bookx_listing_imprint_description) {
+		if ($this->flag_show['imprint_description']) {
 			$additional_fields .= ', bid.imprint_description';
 			$join_imprint = true;
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_series) {
+		if ($this->flag_show['series']) {
 			$additional_fields .= ', bsd.series_name';
 			$join_series = true;
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_series_image) {
+		if ($this->flag_show['series_image']) {
 			$additional_fields .= ', bsd.series_image';
 			$join_series = true;
 			$join_bx_extra = true;
 		}
 
 
-		if ($this->flag_show_product_bookx_listing_series_description) {
+		if ($this->flag_show['series_description']) {
 			$additional_fields .= ', bsd.series_description';
 			$join_series = true;
 			$join_bx_extra = true;
 		}
 
 		//** genres
-		if ($this->flag_show_product_bookx_listing_genres) {
+		if ($this->flag_show['genres']) {
 			$additional_fields .= ', GROUP_CONCAT(DISTINCT bgd.genre_description ORDER BY bg.genre_sort_order ASC SEPARATOR "' . BOOKX_GENRE_SEPARATOR . '")  AS genres';
-			if ($this->flag_show_product_bookx_listing_genres_as_link) {
+			if ($this->flag_show['genres_as_link']) {
 				$genre_link_atag_firstpart = '<a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookxfilter=bookx_genre_id&bookx_genre_id=');
 				$genre_link_atag_middlepart =  '" class="bookx_searchlink">';
 				$additional_fields .= ", GROUP_CONCAT(DISTINCT CONCAT_WS('', '" . $genre_link_atag_firstpart . "', bgd.bookx_genre_id, '" . $genre_link_atag_middlepart . "', bgd.genre_description, '</a>') ORDER BY bg.genre_sort_order ASC SEPARATOR ' | ')  AS genres_as_links";
@@ -418,7 +391,7 @@ class productTypeFilterObserver extends base {
 			$join_bx_extra = true;
 		}
 
-		if ($this->flag_show_product_bookx_listing_genre_image) {
+		if ($this->flag_show['genre_image']) {
 			$additional_fields .= ', bgd.genre_image';
 			$join_genres = true;
 			$join_bx_extra = true;
@@ -490,10 +463,8 @@ class productTypeFilterObserver extends base {
 	 * It adds some bookx specific data to the 'product_name' variable.
 	 */
 	function update_shopping_cart_with_bookx_attributes(&$callingClass, $notifier, $paramsArray) {
-		global $products_array;
-		//global $content;
-		//global $productArray;
-		global $db;
+		global $db, $products_array;
+		//global $content, $productArray;
 		
 		//$const = get_defined_constants();
 		include_once DIR_FS_CATALOG . 'includes/languages/' . $_SESSION['language'] . '/product_bookx_info.php';
@@ -542,9 +513,9 @@ class productTypeFilterObserver extends base {
 		global $list_box_contents;
 		global $listing; /* @var $listing queryFactoryResult */
 		global $column_list;
-		global $zco_notifier;
-
-		$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
+		//global $zco_notifier;
+        pr($column_list,'insert_extra_bookx_attributes');
+		//$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
 
 		$bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
 		$bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
@@ -559,7 +530,7 @@ class productTypeFilterObserver extends base {
                 $keywords = array($keywords);
             }
         }
-
+        
 		if (!$listing->EOF || $listing->cursor) {
 
 			$product_name_column = null;
@@ -576,8 +547,9 @@ class productTypeFilterObserver extends base {
 			if ($product_name_column) {
 				$listing->Move(0);
 				
-		        if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' < floatval(PROJECT_VERSION_MINOR)) {
+		        if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
 				// don't understand why this is necessary, but without it shows the first entry twice ?!
+                    
 				    $listing->cursor = 0;
 				    $listing->MoveNext();
 				}
@@ -588,7 +560,7 @@ class productTypeFilterObserver extends base {
 				while (!$listing->EOF) {
 					$publishing_date_flag = null;
 
-					if($this->flag_group_product_bookx_listing_by_availability && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
+					if($this->flag_group['by_availability'] && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
 						$date_diff_days = (int)((strtotime($listing->fields['flag_date']) - time()) / 86400);
 
 						switch (true) {
@@ -615,8 +587,8 @@ class productTypeFilterObserver extends base {
 						$new_product_text = '';
 
 						$products_name = '<span class="bookxTitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_name']) .
-																	(($this->flag_show_product_bookx_listing_volume && !empty($listing->fields['volume'])) ? ' <span class="bookxProdVolume">' . sprintf(LABEL_BOOKX_VOLUME, $listing->fields['volume']) . '</span>' : '') .
-												   					(($this->flag_show_product_bookx_listing_subtitle && !empty($listing->fields['products_subtitle'])) ? ' - <span class="bookxProdSubtitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_subtitle']) . '</span>' : '') .
+																	(($this->flag_show['volume'] && !empty($listing->fields['volume'])) ? ' <span class="bookxProdVolume">' . sprintf(LABEL_BOOKX_VOLUME, $listing->fields['volume']) . '</span>' : '') .
+												   					(($this->flag_show['subtitle'] && !empty($listing->fields['products_subtitle'])) ? ' - <span class="bookxProdSubtitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_subtitle']) . '</span>' : '') .
 														'</span>';
 
 						$active_boox_get_filters = '';
@@ -655,33 +627,33 @@ class productTypeFilterObserver extends base {
 
 						$new_product_text .= '<h1 class="itemTitle"><a href="' . $product_info_url . '" class="bookx_product_name">' . bookx_highlight_search_terms($keywords, $products_name) . '</a></h1>';
 
-						if ($this->flag_show_product_bookx_listing_authors) {
+						if ($this->flag_show['authors']) {
 							$new_product_text .= '<h2 class="bookxAuthors">' . bookx_highlight_search_terms($keywords, $listing->fields['authors']) . '</h2>';
 						}
 
 						$bookx_extra_attributes = array();
-						if ($this->flag_show_product_bookx_listing_pages && (!empty($listing->fields['pages']) || 2 == $this->flag_show_product_bookx_info_pages)) $bookx_extra_attributes[] = sprintf(LABEL_BOOKX_PAGES, $listing->fields['pages']);
+						if ($this->flag_show['pages'] && (!empty($listing->fields['pages']) || 2 == $this->flag_show_product_bookx_info_pages)) $bookx_extra_attributes[] = sprintf(LABEL_BOOKX_PAGES, $listing->fields['pages']);
 						if ($this->flag_show_product_bookx_listing_binding && (!empty($listing->fields['binding_description']) || 2 == $this->flag_show_product_bookx_info_binding)) $bookx_extra_attributes[] = $listing->fields['binding_description'];
-						if ($this->flag_show_product_bookx_listing_printing && (!empty($listing->fields['printing_description']) || 2 == $this->flag_show_product_bookx_info_printing)) $bookx_extra_attributes[] = $listing->fields['printing_description'];
-						if ($this->flag_show_product_bookx_listing_size && (!empty($listing->fields['size']) || 2 == $this->flag_show_product_bookx_info_size)) $bookx_extra_attributes[] = $listing->fields['size'];
+						if ($this->flag_show['printing'] && (!empty($listing->fields['printing_description']) || 2 == $this->flag_show_product_bookx_info_printing)) $bookx_extra_attributes[] = $listing->fields['printing_description'];
+						if ($this->flag_show['size'] && (!empty($listing->fields['size']) || 2 == $this->flag_show_product_bookx_info_size)) $bookx_extra_attributes[] = $listing->fields['size'];
 
 						if (0 < count($bookx_extra_attributes)) {
 							$new_product_text .= '<div id="bookxExtraAttributes">' . implode(' | ', $bookx_extra_attributes) . '</div>';
 						}
-						if ($this->flag_show_product_bookx_listing_isbn && !empty($listing->fields['isbn_display']) || 2 == $this->flag_show_product_bookx_listing_isbn) $new_product_text .= '<div class="bookxISBN"><span class="bookxLabel">' . LABEL_BOOKX_ISBN . ' </span>' . $listing->fields['isbn_display'] . '</div>';
-						if ($this->flag_show_product_bookx_listing_model && !empty($listing->fields['products_model']) || 2 == $this->flag_show_product_bookx_listing_model) $new_product_text .= '<div class="bookxModel"><span class="bookxLabel">' . LABEL_BOOKX_MODEL . ' </span>' . bookx_highlight_search_terms($keywords, $listing->fields['products_model']) . '</div>';
+						if ($this->flag_show['isbn'] && !empty($listing->fields['isbn_display']) || 2 == $this->flag_show['isbn']) $new_product_text .= '<div class="bookxISBN"><span class="bookxLabel">' . LABEL_BOOKX_ISBN . ' </span>' . $listing->fields['isbn_display'] . '</div>';
+						if ($this->flag_show['model'] && !empty($listing->fields['products_model']) || 2 == $this->flag_show['model']) $new_product_text .= '<div class="bookxModel"><span class="bookxLabel">' . LABEL_BOOKX_MODEL . ' </span>' . bookx_highlight_search_terms($keywords, $listing->fields['products_model']) . '</div>';
 
 
-						if ($this->flag_show_product_bookx_listing_publishing_date && !empty($listing->fields['publishing_date']) || 2 == $this->flag_show_product_bookx_listing_publishing_date) $new_product_text .= '<div class="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $listing->fields['publishing_date'] . '</div>';
+						if ($this->flag_show['publish_date'] && !empty($listing->fields['publishing_date']) || 2 == $this->flag_show['publish_date']) $new_product_text .= '<div class="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $listing->fields['publishing_date'] . '</div>';
 
-						if ($this->flag_show_product_bookx_listing_condition && !empty($listing->fields['condition_description']) || 2 == $this->flag_show_product_bookx_listing_condition) $new_product_text .= '<div class="bookxCondition"><span class="bookxLabel">' . LABEL_BOOKX_CONDITION . ':</span> ' . $listing->fields['condition_description'] . '</div>';
+						if ($this->flag_show['condition'] && !empty($listing->fields['condition_description']) || 2 == $this->flag_show['condition']) $new_product_text .= '<div class="bookxCondition"><span class="bookxLabel">' . LABEL_BOOKX_CONDITION . ':</span> ' . $listing->fields['condition_description'] . '</div>';
 
 
 						$new_product_text .= '<div class="listingDescription">' . bookx_highlight_search_terms($keywords, bookx_truncate_paragraph(zen_clean_html(stripslashes(zen_get_products_description($listing->fields['products_id'], $_SESSION['languages_id']))), PRODUCT_LIST_DESCRIPTION)) . '</div>';
 
-						if ($this->flag_show_product_bookx_listing_genres && !empty($listing->fields['genres']) || 2 == $this->flag_show_product_bookx_listing_genres) {
+						if ($this->flag_show['genres'] && !empty($listing->fields['genres']) || 2 == $this->flag_show['genres']) {
 							$new_product_text .= '<div class="bookxGenres"><span class="bookxLabel">' . LABEL_BOOKX_GENRE . ':</span> ';
-							if ($this->flag_show_product_bookx_listing_genres_as_link) {
+							if ($this->flag_show['genres_as_link']) {
 								$new_product_text .= $listing->fields['genres_as_links'];
 							} else {
 							 $new_product_text .= $listing->fields['genres'];
@@ -754,7 +726,7 @@ class productTypeFilterObserver extends base {
 			$list_box_contents = array_merge($heading_row, $list_box_contents);
 		}
 
-		$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_END');
+		//$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_END');
 	}
 
 
@@ -859,7 +831,7 @@ class productTypeFilterObserver extends base {
 				$this->bookx_filter_active ++;
 				$this->filtered_author_id = (int)$_GET['bookx_author_id'];
 
-				$this->flag_show_product_bookx_filter_author_extra_info  = bookx_get_show_product_switch('author', 'SHOW_', '_FILTER_EXTRA_INFO');
+				$this->flag_show_product_bookx_filter_author_extra_info = bookx_get_show_product_switch('author', 'SHOW_', '_FILTER_EXTRA_INFO');
 				if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int)$this->flag_show_product_bookx_filter_author_extra_info ) {
 					$sql = 'SELECT ba.author_name, ba.author_image, bad.author_description, ba.author_url
 							FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba
@@ -1149,9 +1121,9 @@ class productTypeFilterObserver extends base {
     											  ) AS products_name';
     
     		//** authors
-    		if ($this->flag_show_product_bookx_listing_authors) {
-    			if ($this->flag_show_product_bookx_listing_authors_with_type_below_sort_order ) {
-    				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show_product_bookx_listing_authors_with_type_below_sort_order . '" ';
+    		if ($this->flag_show['authors']) {
+    			if ($this->flag_show['authors_with_type_below_sort_order'] ) {
+    				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show['authors_with_type_below_sort_order'] . '" ';
     			} else {
     				$additional_author_join_condition = '';
     			}
@@ -1161,7 +1133,7 @@ class productTypeFilterObserver extends base {
     						/* .' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES . ' bat ON bat.bookx_author_type_id = batp.bookx_author_type_id ' . $additional_author_join_condition .
     						   ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION . ' batd ON batd.bookx_author_type_id = batp.bookx_author_type_id AND batd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';		*/
     
-    		//	if ($this->flag_show_product_bookx_listing_author_type ) {
+    		//	if ($this->flag_show['author_type'] ) {
     		//		$additional_bookx_fields .= ', GROUP_CONCAT(DISTINCT CONCAT_WS("", IF("" = IFNULL(batd.type_description,""), "", CONCAT_WS("", "<span class=\"bookxLabel\">", batd.type_description , ": </span>")), ba.author_name) ORDER BY bat.type_sort_order ASC SEPARATOR " &middot; ") AS authors';
     
     		//	} else {
@@ -1320,17 +1292,17 @@ class productTypeFilterObserver extends base {
     															  ELSE YEAR(be.publishing_date)
     									END AS formatted_publishing_date';*/
     
-    		if ($this->flag_show_product_bookx_listing_authors) {
+    		if ($this->flag_show['authors']) {
     			//$new_product_text = '<h2 class="bookxAuthors">' . $expectedItems[$i]['authors'] . '</h2>';
     		}
     
-    		if ($this->flag_show_product_bookx_listing_pages) $additional_bookx_fields .= ', be.pages ';
-    		if ($this->flag_show_product_bookx_listing_size) $additional_bookx_fields .= ', be.size ';
+    		if ($this->flag_show['pages']) $additional_bookx_fields .= ', be.pages ';
+    		if ($this->flag_show['size']) $additional_bookx_fields .= ', be.size ';
     
-    		if ($this->flag_show_product_bookx_listing_isbn) $additional_bookx_fields .= ', CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display ';
+    		if ($this->flag_show['isbn']) $additional_bookx_fields .= ', CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display ';
     		;
     
-    		if ($this->flag_show_product_bookx_listing_printing) {
+    		if ($this->flag_show['printing']) {
     			$additional_bookx_fields .= ', printd.printing_description ';
     			$extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' printd ON printd.bookx_printing_id = be.bookx_printing_id AND printd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
     		}
@@ -1340,17 +1312,17 @@ class productTypeFilterObserver extends base {
     			$extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bd ON bd.bookx_binding_id = be.bookx_binding_id AND bd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
     		}
     
-    		if ($this->flag_show_product_bookx_listing_condition) {
+    		if ($this->flag_show['condition']) {
     			$additional_bookx_fields .= ', cd.condition_description ';
     			$extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' cd ON cd.bookx_condition_id = be.bookx_condition_id AND cd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
     		}
     
-    		if ($this->flag_show_product_bookx_listing_model) $additional_bookx_fields .= ', p.products_model ';;
+    		if ($this->flag_show['model']) $additional_bookx_fields .= ', p.products_model ';;
     
     		//** authors
-    		if ($this->flag_show_product_bookx_listing_authors) {
-    			if ($this->flag_show_product_bookx_listing_authors_with_type_below_sort_order ) {
-    				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show_product_bookx_listing_authors_with_type_below_sort_order . '" ';
+    		if ($this->flag_show['authors']) {
+    			if ($this->flag_show['authors_with_type_below_sort_order'] ) {
+    				$additional_author_join_condition = ' AND bat.type_sort_order < "' . $this->flag_show['authors_with_type_below_sort_order'] . '" ';
     			} else {
     				$additional_author_join_condition = '';
     			}
@@ -1363,7 +1335,7 @@ class productTypeFilterObserver extends base {
     		//	LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . ' bad ON bad.bookx_author_id = ba.bookx_author_id AND bad.languages_id = "' . (int)$_SESSION['languages_id'] . '"
     
     
-    			if ($this->flag_show_product_bookx_listing_author_type ) {
+    			if ($this->flag_show['author_type'] ) {
     				$additional_bookx_fields .= ', GROUP_CONCAT(DISTINCT CONCAT_WS("", IF("" = IFNULL(batd.type_description,""), "", CONCAT_WS("", "<span class=\"bookxLabel\">", batd.type_description , ": </span>")), ba.author_name) ORDER BY bat.type_sort_order ASC SEPARATOR " &middot; ") AS authors';
     
     			} else {
