@@ -541,12 +541,11 @@ class productTypeFilterObserver extends base
 
                 if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
                     // don't understand why this is necessary, but without it shows the first entry twice ?!
-
+                    // ON zc156 this wont work @mesnitu
                     $listing->cursor = 0;
                     $listing->MoveNext();
                 }
                 // eof ?!!?
-
                 $rows = 0;
                 $extra_row = 0;
                 while (!$listing->EOF) {
@@ -557,7 +556,7 @@ class productTypeFilterObserver extends base
 
                         switch (true) {
                             case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] <= date('Y-m-d 00:00:00', time() + 86400 * intval($bookx_upcoming_products_look_ahead_number_of_days)) : // publishing less than "look ahead days" in future and not yet in stock
-                                //case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
+                            //case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
                                 $publishing_date_flag = 'upcoming-product';
                                 break;
 
@@ -574,17 +573,22 @@ class productTypeFilterObserver extends base
                     $rows++;
 
                     //*** only add extra bookx info if product is in fact of type bookx
-                    if (isset($listing->fields['product_type_handler']) && 'product_bookx' == $listing->fields['product_type_handler']) {
+                    if (isset($listing->fields['product_type_handler']) && 
+                        'product_bookx' == $listing->fields['product_type_handler']) {
 
                         $new_product_text = '';
-
-                        $products_name = '<span class="bookxTitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_name']) .
-                            (($this->flag_show['volume'] && !empty($listing->fields['volume'])) ? ' <span class="bookxProdVolume">' . sprintf(LABEL_BOOKX_VOLUME, $listing->fields['volume']) . '</span>' : '') .
-                            (($this->flag_show['subtitle'] && !empty($listing->fields['products_subtitle'])) ? ' - <span class="bookxProdSubtitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_subtitle']) . '</span>' : '') .
-                            '</span>';
+                        //removed the wrap span on header title.
+                        $products_name = bookx_highlight_search_terms($keywords, $listing->fields['products_name']);
+                        $products_name .= ($this->flag_show['volume'] && !empty($listing->fields['volume'])) ? ' <span class="bookxProdVolume">' . sprintf(LABEL_BOOKX_VOLUME, $listing->fields['volume']) . '</span>' : '';
+                        $products_name .= ($this->flag_show['subtitle'] && !empty($listing->fields['products_subtitle']) ? ' - <span class="bookxProdSubtitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_subtitle']) . '</span>' : '');
+                            
 
                         $active_boox_get_filters = '';
-
+                        /**
+                         * @todo adding &typefilter=bookx or keywords to the url is necessary ? 
+                         * This should simply link to the book page
+                         * 
+                         */
                         if (isset($_GET['typefilter']) && 'bookx' == $_GET['typefilter']) {
                             $active_boox_get_filters .= '&typefilter=bookx';
 
@@ -608,13 +612,14 @@ class productTypeFilterObserver extends base
                                 $active_boox_get_filters .= '&bookx_genre_id=' . $_GET['bookx_genre_id'];
                             }
                         }
-
+                        
                         $url_cpath = (($_GET['manufacturers_id'] > 0 AND $_GET['filter_id'] > 0) ? zen_get_generated_category_path_rev($_GET['filter_id']) : ($_GET['cPath'] > 0 ? zen_get_generated_category_path_rev($_GET['cPath']) : zen_get_generated_category_path_rev($listing->fields['master_categories_id'])));
+                        
                         $url_keywords = (isset($_GET['keyword']) ? '&keyword=' . $_GET['keyword'] : '')
                             . (isset($_GET['search_in_description']) ? '&search_in_description=' . $_GET['search_in_description'] : '')
                             . (isset($_GET['inc_subcat']) ? '&inc_subcat=' . $_GET['inc_subcat'] : '')
                             . (isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : '');
-                        $product_info_url = zen_href_link(zen_get_info_page($listing->fields['products_id']), 'cPath=' . $url_cpath . '&products_id=' . $listing->fields['products_id'] . $active_boox_get_filters . $url_keywords);
+                        $product_info_url = zen_href_link(zen_get_info_page($listing->fields['products_id']), 'cPath=' . $url_cpath . '&products_id=' . $listing->fields['products_id'] /*. $active_boox_get_filters . $url_keywords*/);
 
                         $new_product_text .= '<h1 class="itemTitle"><a href="' . $product_info_url . '" class="bookx_product_name">' . bookx_highlight_search_terms($keywords, $products_name) . '</a></h1>';
 
