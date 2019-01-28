@@ -76,7 +76,7 @@ class bookxCanonicalObserver extends base
 
             switch (true) {
 
-                case ($this->useCeon == false (
+                case ($this->useCeon == false && (
                 (isset($_GET['bookx_author_id']) && $_GET['bookx_publisher_id'] != '' ) ||
                 (isset($_GET['bookx_author_type_id']) && $_GET['bookx_author_type_id'] != '' ) ||
                 (isset($_GET['bookx_imprint_id']) && $_GET['bookx_imprint_id'] != '' ) ||
