@@ -107,7 +107,8 @@ class productTypeFilterObserver extends base
     {
         global $zco_notifier;
 
-        $zco_notifier->attach($this, array('NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
+        $zco_notifier->attach($this, array(
+            'NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
             , 'NOTIFY_MODULE_PRODUCT_LISTING_RESULTCOUNT'
             , 'NOTIFY_TPL_TABULAR_DISPLAY_START'
             /* ,'NOTIFY_TEMPLATE_PRODUCT_LISTING_COLUMNAR_DISPLAY_BEGIN' */
@@ -140,7 +141,7 @@ class productTypeFilterObserver extends base
                 break;
 
             case 'NOTIFY_TPL_TABULAR_DISPLAY_START': // This notifier was added in ZC v.1.5.5
-                //case 'NOTIFY_TEMPLATE_PRODUCT_LISTING_COLUMNAR_DISPLAY_BEGIN':
+            case 'NOTIFY_TEMPLATE_PRODUCT_LISTING_COLUMNAR_DISPLAY_BEGIN':
                 $this->insert_extra_bookx_attributes($callingClass, $notifier, $paramsArray);
                 break;
 
@@ -392,6 +393,10 @@ class productTypeFilterObserver extends base
             $join_genres = true;
             $join_bx_extra = true;
         }
+        
+        if ($this->flag_show['model']) {
+            $additional_fields .= ', p.products_model ';
+        }
 
         //**** extra joins
 
@@ -505,8 +510,8 @@ class productTypeFilterObserver extends base
         global $list_box_contents;
         global $listing; /* @var $listing queryFactoryResult */
         global $column_list;
-        //global $zco_notifier;
-        pr($column_list, 'insert_extra_bookx_attributes');
+        
+        global $zco_notifier;  
         //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
 
         $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
@@ -549,23 +554,26 @@ class productTypeFilterObserver extends base
                 $rows = 0;
                 $extra_row = 0;
                 while (!$listing->EOF) {
+                    
                     $publishing_date_flag = null;
 
                     if ($this->flag_group['by_availability'] && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
-                        $date_diff_days = (int) ((strtotime($listing->fields['flag_date']) - time()) / 86400);
-
+                        
+                        //$date_diff_days = (int) ((strtotime($listing->fields['flag_date']) - time()) / 86400);
+                        
                         switch (true) {
                             case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] <= date('Y-m-d 00:00:00', time() + 86400 * intval($bookx_upcoming_products_look_ahead_number_of_days)) : // publishing less than "look ahead days" in future and not yet in stock
                             //case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
                                 $publishing_date_flag = 'upcoming-product';
                                 break;
 
-                            case $listing->fields['products_quantity'] > 0 && $listing->fields['flag_date'] >= date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) : // product in stock and publishing date within range of "new" products
-                                $publishing_date_flag = 'new-product';
+                            case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] >= date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) : // product out of stock and publishing date within range of "new" products
+                                $publishing_date_flag = 'sold-out-product';
+                                
                                 break;
 
                             default:
-                                ;
+                               $publishing_date_flag = 'new-product';
                                 break;
                         }
                     }
@@ -621,41 +629,59 @@ class productTypeFilterObserver extends base
                             . (isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : '');
                         $product_info_url = zen_href_link(zen_get_info_page($listing->fields['products_id']), 'cPath=' . $url_cpath . '&products_id=' . $listing->fields['products_id'] /*. $active_boox_get_filters . $url_keywords*/);
 
-                        $new_product_text .= '<h1 class="itemTitle"><a href="' . $product_info_url . '" class="bookx_product_name">' . bookx_highlight_search_terms($keywords, $products_name) . '</a></h1>';
+                        $new_product_text .= '<h3 class="itemTitle"><a href="' . $product_info_url . '" class="bookx_product_name">' . bookx_highlight_search_terms($keywords, $products_name) . '</a></h2>';
 
                         if ($this->flag_show['authors']) {
-                            $new_product_text .= '<h2 class="bookxAuthors">' . bookx_highlight_search_terms($keywords, $listing->fields['authors']) . '</h2>';
+                            $new_product_text .= '<h4 class="bookxAuthors">' . bookx_highlight_search_terms($keywords, $listing->fields['authors']) . '</h4>';
                         }
-
+                        
                         $bookx_extra_attributes = array();
-                        if ($this->flag_show['pages'] && (!empty($listing->fields['pages']) || 2 == $this->flag_show_product_bookx_info_pages))
+                        if ($this->flag_show['pages'] &&
+                            (!empty($listing->fields['pages']) || 2 == $this->flag_show['pages'])) {
                             $bookx_extra_attributes[] = sprintf(LABEL_BOOKX_PAGES, $listing->fields['pages']);
-                        if ($this->flag_show_product_bookx_listing_binding && (!empty($listing->fields['binding_description']) || 2 == $this->flag_show_product_bookx_info_binding))
-                            $bookx_extra_attributes[] = $listing->fields['binding_description'];
-                        if ($this->flag_show['printing'] && (!empty($listing->fields['printing_description']) || 2 == $this->flag_show_product_bookx_info_printing))
+                        }
+                        
+                        if ($this->flag_show['binding'] &&
+                            (!empty($listing->fields['binding_description']) || 2 == $this->flag_show['binding'])) {
+                          $bookx_extra_attributes[] = $listing->fields['binding_description'];  
+                        }
+                            
+                        if ($this->flag_show['printing'] &&
+                            (!empty($listing->fields['printing_description']) || 2 == $this->flag_show['printing'])) {
                             $bookx_extra_attributes[] = $listing->fields['printing_description'];
-                        if ($this->flag_show['size'] && (!empty($listing->fields['size']) || 2 == $this->flag_show_product_bookx_info_size))
+                        }
+                        
+                        if ($this->flag_show['size'] &&
+                            (!empty($listing->fields['size']) || 2 == $this->flag_show['size'])) {
                             $bookx_extra_attributes[] = $listing->fields['size'];
-
+                        }                         
                         if (0 < count($bookx_extra_attributes)) {
                             $new_product_text .= '<div id="bookxExtraAttributes">' . implode(' | ', $bookx_extra_attributes) . '</div>';
                         }
-                        if ($this->flag_show['isbn'] && !empty($listing->fields['isbn_display']) || 2 == $this->flag_show['isbn'])
-                            $new_product_text .= '<div class="bookxISBN"><span class="bookxLabel">' . LABEL_BOOKX_ISBN . ' </span>' . $listing->fields['isbn_display'] . '</div>';
-                        if ($this->flag_show['model'] && !empty($listing->fields['products_model']) || 2 == $this->flag_show['model'])
+                        if ($this->flag_show['isbn'] && 
+                            (!empty($listing->fields['isbn_display']) || 2 == $this->flag_show['isbn'])) {
+                           $new_product_text .= '<div class="bookxISBN"><span class="bookxLabel">' . LABEL_BOOKX_ISBN . ' </span>' . $listing->fields['isbn_display'] . '</div>'; 
+                        }
+                        
+                        if ($this->flag_show['model'] && 
+                            (!empty($listing->fields['products_model']) || 2 == $this->flag_show['model'])) {
                             $new_product_text .= '<div class="bookxModel"><span class="bookxLabel">' . LABEL_BOOKX_MODEL . ' </span>' . bookx_highlight_search_terms($keywords, $listing->fields['products_model']) . '</div>';
+                        }
 
-
-                        if ($this->flag_show['publish_date'] && !empty($listing->fields['publishing_date']) || 2 == $this->flag_show['publish_date'])
-                            $new_product_text .= '<div class="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $listing->fields['publishing_date'] . '</div>';
-
-                        if ($this->flag_show['condition'] && !empty($listing->fields['condition_description']) || 2 == $this->flag_show['condition'])
+                        if ($this->flag_show['publish_date'] && 
+                            (!empty($listing->fields['publishing_date']) || 2 == $this->flag_show['publish_date'])) {
+                           $new_product_text .= '<div class="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $listing->fields['publishing_date'] . '</div>'; 
+                        }
+                        
+                        if ($this->flag_show['condition'] && 
+                            (!empty($listing->fields['condition_description']) || 2 == $this->flag_show['condition'])) {
                             $new_product_text .= '<div class="bookxCondition"><span class="bookxLabel">' . LABEL_BOOKX_CONDITION . ':</span> ' . $listing->fields['condition_description'] . '</div>';
-
-
+                        }
+                            
                         $new_product_text .= '<div class="listingDescription">' . bookx_highlight_search_terms($keywords, bookx_truncate_paragraph(zen_clean_html(stripslashes(zen_get_products_description($listing->fields['products_id'], $_SESSION['languages_id']))), PRODUCT_LIST_DESCRIPTION)) . '</div>';
 
-                        if ($this->flag_show['genres'] && !empty($listing->fields['genres']) || 2 == $this->flag_show['genres']) {
+                        if ($this->flag_show['genres'] && 
+                            (!empty($listing->fields['genres']) || 2 == $this->flag_show['genres'])) {
                             $new_product_text .= '<div class="bookxGenres"><span class="bookxLabel">' . LABEL_BOOKX_GENRE . ':</span> ';
                             if ($this->flag_show['genres_as_link']) {
                                 $new_product_text .= $listing->fields['genres_as_links'];
@@ -664,22 +690,44 @@ class productTypeFilterObserver extends base
                             }
                             $new_product_text .= '</div>';
                         }
-
+                        
                         $list_box_contents[$rows]['date_flag'] = $publishing_date_flag;
                         $list_box_contents[$rows][$product_name_column]['text'] = $new_product_text;
                         $list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
-
+                       
+                        if(0 < $listing->fields['products_quantity']) {
+                                    $btn = true;
+                                }
+                        $begin_prodlink = '';
+                        $end_prodlink = '';
+                        
                         switch ($publishing_date_flag) {
-                            case 'upcoming-product':
+                            case 'upcoming-product':  
+                                /**
+                                 * @todo this is a bit fragil solution since layouts can change as they did and is not working.
+                                 * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
+                                 * Maybe the safest way is to reset all, and rebuild $list_box_contents[$rows][2]. However, I don't know waht to expect. 
+                                 * Other way is to leave the two buttons, and hide the zc button in DOM ?
+                                 * 
+                                 * 
+                                 */
                                 $begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
                                 $end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink + 1);
+
                                 $list_box_contents[$rows]['params'] = str_replace('class="', 'class="upcoming-product ', $list_box_contents[$rows]['params']);
                                 //$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
                                 //$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
-                                $list_box_contents[$rows][2]['text'] = substr($list_box_contents[$rows][2]['text'], 0, $begin_prodlink) . (0 < $listing->fields['products_quantity'] ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' : '') . bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) . substr($list_box_contents[$rows][2]['text'], $end_prodlink) . (0 < $listing->fields['products_quantity'] ? '</a>' : '');
+                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT);
+                                $list_box_contents[$rows][2]['text'] = substr($list_box_contents[$rows][2]['text'], 0, $begin_prodlink) . 
+                                    ($btn ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' : '') . 
+                                    bookx_get_buy_now_button($listing->fields['products_id'], $button ) . 
+                                    substr($list_box_contents[$rows][2]['text'], $end_prodlink) . ($btn ? '</a>' : '');
+                                
 
                                 $upcoming_products_array[] = $list_box_contents[$rows];
+                                //pr($upcoming_products_array, '$upcoming_products_array');
                                 unset($list_box_contents[$rows]);
+                                
                                 break;
 
                             case 'new-product':
@@ -731,6 +779,7 @@ class productTypeFilterObserver extends base
 
         //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_END');
     }
+    
 
     /**
      * This function gets triggered at the end of the header.php inside modules/pages/shopping_cart.
@@ -1301,22 +1350,21 @@ class productTypeFilterObserver extends base
             if ($this->flag_show['authors']) {
                 //$new_product_text = '<h2 class="bookxAuthors">' . $expectedItems[$i]['authors'] . '</h2>';
             }
-
-            if ($this->flag_show['pages'])
+            if ($this->flag_show['pages'])  {
                 $additional_bookx_fields .= ', be.pages ';
-            if ($this->flag_show['size'])
+            }
+            if ($this->flag_show['size']) {
                 $additional_bookx_fields .= ', be.size ';
-
-            if ($this->flag_show['isbn'])
+            }
+            if ($this->flag_show['isbn']) {
                 $additional_bookx_fields .= ', CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display ';
-            ;
-
+            }
             if ($this->flag_show['printing']) {
                 $additional_bookx_fields .= ', printd.printing_description ';
                 $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' printd ON printd.bookx_printing_id = be.bookx_printing_id AND printd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
             }
 
-            if ($this->flag_show_product_bookx_listing_binding) {
+            if ($this->flag_show['binding']) {
                 $additional_bookx_fields .= ', bd.binding_description ';
                 $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bd ON bd.bookx_binding_id = be.bookx_binding_id AND bd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
             }
@@ -1326,9 +1374,9 @@ class productTypeFilterObserver extends base
                 $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' cd ON cd.bookx_condition_id = be.bookx_condition_id AND cd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
             }
 
-            if ($this->flag_show['model'])
-                $additional_bookx_fields .= ', p.products_model ';;
-
+            if ($this->flag_show['model']) {
+                $additional_bookx_fields .= ', p.products_model ';
+            }
             //** authors
             if ($this->flag_show['authors']) {
                 if ($this->flag_show['authors_with_type_below_sort_order']) {
