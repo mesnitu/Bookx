@@ -1,11 +1,16 @@
 #!/bin/bash
 
 # version BookX 0.9.5 BETA
-
 src_dir=/FULL_PATH_TO_YOUR_BOOKX_INSTALLATION/bookX/ZC_INSTALLATION
 dst_dir=/FULL_PATH_TO_YOUR_ZENCART_INSTALLATION/zen-cart
 admin_dir_name=NAME_OF_YOUR_ADMIN_DIR
 tpl_dir_name=NAME_OF_YOUR_TEMPLATE
+
+# example windows
+#src_dir="/c/xampp/htdocs/vhosts/zenbookx.local/bookx-zc155f/ZC_INSTALLATION"
+#dst_dir="/c/xampp/htdocs/vhosts/zenbookx.local"
+#admin_dir_name="zenadmin"
+#tpl_dir_name="responsive_classic"
 
 #create folders first
 umask 000
@@ -13,6 +18,8 @@ mkdir -p ${dst_dir}/${admin_dir_name}/includes/classes/observers
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german
 mkdir -p ${dst_dir}/${admin_dir_name}/includes/languages/german/extra_definitions
+# Adds Installer Folder
+mkdir -p ${dst_dir}/${admin_dir_name}/includes/includes/installers/bookx
 mkdir -p ${dst_dir}/includes/languages/german
 mkdir -p ${dst_dir}/includes/languages/german/extra_definitions
 mkdir -p ${dst_dir}/includes/classes/observers
@@ -41,6 +48,7 @@ ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/bookx_tools.php ${dst_dir}/${a
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/product_bookx.php ${dst_dir}/${admin_dir_name}/product_bookx.php
 
 # files in admin/includes
+
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/auto_loaders/config.product_type_bookx.php ${dst_dir}/${admin_dir_name}/includes/auto_loaders/config.product_type_bookx.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/classes/observers/class.bookx_admin_observers.php ${dst_dir}/${admin_dir_name}/includes/classes/observers/class.bookx_admin_observers.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/extra_datafiles/bookx_type_database_names.php ${dst_dir}/${admin_dir_name}/includes/extra_datafiles/bookx_type_database_names.php
@@ -50,13 +58,13 @@ ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/functions/extra_funct
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/init_includes/init_product_type_bookx.php ${dst_dir}/${admin_dir_name}/includes/init_includes/init_product_type_bookx.php
 
 # files in admin/includes/modules/product_bookx
+ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/preview_info_meta_tags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/preview_info_meta_tags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info_metatags.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info_metatags.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/collect_info.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/collect_info.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/copy_to_confirm.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/copy_to_confirm.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/delete_product_confirm.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/delete_product_confirm.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/preview_info.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/preview_info.php
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/modules/product_bookx/update_product.php ${dst_dir}/${admin_dir_name}/includes/modules/product_bookx/update_product.php
-
 
 # files in admin/includes/languages/english
 ln -sf ${src_dir}/\[RENAME_TO_YOUR_ADMIN_FOLDER\]/includes/languages/english/bookx_author_types.php ${dst_dir}/${admin_dir_name}/includes/languages/english/bookx_author_types.php
@@ -102,6 +110,7 @@ ln -sf ${src_dir}/includes/languages/german/product_bookx_info.php ${dst_dir}/in
 ln -sf ${src_dir}/includes/languages/german/extra_definitions/product_bookx.php  ${dst_dir}/includes/languages/german/extra_definitions/product_bookx.php 
 
 #files in includes/modules
+ln -sf ${src_dir}/includes/modules/product_bookx_prev_next.php ${dst_dir}/includes/modules/product_bookx_prev_next.php
 ln -sf ${src_dir}/includes/modules/pages/bookx_authors_list/header_php.php ${dst_dir}/includes/modules/pages/bookx_authors_list/header_php.php
 ln -sf ${src_dir}/includes/modules/pages/bookx_genres_list/header_php.php ${dst_dir}/includes/modules/pages/bookx_genres_list/header_php.php
 ln -sf ${src_dir}/includes/modules/pages/bookx_imprints_list/header_php.php ${dst_dir}/includes/modules/pages/bookx_imprints_list/header_php.php
@@ -113,7 +122,6 @@ ln -sf ${src_dir}/includes/modules/pages/product_bookx_info/jscript_main.php ${d
 ln -sf ${src_dir}/includes/modules/pages/product_bookx_info/jscript_textarea_counter.js ${dst_dir}/includes/modules/pages/product_bookx_info/jscript_textarea_counter.js
 ln -sf ${src_dir}/includes/modules/pages/product_bookx_info/main_template_vars_product_type.php ${dst_dir}/includes/modules/pages/product_bookx_info/main_template_vars_product_type.php
 ln -sf ${src_dir}/includes/modules/pages/product_bookx_info/main_template_vars.php ${dst_dir}/includes/modules/pages/product_bookx_info/main_template_vars.php
-
 ln -sf ${src_dir}/includes/modules/sideboxes/bookx_filters.php ${dst_dir}/includes/modules/sideboxes/bookx_filters.php
 
 #files in includes/templates
@@ -126,5 +134,5 @@ ln -sf ${src_dir}/includes/templates/template_default/templates/tpl_bookx_publis
 ln -sf ${src_dir}/includes/templates/template_default/templates/tpl_bookx_series_list_default.php ${dst_dir}/includes/templates/template_default/templates/tpl_bookx_series_list_default.php
 ln -sf ${src_dir}/includes/templates/template_default/templates/tpl_product_bookx_info_display.php ${dst_dir}/includes/templates/template_default/templates/tpl_product_bookx_info_display.php
 
-
+ln -sf ${src_dir}/includes/templates/template_default/templates/tpl_bookx_products_next_previous.php ${dst_dir}/includes/templates/template_default/templates/tpl_bookx_products_next_previous.php
 

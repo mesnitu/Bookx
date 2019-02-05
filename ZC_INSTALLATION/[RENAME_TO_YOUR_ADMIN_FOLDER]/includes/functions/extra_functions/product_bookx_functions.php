@@ -32,6 +32,27 @@ function bookx_get_products_subtitle($products_id, $language_id) {
 	}
 }
 
+function bookx_get_isbn($products_id) {
+	global $db;
+	$product = $db->Execute("select isbn
+                                  from " . TABLE_PRODUCT_BOOKX_EXTRA . "
+                                  where products_id = '" . (int)$products_id . "';");
+	if(!$product->EOF) {
+		return ($product->fields['isbn']) ?? '';
+	}
+}
+
+function bookx_get_family_name($products_id) {
+	global $db;
+	$product = $db->Execute("select bookx_family_name
+                                  from " . TABLE_PRODUCT_BOOKX_FAMILIES . " bf LEFT JOIN
+                                  " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " bftp on bf.bookx_family_id = bftp.bookx_family_id
+                                  where bftp.products_id = '" . (int)$products_id . "';");
+	if(!$product->EOF) {
+		return ($product->fields['bookx_family_name']) ?? '';
+	}
+}
+
 // Return the Authors URL
   function bookx_get_author_url($bookx_author_id) {
     global $db;
@@ -298,19 +319,22 @@ function bookx_get_products_subtitle($products_id, $language_id) {
   	global $db;
   	if (null != $product_id) {
   		$db->Execute('DELETE FROM ' . TABLE_PRODUCT_BOOKX_EXTRA . '
+					  WHERE products_id = "' . (int)$product_id . '"');
+		
+		$db->Execute('DELETE FROM ' . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . '
                       WHERE products_id = "' . (int)$product_id . '"');
 
   		$db->Execute('DELETE FROM ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . '
                       WHERE products_id = "' . (int)$product_id . '"');
 
   		$db->Execute('DELETE FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . '
-                      WHERE products_id = "' . (int)$product_id . '"');
+                      WHERE products_id = "' . (int)$product_id . '"'); 
   	}
   }
 
   function bookx_convert_product_to_bookx_type($product_id = null) {
   	global $db;
-
+    
   	$sql = 'SELECT * FROM ' . TABLE_PRODUCT_TYPES . ' WHERE type_handler = "product_bookx"';
 
   	$result = $db->Execute($sql); /* @var $result queryFactoryResult */
@@ -440,3 +464,196 @@ function bookx_get_products_subtitle($products_id, $language_id) {
 
   	return $image;
   }
+  
+ 
+/**
+ * @since v1.0.0
+ * Insures that empty values are inserted Null in database
+ * @param type $value The value received to insert in database
+ * @return string
+ */
+function bookx_null_check($value) {
+    $value = zen_db_prepare_input($value);
+    if (empty($value)) {
+        return 'null';
+    } else {
+        return $value;
+    }
+}
+
+/**
+ * Checks missing relations between bookx tables_to_products and table products.
+ * 
+ * @category admin
+ * @global type $db
+ * @param array $bx_tables an array on tables to check
+ * @param bool $delete default false
+ * @return string $msg info
+ * 
+ */
+function bookx_check_missing_product_relations($bx_tables, $field_id, $delete = false) {
+    global $db;
+    $msg = '';
+    if (is_array($bx_tables)) {
+
+        foreach ($bx_tables as $table => $table2) {
+            $check = $db->Execute("SELECT ".$field_id." FROM " . $table . " WHERE 
+                ".$field_id." NOT IN (SELECT ".$field_id." FROM " .$table2 . ");");
+         
+            $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in table[" . $table . "]<br />" : $table . " all Good!<br />";
+            if ($delete == true && $check->Count() > 0) {
+                $msg .= ($check->Count() > 0) ? "Deleted " . $check->Count() . " in " . $table . "<br />" : "All Goodfff!";
+                $db->Execute("DELETE FROM " . $table . " WHERE 
+                ".$field_id." NOT IN (SELECT ".$field_id." FROM " . $table2 . ");");
+            }
+        }
+    }
+    
+    return $msg;
+}
+
+/**
+ * 
+ * @param type $url the git api release links
+ * @param type $compare if <b>TRUE</b> returns an array. Else, display formated info (on install) 
+ * @param type $install maybe future git install releases. 
+ * @return type array
+ */
+function check_git_release_for($url, $compare = false, $install = null) {
+    //$download_folder = '';
+    $cInit = curl_init();
+    curl_setopt($cInit, CURLOPT_URL, $url);
+    curl_setopt($cInit, CURLOPT_RETURNTRANSFER, 1); // 1 = TRUE
+    curl_setopt($cInit, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+    curl_setopt($cInit, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+    $output = curl_exec($cInit);
+    $response = curl_getinfo($cInit, CURLINFO_HTTP_CODE);
+    
+    if ($response == "200") {
+        $result = json_decode($output, true);
+    } else {
+        $info = "No info found " . $response;
+    }
+
+    if ($compare == false) {
+        $info = "Latest Release: " . $result[0]['name'] . " <br />Download: <a href=" . $result[0]['zipball_url'] . " rel=\"no-follow\" >" . $result[0]['name'] . "</a> <br />published: " . $result[0]['published_at'] . "\n";
+    } else {
+        $info = array(
+            'tag_name' => $result[0]['tag_name'],
+            'html_url' => $result[0]['html_url'],
+            'zipball_url' => $result[0]['zipball_url'],
+            'published_at' => $result[0]['published_at'],
+            'body' => $result[0]['body'],
+            'author' => $result[0]['author']['login']
+        );
+    }
+
+    curl_close($cInit);
+
+    return $info;
+}
+
+function download_img_from_url($url, $imageName) {
+    
+    if (!file_exists($imageName)) {
+        
+        $ch = curl_init($url);
+        $fp = fopen($imageName, 'wb');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,5);
+        //curl_setopt($ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
+    } 
+}
+
+function cleanImageName($post_name, $type = null)
+{
+    
+    $r = array(' ', '-', '.');
+
+    if (class_exists('CeonURIMappingAdmin')) {
+
+        require_once(DIR_FS_CATALOG . DIR_WS_CLASSES . 'class.CeonURIMappingAdmin.php');
+        $handleUri = new CeonURIMappingAdmin();
+        
+        $lang_code = $_SESSION['languages_code'];
+
+        $name = $handleUri->_convertStringForURI(trim($post_name), $lang_code);
+        //some extra string checks
+        
+        if ($type == 'lower') {
+            //for file names
+            $post_name = str_replace($r, '_', strtolower($name));
+            return $post_name;
+        } else {
+            // for Folders Name
+            $post_name = str_replace($r, '', ucwords($name, '-'));
+            return $post_name;
+        }
+    } elseif (extension_loaded('intl')) {
+        
+        $t = str_replace($r, '_', $post_name);
+        return transliterator_transliterate('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();', $t);
+        
+    } else {
+        return null;
+    }
+}
+
+function bookx_update_plugin_release($now = true, $days = null) {
+    global $objGit;
+
+    $file = DIR_FS_ADMIN . 'includes/exra_datafiles/bookx/plugin_check.json';
+    $msg = '';
+    $date = new DateTime(); //this returns the current date time
+    $today = $date->format('Y-m-d');
+
+//    if (zen_not_null($days) && zen_date_diff($today, $last_checked) <= -$conf_date) {
+//        $last_checked = $read_file->last_check_date;
+//        //@todo by days
+//    }
+
+    if ($now) {
+        foreach ($objGit as $key => $plugin) {
+            if ($key !== 'last_check_date') {
+                $msg .= (empty($plugin->url)) ? '<span class="text-danger">No url found for ' . $key . '</span><br />' : '<span>Updated Info for ' . $key . '</span><br />';
+                $check = check_git_release_for($plugin->url, true);
+                if ($tag_name !== $plugin->installed) {
+                    $objGit->{$key}->last_release = $check['tag_name'];
+                    $objGit->{$key}->html_url = $check['html_url'];
+                }
+            }
+        }
+    }
+    $objGit->last_check_date = $today;
+
+    file_put_contents($file, json_encode($objGit, JSON_PRETTY_PRINT));
+    return $msg;
+}
+
+
+
+
+function pr($v,$die=null, $dedug=null) {
+    echo '<pre>';
+    echo $vn;
+    print_r($v);
+    if ($dedug) {
+        debug_print_backtrace();
+    }
+    echo '</pre>';
+    if($die) die();
+}
+
+
+function vd($v,$n=null) {
+    echo "<pre>$n";
+    var_dump($v);
+    echo "</pre>";
+}

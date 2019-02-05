@@ -18,11 +18,6 @@
  * @version $Id: [admin]/includes/auto_loaders/config.product_type_bookx.php 2016-02-02 philou $
  */
 
-
-/**
- * This files checks for the $_GET flags "install", "remove" and "update"
- *
- */
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
@@ -35,37 +30,16 @@ $autoLoadConfig[30][] = array('autoType'=>'classInstantiate',
 		'className'=>'bookxAdminObserver',
 		'objectName'=>'bookxAdminObserver');
 
-if (isset($_GET['action']) &&
-	('bookx_remove' == $_GET['action'] ||
-	 'bookx_install' == $_GET['action'] ||
-	 'bookx_update' == $_GET['action'])) {
-	$autoLoadConfig[199][] = array('autoType' => 'init_script',
+$autoLoadConfig[199][] = array('autoType' => 'init_script',
 			'loadFile' => 'init_product_type_bookx.php');
 
-	switch ($_GET['action']) {
-		case 'bookx_remove':
-			$bookx_install = 'uninstall';
-			break;
+/**
+ * @since v1.0.0
+ */
+$autoLoadConfig[199][] = array('autoType'=>'class',
+		'loadFile'=> 'bookx/BookxFamilies.php',
+		'classPath'=>DIR_WS_CLASSES);
 
-		case 'bookx_install':
-			$bookx_install = 'install';
-			break;
-
-		case 'bookx_update':
-			$bookx_install = 'update';
-			break;
-			
-		case 'bookx_reset_to_defaults':
-		    $bookx_install = 'reset';
-		    break;
-			    
-		default:
-			$bookx_install = false;
-			break;
-	}
-
-}
-
-// uncomment the following line to perform a uninstall
-//$bookx_install = 'uninstall';
-
+$autoLoadConfig[100][] = array('autoType'=>'class',
+		'loadFile'=> 'bookx/BookxExceptions.php',
+		'classPath'=>DIR_WS_CLASSES);

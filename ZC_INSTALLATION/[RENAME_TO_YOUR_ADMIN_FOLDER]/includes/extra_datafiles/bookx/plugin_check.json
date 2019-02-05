@@ -1,0 +1,21 @@
+{
+    "bookx": {
+        "installed": "v1.0.0",
+        "url": "https:\/\/api.github.com\/repos\/mesnitu\/bookx-zc155f\/releases",
+        "html_url": "https:\/\/github.com\/mesnitu\/bookx-zc155f\/releases\/tag\/v0.9.5",
+        "last_release": "v1.0.0"
+    },
+    "ep4": {
+        "installed": "",
+        "url": "",
+        "html_url": null,
+        "last_release": null
+    },
+    "ep4bookx": {
+        "installed": "EP4BOOKX_VERSION",
+        "url": "",
+        "html_url": null,
+        "last_release": null
+    },
+    "last_check_date": "2019-01-11"
+}

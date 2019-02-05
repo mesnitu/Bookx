@@ -29,7 +29,7 @@
   require('includes/application_top.php');
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
-
+  
   if (zen_not_null($action)) {
     switch ($action) {
       case 'insert':
@@ -37,7 +37,7 @@
         if (isset($_GET['mID'])) $bookx_binding_id = zen_db_prepare_input($_GET['mID']);
         $binding_sort_order = zen_db_prepare_input($_POST['binding_sort_order']);
         
-        $sql_data_array = array('binding_sort_order' => $binding_sort_order);        
+        $sql_data_array = array('binding_sort_order' => (int)$binding_sort_order);        
 
         if ($action == 'insert') {
 
@@ -135,8 +135,7 @@
 <!-- header_eof //-->
 
 <!-- body //-->
-<table border="0" width="100%" cellspacing="2" cellpadding="2">
-  <tr>
+
 <!-- body_text //-->
     <td width="100%" valign="top"><table border="0" width="100%" cellspacing="0" cellpadding="2">
       <tr>
@@ -161,6 +160,7 @@
   $binding_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $binding_query_raw, $binding_query_numrows);
   $binding = $db->Execute($binding_query_raw);
 
+  
   while (!$binding->EOF) {
 
     if ((!isset($_GET['mID']) || (isset($_GET['mID']) && ($_GET['mID'] == $binding->fields['bookx_binding_id']))) && !isset($aInfo) && (substr($action, 0, 3) != 'new')) {
@@ -228,7 +228,7 @@
 	  }
 	  $contents[] = array('text' => '<br>' . TEXT_BINDING_DESCRIPTION . $binding_description_inputs);
 	  
-      $contents[] = array('text' => '<br />' . TEXT_BINDING_SORT_ORDER . '<br>' . zen_draw_input_field('binding_sort_order'));
+      $contents[] = array('text' => '<br />' . TEXT_BINDING_SORT_ORDER . '<br>' . zen_draw_input_field('binding_sort_order', '0'));
       
       $contents[] = array('align' => 'center', 'text' => '<br>' . zen_image_submit('button_save.gif', IMAGE_SAVE) . ' <a href="' . zen_href_link(FILENAME_BOOKX_BINDING, 'page=' . $_GET['page'] . '&mID=' . $_GET['mID']) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
       break;

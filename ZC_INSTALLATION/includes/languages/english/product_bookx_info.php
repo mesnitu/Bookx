@@ -45,8 +45,8 @@ define('LABEL_IMPRINT_DESCRIPTION', 'About the sublabel / imprint: ');
 define('LABEL_SERIES', 'Series: ');
 define('LABEL_SERIES_DESCRIPTION', 'About the series: ');
 
-define('LABEL_AUTHORS', 'Authors:');
-define('LABEL_AUTHOR', 'Author:');
+define('LABEL_AUTHORS', 'Authors: ');
+define('LABEL_AUTHOR', 'Author: ');
 define('LABEL_AUTHOR_DESCRIPTION', 'About %s: ');
 define('TEXT_AUTHOR_URL', 'For more information, please visit the author\'s <a href="%s" target="_blank">webpage</a>.');
 define('HEADING_AUTHOR_RELATED_PRODUCTS', 'Other books by <span class="author">%s</span>:');
@@ -82,3 +82,5 @@ define('ATTRIBUTES_PRICE_DELIMITER_PREFIX', ' ( ' );
 define('ATTRIBUTES_PRICE_DELIMITER_SUFFIX', ' )' );
 define('ATTRIBUTES_WEIGHT_DELIMITER_PREFIX', ' (' );
 define('ATTRIBUTES_WEIGHT_DELIMITER_SUFFIX', ') ' );
+
+define('TEXT_PRODUCT_MANUFACTURER', 'Manufacturer:');

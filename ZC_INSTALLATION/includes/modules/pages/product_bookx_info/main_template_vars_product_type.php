@@ -211,11 +211,11 @@ if (BOOKX_NEXT_PREVIOUS_BASED_ON_FILTER && isset($_GET['typefilter']) && 'bookx'
     		$authors->MoveNext();
     	}
     	$authors->Move(0);
-
+        
     	// This seemed to be necessary in ZC Versions up to 1.5.3, but not anymore in 1.5.5
-		if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' < floatval(PROJECT_VERSION_MINOR)) {
-    	   $authors->cursor = 0;    	    	
-    	   $authors->MoveNext(); // There must be a better way to reset the result, but I can't seem to find a way....   	        
+		if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.6' < floatval(PROJECT_VERSION_MINOR)) {
+    	  $authors->cursor = 0;    	    	
+    	  $authors->MoveNext(); // There must be a better way to reset the result, but I can't seem to find a way....
     	}
 
     	if (!empty($last_author)) {
