@@ -24,7 +24,7 @@ if (!defined ('IS_ADMIN_FLAG')) {
 $languages = zen_get_languages();
 
 if (zen_not_null($_POST)) {
-   
+  
     $pInfo = new objectInfo($_POST);
    
     $products_name = $_POST['products_name'];
@@ -46,9 +46,10 @@ if (zen_not_null($_POST)) {
      * @since v1.0.0
      * This family obj is initiated in BookX admin observer -> bookx_notify_begin_admin_products
      */
-    $pInfo->bookx_family = $objBookxFamily->family_name;
-    
-    
+    if(isset($_POST['bookx_family_id']) && $_POST['bookx_family_id'] !='' ) {
+        $pInfo->bookx_family = $objBookxFamily->family_name;
+    }
+
     /**
      * BookX data which has language sepcific names / descriptions to display
      */

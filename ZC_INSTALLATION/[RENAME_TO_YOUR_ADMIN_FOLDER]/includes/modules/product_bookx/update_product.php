@@ -171,13 +171,13 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     /*
      * @since v1.0.0
      */
-    if (isset($_POST['bookx_family_id'])) {
-      $objBookxFamily->BookxInsertFamilyProduct((int)$products_id);
+    if (isset($_POST['bookx_family_id']) && !empty($_POST['bookx_family_id'])) {
+        $objBookxFamily->BookxInsertFamilyProduct((int) $products_id);
+        
+        if (BOOKX_APPLY_SPECIALS_UPDATE == true && $_POST['ignore_family_discount'] == 'off') {
+                $objBookxFamily->applyFamilyDiscount();
+            }
     }
-    if (BOOKX_APPLY_SPECIALS_UPDATE == true && $_POST['ignore_family_discount'] == 'off') {
-      $objBookxFamily->applyFamilyDiscount();
-    }
-
 
     ////    *END OF PRODUCT-TYPE-SPECIFIC INSERTS* ////////
     ///////////////////////////////////////////////////////
@@ -186,12 +186,16 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     /*
      * @since v1.0.0
      */
-    if (isset($_POST['bookx_family_id']) && isset($_POST['ignore_family_discount'])) {
-      $objBookxFamily->BookxUpdateFamilyProduct((int)$products_id);
-    }
-    if (BOOKX_APPLY_SPECIALS_UPDATE == true && $_POST['ignore_family_discount'] == 'off') {
-      $objBookxFamily->applyFamilyDiscount();
-    }
+    if (isset($_POST['bookx_family_id']) && empty($_POST['bookx_family_id'])) {
+        $objBookxFamily->BookxDeleteFamilyProduct((int)$products_id);
+    } else {
+        $objBookxFamily->BookxUpdateFamilyProduct((int)$products_id);
+        
+        if (BOOKX_APPLY_SPECIALS_UPDATE == true && $_POST['ignore_family_discount'] == 'off') {
+            $objBookxFamily->applyFamilyDiscount();
+        }
+    } 
+
 
     $sql_data_array['products_last_modified'] = 'now()';
     $sql_data_array['master_categories_id'] = (!empty($_POST['master_category']) && (int)$_POST['master_category'] > 0 ? (int)$_POST['master_category'] : (int)$_POST['master_categories_id']);
