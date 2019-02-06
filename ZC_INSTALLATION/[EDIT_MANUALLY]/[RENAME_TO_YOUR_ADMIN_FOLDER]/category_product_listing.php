@@ -581,6 +581,9 @@ if (is_dir(DIR_FS_CATALOG_IMAGES)) {
                   <th class="text-right"><?php echo TABLE_HEADING_ID; ?></th>
                   <th><?php echo TABLE_HEADING_CATEGORIES_PRODUCTS; ?></th>
                   <th class="hidden-md hidden-sm hidden-xs"><?php echo TABLE_HEADING_MODEL; ?></th>
+                  <?php 
+                  $zco_notifier->notify('NOTIFY_ADMIN_PROD_LISTING_ADD_THEADER'); 
+                  ?>
                   <th class="text-right hidden-md hidden-sm hidden-xs"><?php echo TABLE_HEADING_PRICE; ?></th>
                   <th class="text-right hidden-md hidden-sm hidden-xs">&nbsp;</th>
                   <th class="text-right hidden-md hidden-sm hidden-xs"><?php echo TABLE_HEADING_QUANTITY; ?></th>
@@ -816,7 +819,7 @@ if (is_dir(DIR_FS_CATALOG_IMAGES)) {
                                         $order_by);
               }
 /* bof Bookx mod 1 of 1 */
-$zco_notifier->notify('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT');
+//$zco_notifier->notify('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT');
 /* eof Bookx mod 1 of 1 */
 // Split Page
 // reset page when page is unknown
@@ -863,6 +866,10 @@ $zco_notifier->notify('NOTIFY_MODULE_ADMIN_CATEGORY_LISTING_QUERY_BUILT');
                   <td class="text-right"><?php echo $product['products_id']; ?></td>
                   <td><a href="<?php echo zen_catalog_href_link($type_handler . '_info', 'cPath=' . $cPath . '&products_id=' . $product['products_id'] . '&language=' . $_SESSION['languages_code'] . '&product_type=' . $product['products_type']); ?>" target="_blank"><?php echo zen_image(DIR_WS_ICONS . 'preview.gif', ICON_PREVIEW); ?></a>&nbsp;<?php echo $product['products_name']; ?></td>
                   <td class="hidden-md hidden-sm hidden-xs"><?php echo $product['products_model']; ?></td>
+                  <?php 
+                  //NOTIFY_ADMIN_PROD_LISTING_ADD_BOOKX_INFO
+                  $zco_notifier->notify('NOTIFY_ADMIN_PROD_LISTING_ADD_BOOKX_INFO', $product['products_id']); 
+                  ?>
                   <td colspan="2" class="text-right hidden-md hidden-sm hidden-xs"><?php echo zen_get_products_display_price($product['products_id']); ?></td>
                   <td class="text-right hidden-md hidden-sm hidden-xs"><?php echo $product['products_quantity']; ?></td>
                   <td class="text-right hidden-md hidden-sm hidden-xs">
