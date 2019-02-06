@@ -307,7 +307,7 @@ class productTypeFilterObserver extends base
         }
 
         //**** publisher
-        pr($this->flag_show['publisher']);
+       
         if ($this->flag_show['publisher']) {
             $additional_fields .= ', bp.publisher_name';
             $join_publisher = true;
@@ -324,7 +324,7 @@ class productTypeFilterObserver extends base
             $join_publisher = true;
             $join_bx_extra = true;
         }
-        pr($this->flag_show['publisher_url']);
+        
         if ($this->flag_show['publisher_url']) {
             $additional_fields .= ', bpd.publisher_url';
             $join_publisher = true;
@@ -557,26 +557,23 @@ class productTypeFilterObserver extends base
                     
                     $publishing_date_flag = null;
 
-                    if ($this->flag_group['by_availability'] && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
-                        
-                        //$date_diff_days = (int) ((strtotime($listing->fields['flag_date']) - time()) / 86400);
-                        
-                        switch (true) {
-                            case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] <= date('Y-m-d 00:00:00', time() + 86400 * intval($bookx_upcoming_products_look_ahead_number_of_days)) : // publishing less than "look ahead days" in future and not yet in stock
-                            //case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
-                                $publishing_date_flag = 'upcoming-product';
-                                break;
+					if($this->flag_group['by_availability'] == true && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
+						$date_diff_days = (int)((strtotime($listing->fields['flag_date']) - time()) / 86400);
 
-                            case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] >= date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) : // product out of stock and publishing date within range of "new" products
-                                $publishing_date_flag = 'sold-out-product';
-                                
-                                break;
+						switch (true) {
+							case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] <= date('Y-m-d 00:00:00', time() + 86400 * intval($bookx_upcoming_products_look_ahead_number_of_days)) : // publishing less than "look ahead days" in future and not yet in stock
+							//case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
+								$publishing_date_flag = 'upcoming-product';
+								break;
 
-                            default:
-                               $publishing_date_flag = 'new-product';
-                                break;
-                        }
-                    }
+							case $listing->fields['products_quantity'] > 0 && $listing->fields['flag_date'] >= date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) : // product in stock and publishing date within range of "new" products
+								$publishing_date_flag = 'new-product';
+								break;
+
+							default:
+								break;
+						}
+					}
 
                     $rows++;
 
@@ -627,6 +624,11 @@ class productTypeFilterObserver extends base
                             . (isset($_GET['search_in_description']) ? '&search_in_description=' . $_GET['search_in_description'] : '')
                             . (isset($_GET['inc_subcat']) ? '&inc_subcat=' . $_GET['inc_subcat'] : '')
                             . (isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : '');
+                        /**
+                         * Commeting here $active_boox_get_filters . $url_keywords from the url. 
+                         * This could be optional, otherwise, it will mess CEON urls
+                         * In tests. Also the $url_keywords highlight should be optional. 
+                         */
                         $product_info_url = zen_href_link(zen_get_info_page($listing->fields['products_id']), 'cPath=' . $url_cpath . '&products_id=' . $listing->fields['products_id'] /*. $active_boox_get_filters . $url_keywords*/);
 
                         $new_product_text .= '<h3 class="itemTitle"><a href="' . $product_info_url . '" class="bookx_product_name">' . bookx_highlight_search_terms($keywords, $products_name) . '</a></h2>';
@@ -695,58 +697,51 @@ class productTypeFilterObserver extends base
                         $list_box_contents[$rows][$product_name_column]['text'] = $new_product_text;
                         $list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
                        
-                        if(0 < $listing->fields['products_quantity']) {
-                            pr($listing->fields['products_quantity'],"link");
-                            $link = true;
-                        }
-                        
+                        /**
+                         * Check if the button should be linked
+                         */
+                        $btn_link = false;
+
+                        /* @todo this is a bit fragil solution since layouts can change as they did and is not working.
+                         * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
+                         * Maybe the safest way is to reset all, and rebuild $list_box_contents[$rows][2]. However, I don't know waht to expect in terms of content.
+                         * Other way is to leave the two buttons, and hide the zc button in DOM ?
+                         */
+                       
+                        $bsearch = strpos($list_box_contents[$rows][2]['text'], '<span class="cssB');
+                        $esearch = strpos($list_box_contents[$rows][2]['text'], 'an>', $bsearch) - 4;
+                        $len = $esearch - $bsearch;
+                        $new_content = substr_replace($list_box_contents[$rows][2]['text'], '<!-- here -->', $bsearch, $len);
+                      
                         switch ($publishing_date_flag) {
-                            case 'upcoming-product':
-                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT,'class="listingBuyNowButton"');
-                                /**
-                                 * @todo this is a bit fragil solution since layouts can change as they did and is not working.
-                                 * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
-                                 * Maybe the safest way is to reset all, and rebuild $list_box_contents[$rows][2]. However, I don't know waht to expect in terms of content.
-                                 * Other way is to leave the two buttons, and hide the zc button in DOM ?
-                                 */
-                                $b = strpos($list_box_contents[$rows][2]['text'], '<span class="cssButton');
-                                $e = strpos($list_box_contents[$rows][2]['text'], 'an>', $b) -4;
-                                $len = $e - $b;
-                               
-                                substr_replace($list_box_contents[$rows][2]['text'], 'span', $b, $len);
-                                
-                                //$begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
-                                //$end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink + 1);
-                                
-                                $list_box_contents[$rows]['params'] = str_replace('class="', 'class="upcoming-product ', $list_box_contents[$rows]['params']);
-                                //$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
-                                //$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
-                                    
-								//$list_box_contents[$rows][2]['text'] = substr($list_box_contents[$rows][2]['text'], 0, $begin_prodlink) . (0 < $listing->fields['products_quantity'] ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' :'') . bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) . substr($list_box_contents[$rows][2]['text'], $end_prodlink) . (0 < $listing->fields['products_quantity'] ? '</a>' : '');
-                                
-                                $list_box_contents[$rows][2]['text'] = 
-                                    (!$link ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' : '') . 
-                                    bookx_get_buy_now_button($listing->fields['products_id'], $button ) . 
-                                     (!$link ? '</a>' : '');
-                                
+							case 'upcoming-product':
+                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT);
+                                if (0 < $listing->fields['products_quantity']) {
+                                    $btn_link = true;
+                                }
+							    //$begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
+							    //$end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink +1);
+								$list_box_contents[$rows]['params'] = str_replace('class="', 'class="upcoming-product ', $list_box_contents[$rows]['params']);
+								//$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
+								//$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
+								$list_box_contents[$rows][2]['text'] = $new_content . ($btn_link == true ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' :'') . bookx_get_buy_now_button($listing->fields['products_id'], $button) . ($btn_link == true ? '</a>' : '');
+								
+								$upcoming_products_array[] = $list_box_contents[$rows];
+								unset($list_box_contents[$rows]);
+								break;
 
-                                $upcoming_products_array[] = $list_box_contents[$rows];
-                                
-                                unset($list_box_contents[$rows]);
-                                
-                                break;
+							case 'new-product':
+							    //$begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
+							    //$end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink +1);
+							    $list_box_contents[$rows]['params'] = str_replace('class="', 'class="new-product ', $list_box_contents[$rows]['params']);
+								$standard_buy_now_button = zen_image_button(BUTTON_IMAGE_BUY_NOW, BUTTON_BUY_NOW_ALT, 'class="listingBuyNowButton"');
+								//$list_box_contents[$rows][2]['text'] = str_replace($standard_buy_now_button, bookx_get_buy_now_button($listing->fields['products_id'],zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)), $list_box_contents[$rows][2]['text']);
+								$list_box_contents[$rows][2]['text'] = $new_content . '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' . bookx_get_buy_now_button($listing->fields['products_id'],zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)) . '</a>';
+								$new_products_array[] = $list_box_contents[$rows];
+								unset($list_box_contents[$rows]);
+								break;
 
-                            case 'new-product':
-                                $begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
-                                $end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink + 1);
-                                $list_box_contents[$rows]['params'] = str_replace('class="', 'class="new-product ', $list_box_contents[$rows]['params']);
-                                $standard_buy_now_button = zen_image_button(BUTTON_IMAGE_BUY_NOW, BUTTON_BUY_NOW_ALT, 'class="listingBuyNowButton"');
-                                //$list_box_contents[$rows][2]['text'] = str_replace($standard_buy_now_button, bookx_get_buy_now_button($listing->fields['products_id'],zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)), $list_box_contents[$rows][2]['text']);
-                                $list_box_contents[$rows][2]['text'] = substr($list_box_contents[$rows][2]['text'], 0, $begin_prodlink) . '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' . bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)) . substr($list_box_contents[$rows][2]['text'], $end_prodlink) . '</a>';
-                                $new_products_array[] = $list_box_contents[$rows];
-                                unset($list_box_contents[$rows]);
-                                break;
-                        }
+						}
                     }
                     $listing->MoveNext();
                 }
