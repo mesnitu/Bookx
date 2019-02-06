@@ -33,7 +33,6 @@ admin_files=(
     bookx_publishers.php
     bookx_series.php
     bookx_tools.php
-    category_product_listing.php
     #product_bookx.php
     
     # files in admin/includes
