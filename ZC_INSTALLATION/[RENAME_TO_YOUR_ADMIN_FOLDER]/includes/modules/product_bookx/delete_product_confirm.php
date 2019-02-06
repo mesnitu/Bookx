@@ -44,24 +44,23 @@ if (!empty($cascaded_prod_id_for_delete) && !empty($cascaded_prod_cat_for_delete
 
 if ($do_delete_flag) {
   //--------------PRODUCT_TYPE_SPECIFIC_INSTRUCTIONS_GO__BELOW_HERE--------------------------------------------------------
-    
-  	bookx_delete_bookx_specific_product_entries($product_id);
-  	
-  	// addition for extra product fields
-  	if (defined('TABLE_PRODUCT_EXTRA_FIELDS')) {
-        $db->Execute("delete from " . TABLE_PRODUCT_EXTRA_FIELDS . "
-                    where products_id = '" . (int) $product_id . "'");
-    }
-    // eof addition for extra product fields
-      
-    /**
-     * @since v1.0.0 
-     */
-    //require_once DIR_FS_ADMIN . DIR_WS_CLASSES . 'bookx/BookxFamilies.php';
-    if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
-        $objBookxFamily = new \Bookx\BookxFamilies();
-        $objBookxFamily->BookxDeleteFamilyProduct((int) $product_id);
-    }
+
+  bookx_delete_bookx_specific_product_entries($product_id);
+
+  // addition for extra product fields
+  if (defined('TABLE_PRODUCT_EXTRA_FIELDS')) {
+    $db->Execute("DELETE FROM " . TABLE_PRODUCT_EXTRA_FIELDS . "
+                  WHERE products_id = " . (int) $product_id);
+  }
+  // eof addition for extra product fields
+  /**
+   * @since v1.0.0 
+   */
+  //require_once DIR_FS_ADMIN . DIR_WS_CLASSES . 'bookx/BookxFamilies.php';
+  if (BOOKX_APPLY_SPECIALS_UPDATE == true) {
+    $objBookxFamily = new \Bookx\BookxFamilies();
+    $objBookxFamily->BookxDeleteFamilyProduct((int) $product_id);
+  }
   //--------------PRODUCT_TYPE_SPECIFIC_INSTRUCTIONS_GO__ABOVE__HERE--------------------------------------------------------
   // now do regular non-type-specific delete:
   // remove product from all its categories:
