@@ -130,7 +130,7 @@ if (isset($_GET['pID']) && empty($_POST)) { //" . DATE_FORMAT_SHORT . "
                  p.products_tax_class_id, be.bookx_publisher_id, be.bookx_series_id, be.bookx_imprint_id,
                  be.bookx_binding_id, be.bookx_printing_id, be.bookx_condition_id,
                  DATE_FORMAT(be.publishing_date, '%Y-%m-%d') AS publishing_date, be.pages, be.volume, be.size, be.isbn,
-                 CONCAT_WS(" - ", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display,
+                 CONCAT_WS('-', SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display,
                  DATEDIFF('" . date('Y-m-d') . "',
                  CONCAT_WS('-', SUBSTRING(be.publishing_date, 1,4 ),
                  IF(SUBSTRING(be.publishing_date, 6,2 ) = '00', '01', SUBSTRING(be.publishing_date, 6,2 ) ),
