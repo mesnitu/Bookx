@@ -10,7 +10,8 @@
  * @package admin
  * @copyright Copyright 2003-2018 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
- * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
+ * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+ * @version $Id: Zen4All Wed Mar 21 13:51:14 2018 +0100 Modified in v1.5.6 $
  *
  * @version BookX V 1.0.1
  * @version $Id: collect_info_metatags.php 2018-12-28 mesnitu $
@@ -20,19 +21,19 @@ if (!defined('IS_ADMIN_FLAG')) {
   die('Illegal Access');
 }
 
-    $parameters = array(
-                       'products_name' => '',
-                       'products_model' => '',
+$parameters = array(
+  'products_name' => '',
+  'products_model' => '',
   'metatags_title_status' => '1',
   'metatags_products_name_status' => '1',
   'metatags_model_status' => '1',
-                       'products_id' => '',
+  'products_id' => '',
   'metatags_price_status' => '1',
   'metatags_title_tagline_status' => '1',
-                       'metatags_title' => '',
-                       'metatags_keywords' => '',
-                       'metatags_description' => ''
-                       );
+  'metatags_title' => '',
+  'metatags_keywords' => '',
+  'metatags_description' => ''
+);
 /*    SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_STATUS',
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_PRODUCTS_SUBTITLE_STATUS',
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_MODEL_STATUS',
@@ -40,9 +41,9 @@ if (!defined('IS_ADMIN_FLAG')) {
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_TAGLINE_STATUS',
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_AUTHOR_STATUS',
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_PUBLISHER_STATUS',
-     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_GENRE_STATUS',
-     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_SERIES_STATUS',
-     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_IMPRINT_STATUS
+    'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_GENRE_STATUS',
+    'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_SERIES_STATUS',
+    'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_IMPRINT_STATUS
     'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_STATUS', 43, 'Soll der Titel der Webseite im Metatag Titel angezeigt werden<br/>', now(), now()),
     ('Metatag Titel Standardeinstellung - Webseiten-Tagline', 'SHOW_PRODUCT_BOOKX_INFO_METATAGS_TITLE_TAGLINE_STATUS', 43, 'Soll die Tagline der Webseite im Metatag Titel angezeigt werden<br/>', now(), now()),
 
@@ -50,27 +51,27 @@ if (!defined('IS_ADMIN_FLAG')) {
     ('Metatag Titel Standardeinstellung - Untertitel', 'SHOW_PRODUCT_BOOKX_INFO_METATAGS_PRODUCTS_SUBTITLE_STATUS', 43, 'Soll der Untertitel im Metatag Titel angezeigt werden<br/>', now(), now()),
     ('Metatag Titel Standardeinstellung - ISBN', 'SHOW_PRODUCT_BOOKX_INFO_METATAGS_MODEL_STATUS'*/
 
-    $pInfoMetatags = new objectInfo($parameters);
+$pInfoMetatags = new objectInfo($parameters);
 
-    if (isset($_GET['pID']) && empty($_POST)) {
+if (isset($_GET['pID']) && empty($_POST)) {
 // check if new meta tags or existing
   $check_meta_tags_description = $db->Execute("SELECT products_id
                                                FROM " . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . "
                                                WHERE products_id = " . (int)$_GET['pID']);
-    if ($check_meta_tags_description->RecordCount() <= 0) {
+  if ($check_meta_tags_description->RecordCount() <= 0) {
     $product = $db->Execute("SELECT pd.products_name, p.products_model, p.products_price_sorter,
-                                      p.metatags_title_status, p.metatags_products_name_status, p.metatags_model_status,
-                                      p.products_id, p.metatags_price_status, p.metatags_title_tagline_status
+                                    p.metatags_title_status, p.metatags_products_name_status, p.metatags_model_status,
+                                    p.products_id, p.metatags_price_status, p.metatags_title_tagline_status
                              FROM " . TABLE_PRODUCTS . " p,
                                   " . TABLE_PRODUCTS_DESCRIPTION . " pd
                              WHERE p.products_id = " . (int)$_GET['pID'] . "
                              AND p.products_id = pd.products_id
                              AND pd.language_id = " . (int)$_SESSION['languages_id']);
-    } else {
+  } else {
     $product = $db->Execute("SELECT pd.products_name, p.products_model, p.products_price_sorter,
-                                      p.metatags_title_status, p.metatags_products_name_status, p.metatags_model_status,
-                                      p.products_id, p.metatags_price_status, p.metatags_title_tagline_status,
-                                      mtpd.metatags_title, mtpd.metatags_keywords, mtpd.metatags_description
+                                    p.metatags_title_status, p.metatags_products_name_status, p.metatags_model_status,
+                                    p.products_id, p.metatags_price_status, p.metatags_title_tagline_status,
+                                    mtpd.metatags_title, mtpd.metatags_keywords, mtpd.metatags_description
                              FROM " . TABLE_PRODUCTS . " p,
                                   " . TABLE_PRODUCTS_DESCRIPTION . " pd,
                                   " . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . " mtpd
@@ -79,43 +80,43 @@ if (!defined('IS_ADMIN_FLAG')) {
                              AND pd.language_id = " . (int)$_SESSION['languages_id'] . "
                              AND p.products_id = mtpd.products_id
                              AND mtpd.language_id = " . (int)$_SESSION['languages_id']);
-    }
+  }
 
   $pInfoMetatags->updateObjectInfo($product->fields);
-    } elseif (zen_not_null($_POST)) {
+} elseif (zen_not_null($_POST)) {
   $pInfoMetatags->updateObjectInfo($_POST);
-      $metatags_title = $_POST['metatags_title'];
-      $metatags_keywords = $_POST['metatags_keywords'];
-      $metatags_description = $_POST['metatags_description'];
-    }
+  $metatags_title = $_POST['metatags_title'];
+  $metatags_keywords = $_POST['metatags_keywords'];
+  $metatags_description = $_POST['metatags_description'];
+}
 
-    $languages = zen_get_languages();
+$languages = zen_get_languages();
 
 // metatags_products_name_status shows
 if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_description)) {
   $pInfoMetatags->metatags_products_name_status = zen_get_show_product_switch($_GET['pID'], 'metatags_products_name_status');
-    }
+}
 // metatags_title_status shows
 if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_description)) {
   $pInfoMetatags->metatags_title_status = zen_get_show_product_switch($_GET['pID'], 'metatags_title_status');
-    }
+}
 // metatags_model_status shows
 if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_description)) {
   $pInfoMetatags->metatags_model_status = zen_get_show_product_switch($_GET['pID'], 'metatags_model_status');
-    }
+}
 // metatags_price_status shows
 if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_description)) {
   $pInfoMetatags->metatags_price_status = zen_get_show_product_switch($_GET['pID'], 'metatags_price_status');
-    }
+}
 // metatags_title_tagline_status shows TITLE and TAGLINE in metatags_header.php
 if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_description)) {
   $pInfoMetatags->metatags_title_tagline_status = zen_get_show_product_switch($_GET['pID'], 'metatags_title_tagline_status');
-    }
+}
 ?>
 <div class="container-fluid">
     <?php
 //  echo $type_handler;
-    echo zen_draw_form('new_product_meta_tags', FILENAME_PRODUCT, 'cPath=' . $cPath . (isset($_GET['product_type']) ? '&product_type=' . $_GET['product_type'] : '') . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview_meta_tags' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
+    echo zen_draw_form('new_product_meta_tags', $type_handler, 'cPath=' . $cPath . (isset($_GET['product_type']) ? '&product_type=' . $_GET['product_type'] : '') . (isset($_GET['pID']) ? '&pID=' . $_GET['pID'] : '') . '&action=new_product_preview_meta_tags' . (isset($_GET['page']) ? '&page=' . $_GET['page'] : ''), 'post', 'enctype="multipart/form-data" class="form-horizontal"');
     ?>
   <h3><?php echo sprintf(TEXT_NEW_PRODUCT, zen_output_generated_category_path($current_category_id)); ?></h3>
   <div class="form-group">
@@ -160,9 +161,9 @@ if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_d
   </div>
   <div class="form-group"><?php echo zen_draw_separator('pixel_black.gif', '100%', '3'); ?></div>
   <div class="form-group">
-<?php
+      <?php
       for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-?>
+        ?>
       <div class="input-group">
         <span class="input-group-addon">
             <?php echo zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']); ?>
@@ -192,9 +193,9 @@ if (empty($pInfoMetatags->metatags_keywords) && empty($pInfoMetatags->metatags_d
         </div>
       </div>
       <br>
-<?php
+      <?php
     }
-?>
+    ?>
   </div>
   <div class="form-group"><?php echo TEXT_INFO_META_TAGS_USAGE; ?></div>
   <div class="form-group text-right">
