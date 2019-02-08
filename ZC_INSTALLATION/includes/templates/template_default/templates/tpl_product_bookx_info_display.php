@@ -167,34 +167,42 @@ foreach ($products_authors as $author) {
 		$single_author_detail_html .= '</div>';
 	}
 
-	if ($flag_show_product_bookx_info_authors_related_products &&
-	    (!empty($author['related_products']) || 2 == $flag_show_product_bookx_info_authors_related_products)) {
-	        $single_author_related_products_html = '<!-- bof bookx author related products--><div class="bookxAuthorRelatedProducts">';
-	        $single_author_related_products_html .= '<h2 class="bookxAuthorRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $author['name']) . '</h2>';
-	        foreach ($author['related_products'] as $related_product) {
-	            $single_author_related_products_html .= '<!-- bof related product --><div class="bookxRelatedProduct' . (!empty($related_product['bookx_product_status']) ? '_'.$related_product['bookx_product_status'] : '') . '">'
-	                . '<a href="' . $related_product['products_link'] . '">' . $related_product['products_name']
-	                . (!empty($related_product['volume']) ? ' ' . $related_product['volume'] : '')
-	                . (!empty($related_product['products_subtitle']) ? ' &ndash; ' . $related_product['products_subtitle'] : '')
-	                . (!empty($related_product['bookx_product_status']) ? ' <span class="bookx_product_status">'. constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '')
-	                . '</span></a>'
-	                    . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
-	                    .'</div><!-- eof related product -->';
-	
-	        }
-	        $single_author_related_products_html .= '</div><!-- eof bookx author related products-->';
-	        ///**** this places the related products in the same div as the author. If not desired, remove  following line
-	        $single_author_detail_html .= $single_author_related_products_html;
-	    }
-	    
-	    
 	//*** author description
 	if ($flag_show_product_bookx_info_authors_description &&
 			(!empty($author['description']) || 2 == $flag_show_product_bookx_info_authors_description)) {
 
-		$single_author_detail_html .= '<div class="bookxAuthorDescription"><div class="bookxLabel">' . sprintf(LABEL_AUTHOR_DESCRIPTION, $author['name']) . '</div>' . $author['description'] . '</div>';
+		$single_author_detail_html .= '<div class="bookxAuthorDescription"><div class="bookxLabel">' . sprintf(LABEL_AUTHOR_DESCRIPTION, $author['name']) . '</div>' . $author['description'] . $author['description_link'] .'</div>';
 	}
+    
+	if ( $flag_show_product_bookx_info_authors_related_products &&
+        (!empty($author['related_products']) || 2 == $flag_show_product_bookx_info_authors_related_products) ) {
+        $single_author_related_products_html = '<div class="bookxAuthorRelatedProducts">';
+        $single_author_related_products_html .= '<h4 class="bookxAuthorRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $author['name']) . '</h4>';
 
+        $i = 0;
+     
+        foreach ( $author['related_products'] as $related_product ) {
+            $i++;
+            $single_author_related_products_html .= '<div class="bookxRelatedProduct' . (!empty($related_product['bookx_product_status']) ? '_' . $related_product['bookx_product_status'] : '') . '">';
+            $single_author_related_products_html .= '<h5><a href="' . $related_product['products_link'] . '">' . $related_product['products_name'] . '</a>' . (!empty($related_product['volume']) ? '<small>Vol ' . $related_product['volume'] .'</small>': '') .'</h5>';
+            $single_author_related_products_html .= (!empty($related_product['products_subtitle']) ? ' &ndash;<small>' . $related_product['products_subtitle']. '</small>' : '');
+            $single_author_related_products_html .= (!empty($related_product['bookx_product_status']) ? constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '');
+            $single_author_related_products_html .= '<div class="bookx_author_related_books">'
+                    . '<div class="related_book_image">' . zen_image(DIR_WS_IMAGES . $related_product['author_related_book_image'], $related_product['products_name'], SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT)  . '</div>'
+                    . '<div class="related_book_price">' . zen_get_products_display_price($related_product['products_id']) .'</div>'
+                    . '</div>'
+                . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
+                . '</div>';
+            if ( $i == BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT ) {
+                break;
+            }
+        }
+
+        //$single_author_related_products_html .= '</div>';
+        ///**** this places the related products in the same div as the author. If not desired, remove  following line
+        $single_author_detail_html .= $single_author_related_products_html;
+    }
+    
 	//*** author url
 	if ($flag_show_product_bookx_info_authors_url &&
 			(!empty($author['url']) || 2 == $flag_show_product_bookx_info_authors_url)) {

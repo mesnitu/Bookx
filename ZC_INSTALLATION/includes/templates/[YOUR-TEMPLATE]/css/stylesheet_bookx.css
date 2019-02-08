@@ -33,7 +33,7 @@
 
 #bookxImprint, #bookxPublishingDate, #bookxExtraAttributes, .bookxExtraAttributes,
 .bookxSingleAuthor, .bookxSingleGenre {
-	display: block;
+	
 }
 
 .bookxCondition {}
@@ -52,14 +52,11 @@
 
 
 .bookxAuthors {
-	font-size: 1em;
+	
 }
 
 .bookxSingleAuthor {
-	/*padding: 5px;
-	border: 1px solid #ccc;*/
-	width: 50%;
-	float: left;
+	
 }
 
 .bookxAuthor {
@@ -72,28 +69,27 @@
 }
 
 .bookxAuthorDescription {
-	padding-right: 40%
+	
 }
 
 .bookxAuthorDescription p {
-	margin: 0;
-	padding-right: 2em;
+	
+	
 }
 
 .bookxAuthorDescription .bookxLabel {
-	color: #2793d6;
+	
 	font-weight: bold;
 }
 
 .bookxAuthorRelatedProducts {
-	float: right;
-	width: 40%;
+	
 }
 
 
 
 .bookxAuthorUrl {
-    color: #aa1166;
+   
 }
 
 .bookxAuthorRelatedProductsHeading {

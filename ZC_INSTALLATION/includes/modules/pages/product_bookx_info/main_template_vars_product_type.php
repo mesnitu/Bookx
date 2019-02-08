@@ -150,7 +150,7 @@ $sql = 'SELECT a.*, a.author_url, ad.author_description, at.type_sort_order, atd
         relbe.publishing_date >= "' . date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) . '"
         THEN "new_product"
         ELSE "in_stock"
-        END)
+        END, COALESCE(relp.products_image, ""))
         ORDER BY relpd.products_name ASC, CAST(relbe.volume AS UNSIGNED) ASC SEPARATOR "#§#")
         AS related_products
 
@@ -323,12 +323,27 @@ $related_products_by_author_team = null;
 
 while (!$authors->EOF) {
     $current_author = array();
+    
+    $link_author_desc = zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $authors->fields['bookx_author_id']);
+    /**
+     * @todo So this is depending on the CEON update for zc156
+     * 
+     */
+    if (BOOKX_USES_CEON_URI_MODULE) {
+        $authorCleanUrl = $db->Execute("SELECT uri FROM " . TABLE_CEON_URI_MAPPINGS . " WHERE query_string_parameters ='typefilter=bookx&bookx_author_id=" . $authors->fields['bookx_author_id'] . "'");
+        if ($authorCleanUrl->RecordCount() > 0) {
+            $link_author_desc = zen_href_link(substr($authorCleanUrl->fields['uri'], 1), null, 'NONSSL', true, true, true);
+        }
+    }
+
     $current_author['name'] = (!empty($authors->fields['author_name']) ? $authors->fields['author_name'] : '');
     $current_author['image'] = (!empty($authors->fields['author_image']) ? DIR_WS_IMAGES . $authors->fields['author_image'] : '');
     $current_author['image_copyright'] = (!empty($authors->fields['author_image_copyright']) ? $authors->fields['author_image_copyright'] : '');
     $current_author['sort_order'] = (!empty($authors->fields['author_sort_order']) ? $authors->fields['author_sort_order'] : '0');
     $current_author['url'] = (!empty($authors->fields['author_url']) ? (strpos($authors->fields['author_url'], 'http') ? $authors->fields['author_url'] : 'http://' . $authors->fields['author_url']) : '');
-    $current_author['description'] = (!empty($authors->fields['author_description']) ? $authors->fields['author_description'] : '');
+    $current_author['description'] = (!empty($authors->fields['author_description']) ? bookx_truncate_paragraph($authors->fields['author_description'], BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION) : '');
+    $current_author['description_link'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name']) ? '<a href="' . $link_author_desc . '" class="bookx_searchlink">' . SEE_MORE . '</a>' : '');
+
     $current_author['type'] = (!empty($authors->fields['type_description']) ? $authors->fields['type_description'] : '');
     $current_author['type_image'] = (!empty($authors->fields['type_image']) ? DIR_WS_IMAGES . $authors->fields['type_image'] : '');
     $current_author['type_sort_order'] = (!empty($authors->fields['type_sort_order']) ? $authors->fields['type_sort_order'] : '0');
@@ -344,7 +359,8 @@ while (!$authors->EOF) {
                 foreach ($temp_relp_array as $value) {
                     $temp_relp_entry = explode('$§$', $value); // split single product entry into products_id and products_name
                     if (!empty($temp_relp_entry[0])) { //*** if product_id is empty then we don't actually have a product
-                        $related_product = array('products_name' => $temp_relp_entry[1],
+                        $related_product = array(
+                            'products_name' => $temp_relp_entry[1],
                             'products_id' => $temp_relp_entry[0],
                             'volume' => $temp_relp_entry[2],
                             'products_link' => (!empty($temp_relp_entry[0]) ? zen_href_link(zen_get_info_page($temp_relp_entry[0]), 'products_id=' . $temp_relp_entry[0]) : 0),
@@ -352,7 +368,9 @@ while (!$authors->EOF) {
                             'products_subtitle' => $temp_relp_entry[4],
                             'bookx_author_type_id' => $temp_relp_entry[5],
                             'author_type_name' => $temp_relp_entry[6],
-                            'bookx_product_status' => $temp_relp_entry[7]);
+                            'bookx_product_status' => $temp_relp_entry[7],
+                            /* @since v1.0.0 adding related books images*/
+                            'author_related_book_image' => $temp_relp_entry[8]);
 
                         if ($flag_show_product_bookx_info_authors_team_related_products && !empty($products_by_same_team)) {
                             if (in_array($related_product['products_id'], $products_by_same_team)) {
