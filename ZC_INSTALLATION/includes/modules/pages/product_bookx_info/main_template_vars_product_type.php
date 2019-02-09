@@ -347,7 +347,15 @@ while (!$authors->EOF) {
     $current_author['type'] = (!empty($authors->fields['type_description']) ? $authors->fields['type_description'] : '');
     $current_author['type_image'] = (!empty($authors->fields['type_image']) ? DIR_WS_IMAGES . $authors->fields['type_image'] : '');
     $current_author['type_sort_order'] = (!empty($authors->fields['type_sort_order']) ? $authors->fields['type_sort_order'] : '0');
-    $current_author['searchlink'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $authors->fields['bookx_author_id']) . '" class="bookx_searchlink">' . $authors->fields['author_name'] . '</a>' : '');
+    /*
+     * Only link if there's more than on book
+     */
+    if (mb_strcut($authors->fields['related_products'], 0, 5) === '$§$$') {
+        $current_author['searchlink'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name'])) ? $authors->fields['author_name'] : '';
+    } else {
+        $current_author['searchlink'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $authors->fields['bookx_author_id']) . '" class="bookx_searchlink">' . $authors->fields['author_name'] . '</a>' : '');
+    }
+    
 
     switch ((int) $flag_show_product_bookx_info_authors_related_products) {
         case 1:
