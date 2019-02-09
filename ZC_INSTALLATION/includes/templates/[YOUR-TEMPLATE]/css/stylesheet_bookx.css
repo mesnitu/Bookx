@@ -18,26 +18,68 @@
  */
 
 @CHARSET "UTF-8";
+/* wraps extra bookx attributes info on product_info_display page */
+#bookxExtra {
+    margin-bottom: 1em;
+    padding: 0.5em;
+}
 
-#productPrices {
-	float: right;
-    text-align: right;
-    font-weight: bold;
-    font-size: 1.5em;
+.labelBookStatus {
+    color: white;
+    padding: 8px;
+    background-color: #2196F3;
+}
+
+/* Bookx Extra Detailed Info DIV */
+#bookxPublisher, 
+#bookxSeries, 
+#bookxImprint {
+ margin-bottom: 1em;
+ border-bottom: 1px solid #eee;
+ 
+}
+/* Bookx Extra Detailed Info Images */
+.bookxPublisherImage, 
+.bookxAuthorImage, 
+.bookxGenreImage,
+.bookxImprintImage,
+.bookxPublisherImage,
+.bookxSeriesImage {
+    float: left;
+    margin: 0 1.5em 1.5em 0;
+}
+
+/* On productDetailsList one has to unset the imgages floats */
+ul#productDetailsList li {
+    line-height: 1.5;
+}
+ul#productDetailsList li div {
+    clear: both;
+    margin: 0;
+}
+
+.bookxAuthorsDetail {
+    display: table;
+}
+.bookxAuthorRelatedProductsHeading {
+    clear: both;
+}
+.bookxWrapAuthorRelatedBooks {
+    display: inline-table;
+    width: 33%;
 }
 
 .bookxLabel {
-	font-style: italic;
-	font-weight: normal;
+    font-style: italic;
+    font-weight: bold;
 }
 
 #bookxImprint, #bookxPublishingDate, #bookxExtraAttributes, .bookxExtraAttributes,
 .bookxSingleAuthor, .bookxSingleGenre {
-	display: block;
+
 }
 
 .bookxCondition {}
-
 .bookxPublishingDate {}
 .bookxISBN {}
 .bookxModel {}
@@ -52,96 +94,73 @@
 
 
 .bookxAuthors {
-	font-size: 1em;
+
 }
 
 .bookxSingleAuthor {
-	/*padding: 5px;
-	border: 1px solid #ccc;*/
-	width: 50%;
-	float: left;
+    display: table-row;
 }
 
 .bookxAuthor {
-	font-weight: bold;
+    font-weight: bold;
 }
 
-.bookxAuthorImage {
-	float: left;
-	margin: 0 1em 0.7em 0;
-}
 
 .bookxAuthorDescription {
-	padding-right: 40%
+
 }
 
 .bookxAuthorDescription p {
-	margin: 0;
-	padding-right: 2em;
+
+
 }
 
 .bookxAuthorDescription .bookxLabel {
-	color: #2793d6;
-	font-weight: bold;
+
+    font-weight: bold;
 }
 
 .bookxAuthorRelatedProducts {
-	float: right;
-	width: 40%;
+
 }
 
-
-
 .bookxAuthorUrl {
-    color: #aa1166;
+
 }
 
 .bookxAuthorRelatedProductsHeading {
     clear: both;
 }
 
-/* wraps extra bookx attributes info on product_info_display page */
-#bookxExtra {
-	margin-top: 10px;
-}
-#bookxExtra #productDescription {
-	border: 1px solid #000;
-}
+
 
 .bookxSingleGenre, .bookxGenreName, .bookxGenreImage {
-	display: inline;
+    display: inline;
 }
 
 .bookxGenres .bookxSingleGenre {
-    /*border-right: 1px solid #666;
-    padding-right: 7px;
-    margin-right: 7px;*/
+
 }
 
 /* display volume no. of book */
 .bookxProdVolume {
-	display: inline;
-	color: #000;
+    display: inline;
+
 }
 
 /* display subtitle of book */
 .bookxProdSubtitle {
-	display: inline;
-	color: #000;
-	font-style: italic;
+    display: inline;
+
+    font-style: italic;
 }
 
 /* wrapper for publisher detail on product_info_display */
-#bookxPublisher {
-	border: 1px solid #000;
-}
+
 
 .bookxPublisherName {}
 
-.bookxPublisherImage {
-	float: left;
-	margin: 0 1.5em 1.5em 0;
-}
+
 
 .bookxPublisherDescription {
 }
@@ -163,16 +182,16 @@
 }
 
 .listingDescription {
-	margin-top: 5px;
+    margin-top: 5px;
 }
 
 .listingProductImage {
-	border: 1px solid #000;
-	margin-right: 15px;
+
+    margin-right: 15px;
 }
 
 .booxAuthorRelatedType { /* .bookxRelatedProduct, */
-	display: inline;
+    display: inline;
 }
 
 #bookxSeries{}
@@ -185,7 +204,7 @@
 #bookxExtraAttributes a.boox_searchlink:link,
 #bookxExtraAttributes a.boox_searchlink:active,
 #bookxExtraAttributes a.boox_searchlink:visited {
-	color: #2740d6;
+    color: #2740d6;
 }
 
 a.boox_searchlink:hover,
@@ -193,45 +212,45 @@ a.bookx_product_name:hover,
 a.bookx_product_name:hover .bookxTitle,
 a.bookx_product_name:hover .bookxProdSubtitle,
 #whatsNew a:hover .bookxProdSubtitle {
-	color: #06E;
+    color: #06E;
 }
 
 a:hover .listingProductImage,
 #bookxUpcomingProductsWrapper a:hover img,
 #whatsNew a:hover img {
-	border-color: #06E;
+    border-color: #06E;
 }
 
 #bookxAuthorListingTable td.bookxAuthorListingInfoCell,
 #bookxSeriesListingTable td.bookxSeriesListingInfoCell {
-	padding: 0 10px 10px 10px;
+    padding: 0 10px 10px 10px;
 }
 
 #bookxAuthorListingTable a.bookx_searchlink,
 #bookxSeriesListingTable a.bookx_searchlink {
-	margin-left: 0px;
+    margin-left: 0px;
 }
 
 #bookxAuthorListingTable td,
 #bookxSeriesListingTable td {
-	vertical-align: top;
+    vertical-align: top;
 }
 
 #bookxAuthorListingTable .bookxAuthorName,
 #bookxSeriesListingTable .bookxSeriesName {
-	font-weight: bold;
-	font-size: 1.3em;
+    font-weight: bold;
+    font-size: 1.3em;
 }
 
 #bookxRelatedProductsTeam {
-	float: left;
-	clear: both;
+    float: left;
+    clear: both;
 }
 
 .tabTable tr.bookxList-newProductsHeading,
 .tabTable tr.bookxList-upcomingProductsHeading,
 .tabTable tr.bookxList-publishedProductsHeading {
-	border-bottom: 5px solid #fff;
+    border-bottom: 5px solid #fff;
 }
 
 .productListing-data a:hover {
@@ -246,105 +265,99 @@ a:hover .listingProductImage,
 #bookxExtra .button_bookx_new,
 #cartAdd .button_bookx_new,
 .productListing-data .button_bookx_new {
-    background-color: #fff;
-	color: #f00;
-	border: 1px solid #3399FF;
+
 }
 
 .new-product .button_bookx_newHover,
 #cartAdd .button_bookx_newHover,
 #docProductDisplay #cartAdd .button_bookx_newHover {
-    background-color: #3399FF;
-	color: #fff;
-	border: 1px solid #f00;
+
 }
 
 .upcoming-product .button_bookx_upcoming, .upcoming-product .button_bookx_upcomingHover
 #cartAdd .button_bookx_upcoming, #cartAdd .button_bookx_upcomingHover {
-    background-color: transparent;
-	color: #39F;
-	border: 1px solid #39F;
+
 }
 
 .bookxAuthorImage {
-	position: relative;
+    position: relative;
 }
 
 .bookxAuthorImageCopyright {
-	width:170px;
-	height:10px;
-	position: absolute;
-	left: -90px;
-	bottom: 80px;
-	overflow: hidden;
-	font-size: 8px;
-	-ms-transform:rotate(270deg); /* IE 9 */
-	-moz-transform:rotate(270deg); /* Firefox */
-	-webkit-transform:rotate(270deg); /* Safari and Chrome */
-	-o-transform:rotate(270deg); /* Opera */
-	filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE earlier 9 */
+    width:170px;
+    height:10px;
+    position: absolute;
+    left: -90px;
+    bottom: 80px;
+    overflow: hidden;
+    font-size: 8px;
+    -ms-transform:rotate(270deg); /* IE 9 */
+    -moz-transform:rotate(270deg); /* Firefox */
+    -webkit-transform:rotate(270deg); /* Safari and Chrome */
+    -o-transform:rotate(270deg); /* Opera */
+    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE earlier 9 */
 }
 
 #bookxUpcomingProductsWrapper {
-	display: table;
+    display: table;
 }
 
 #bookxUpcomingProductsFirstRow,
 #bookxUpcomingProductsWrapper .rowEven,
 #bookxUpcomingProductsWrapper .rowOdd {
-	display: table-row;
-	height: 100%;
+    display: table-row;
+    height: 100%;
 }
 
 #upImageHeading, #upProductsHeading, #upDescriptionHeading,
 #upPublishingDateHeading, #upDateExpectedHeading,
 .upImageCell, .upProductsCell, .upDescriptionCell,
 .upPublishingDateCell, .upDateExpectedCell {
-	display: table-cell;
-	vertical-align: top;
-	padding: 5px;
+    display: table-cell;
+    vertical-align: top;
+    padding: 5px;
 }
 
 .upImageCell {
-	padding: 0;
+    padding: 0;
 }
 
 #upImageHeading {
-	width: 126px;
+    width: 126px;
 }
 
 .upImageCell img,
 #whatsNew img {
-	margin-bottom: 20px;
-	border: 1px solid #ccc;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
 }
 
 #bookxUpcomingProductsHeading {
-	display: table-caption;
+    display: table-caption;
 }
 
 #bookxUpcomingProductsWrapper p {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .bookxRelatedProduct_out_of_print,
 .bookxRelatedProduct_out_of_print a {
-	color: #999;
+
 }
 
 .bookxRelatedProduct_new_product .bookx_product_status {
-	color: #ff0000;
-	font-weight: bold;
+
+    font-weight: bold;
 }
 
 .bookxRelatedProduct_new_product a {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 .bookxRelatedProduct_upcoming_product .bookx_product_status {
-	color: #ff0000;
-	font-weight: bold;
+
+    font-weight: bold;
 }
 
 
@@ -352,25 +365,25 @@ a:hover .listingProductImage,
 #upPublishingDateHeading, #upDateExpectedHeading {}
 
 .navNextPrevWrapper {
-	margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 form.bxf_active select {
-	color: #f00;
+    color: #f00;
 }
 
 #navBreadCrumb .bookxFilterBreadcrumbLabel {
-	font-weight: normal;
-	color: #000;
+    font-weight: normal;
+    color: #000;
 }
 
 #navBreadCrumb .bookxSubtitle {
-	font-style: italic;
+    font-style: italic;
 }
 
 #navBreadCrumb .bookxVolume {
-	color: #000;
+    color: #000;
 }
 .search-term-hi {
-	background-color: yellow;
+    background-color: yellow;
 }

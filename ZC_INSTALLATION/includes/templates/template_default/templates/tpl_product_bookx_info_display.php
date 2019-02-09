@@ -115,13 +115,13 @@ $zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_BEGIN', array('prod
 $authors_related_products_html = '';
 $authors_related_products_team_html = '';
 $authors_short_html = '<!-- bof bookx authors short -->
-		<div class="bookxAuthors">';
+		<div class="bookxAuthorsShort">';
 
 $authors_detail_html = '<!-- bof bookx authors detail -->
- 		  <div class="bookxAuthors">';
+ 		  <div class="bookxAuthorsDetail">';
 
 if (!empty($products_authors)) {
-	$authors_detail_html .= '<h2 id="bookxAuthorSectionHeading"><span class="bookxLabel">' . LABEL_AUTHORS . '</span></h2>';
+	$authors_detail_html .= '<h3 id="bookxAuthorSectionHeading">' . LABEL_AUTHORS . '</h3>';
 }
 
 foreach ($products_authors as $author) {
@@ -143,7 +143,8 @@ foreach ($products_authors as $author) {
 
 
 		//$authors_detail_html .= '<div class="bookxAuthor"><span class="bookxLabel">' . $author_name_label . '</span>';
-		$authors_short_html .= '<div class="bookxAuthor"><span class="bookxLabel">' . $author_name_label . '</span>';
+		$authors_short_html .= '<div>'
+            . '<span class="bookxLabel">' . $author_name_label . '</span>';
 
 		if ($flag_show_product_bookx_info_authors_as_link && !empty($author['searchlink'])) {
 			//$authors_detail_html .= ' ' . $author['searchlink'];
@@ -159,7 +160,7 @@ foreach ($products_authors as $author) {
 	//*** author image
 	if ($flag_show_product_bookx_info_authors_image &&
 			(!empty($author['image']) || 2 == $flag_show_product_bookx_info_authors_image)) {
-
+        
 		$single_author_detail_html .= '<div class="bookxAuthorImage">' .  zen_image($author['image'], $author['name'], BOOKX_AUTHOR_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_IMAGE_MAX_HEIGHT);
 		if (!empty($author['image_copyright'])) {
 			$single_author_detail_html .= '<div class="bookxAuthorImageCopyright">' .  $author['image_copyright'] . '</div>';
@@ -167,34 +168,48 @@ foreach ($products_authors as $author) {
 		$single_author_detail_html .= '</div>';
 	}
 
-	if ($flag_show_product_bookx_info_authors_related_products &&
-	    (!empty($author['related_products']) || 2 == $flag_show_product_bookx_info_authors_related_products)) {
-	        $single_author_related_products_html = '<!-- bof bookx author related products--><div class="bookxAuthorRelatedProducts">';
-	        $single_author_related_products_html .= '<h2 class="bookxAuthorRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $author['name']) . '</h2>';
-	        foreach ($author['related_products'] as $related_product) {
-	            $single_author_related_products_html .= '<!-- bof related product --><div class="bookxRelatedProduct' . (!empty($related_product['bookx_product_status']) ? '_'.$related_product['bookx_product_status'] : '') . '">'
-	                . '<a href="' . $related_product['products_link'] . '">' . $related_product['products_name']
-	                . (!empty($related_product['volume']) ? ' ' . $related_product['volume'] : '')
-	                . (!empty($related_product['products_subtitle']) ? ' &ndash; ' . $related_product['products_subtitle'] : '')
-	                . (!empty($related_product['bookx_product_status']) ? ' <span class="bookx_product_status">'. constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '')
-	                . '</span></a>'
-	                    . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
-	                    .'</div><!-- eof related product -->';
-	
-	        }
-	        $single_author_related_products_html .= '</div><!-- eof bookx author related products-->';
-	        ///**** this places the related products in the same div as the author. If not desired, remove  following line
-	        $single_author_detail_html .= $single_author_related_products_html;
-	    }
-	    
-	    
 	//*** author description
 	if ($flag_show_product_bookx_info_authors_description &&
 			(!empty($author['description']) || 2 == $flag_show_product_bookx_info_authors_description)) {
 
-		$single_author_detail_html .= '<div class="bookxAuthorDescription"><div class="bookxLabel">' . sprintf(LABEL_AUTHOR_DESCRIPTION, $author['name']) . '</div>' . $author['description'] . '</div>';
+		$single_author_detail_html .= '<div class="bookxAuthorDescription">'
+            . '<span class="bookxLabel">' . sprintf(LABEL_AUTHOR_DESCRIPTION, $author['name']) . '</span>' 
+            . '<p>' . bookx_truncate_paragraph($author['description'], BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION) . ' ' . $author['description_link'] 
+            .'</p></div>';
 	}
+    
+	if ( $flag_show_product_bookx_info_authors_related_products &&
+        (!empty($author['related_products']) || 2 == $flag_show_product_bookx_info_authors_related_products) ) {
+        $single_author_related_products_html = '<div class="bookxAuthorRelatedProducts">';
+        
+        $single_author_related_products_html .= '<h4 class="bookxAuthorRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $author['name']) . '</h4>';
 
+        $i = 0;
+     
+        foreach ( $author['related_products'] as $related_product ) {
+            $i++;
+            $single_author_related_products_html .= '<div class="bookxWrapAuthorRelatedBooks ' . (!empty($related_product['bookx_product_status']) ? 'status_' . $related_product['bookx_product_status'] : '') . '">';
+            
+            $single_author_related_products_html .= '<h5><a href="' . $related_product['products_link'] . '">' . $related_product['products_name'] . '</a>' . (!empty($related_product['volume']) ? '<small>Vol ' . $related_product['volume'] .'</small>': '');
+            $single_author_related_products_html .= (!empty($related_product['products_subtitle']) ? ' &ndash;<small>' . $related_product['products_subtitle']. '</small>' : '');
+            $single_author_related_products_html .= '</h5>';
+            $single_author_related_products_html .= (!empty($related_product['bookx_product_status']) ? '<span class="labelBookStatus">' . constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) . '</span>' : '');
+            $single_author_related_products_html .= '<div class="bookxAuthoRelatedBooks">'
+                    . '<div class="related_book_image">' . zen_image(DIR_WS_IMAGES . $related_product['author_related_book_image'], $related_product['products_name'], SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT)  . '</div>'
+                    . '<div class="related_book_price">' . zen_get_products_display_price($related_product['products_id']) .'</div>'
+                    . '</div>'
+                . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
+                . '</div>';
+            if ( $i == BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT ) {
+                break;
+            }
+        }
+
+        $single_author_related_products_html .= '</div>';
+        ///**** this places the related products in the same div as the author. If not desired, remove  following line
+        $single_author_detail_html .= $single_author_related_products_html;
+    }
+    
 	//*** author url
 	if ($flag_show_product_bookx_info_authors_url &&
 			(!empty($author['url']) || 2 == $flag_show_product_bookx_info_authors_url)) {
@@ -205,7 +220,8 @@ foreach ($products_authors as $author) {
 
 
 	if (!empty($single_author_detail_html)) {
-		$authors_detail_html .= '<div class="bookxSingleAuthor">' . $single_author_detail_html . '<div style="clear: both;"></div></div><!-- eof single author -->';
+		$authors_detail_html .= '<div class="bookxSingleAuthor">' . $single_author_detail_html . ''
+            . '</div><!-- eof single author -->';
 	}
 }
 
@@ -220,17 +236,17 @@ if ($flag_show_product_bookx_info_authors_team_related_products && !empty($relat
 	$authors_related_products_team_html = '<!-- bof bookx related products team --><div id="bookxRelatedProductsTeam">';
 	$authors_related_products_team_html .= '<h2 id="bookxTeamRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $team_names_display) . '</h2>';
 	foreach ($related_products_by_author_team as $related_product) {
-		$authors_related_products_team_html .= '<!-- bof related product --><div class="bookxRelatedProduct' . (!empty($related_product['bookx_product_status']) ? '_'.$related_product['bookx_product_status'] : '') . '">'
-						. '<a href="' . $related_product['products_link'] . '">' . $related_product['products_name']
-																				. (!empty($related_product['volume']) ? ' ' . $related_product['volume'] : '')
-																				. (!empty($related_product['products_subtitle']) ? ' &ndash; ' . $related_product['products_subtitle'] : '')
-						. (!empty($related_product['bookx_product_status']) ? ' <span class="bookx_product_status">'. constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '')
-						. '</a>'
-						. ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
-						.'</div><!-- eof related product -->';
-
-	}
-	$authors_related_products_team_html .= '</div><!-- eof bookx related products team -->';
+        $authors_related_products_team_html .= '<!-- bof related product --><div class="bookxRelatedProduct'
+            . (!empty($related_product['bookx_product_status']) ? '_' . $related_product['bookx_product_status'] : '') . '">'
+            . '<a href="' . $related_product['products_link'] . '">' . $related_product['products_name']
+            . (!empty($related_product['volume']) ? ' ' . $related_product['volume'] : '')
+            . (!empty($related_product['products_subtitle']) ? ' &ndash; ' . $related_product['products_subtitle'] : '')
+            . (!empty($related_product['bookx_product_status']) ? ' <span class="bookx_product_status">' . constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '')
+            . '</a>'
+            . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
+            . '</div><!-- eof related product -->';
+    }
+    $authors_related_products_team_html .= '</div><!-- eof bookx related products team -->';
 }
 
 
@@ -241,17 +257,19 @@ $publisher_short_html = '';
 if ($flag_show_product_bookx_info_publisher &&
 		(!empty($products_publisher_name) || 2 == $flag_show_product_bookx_info_publisher)) {
 
-	$publisher_detail_html .= '<div class="bookxPublisherName"><span class="bookxLabel">' . LABEL_PUBLISHER . '</span>';
+	$publisher_short_html .= '<div class="bookxPublisherName"><span class="bookxLabel">' . LABEL_PUBLISHER . '</span>';
+    $publisher_detail_html .= '<h5 class="bookxPublisherName"><span class="bookxLabel">' . LABEL_PUBLISHER . '</span>';
 	if ($flag_show_product_bookx_info_publisher_as_link && !empty($products_publisher_searchlink)) {
-		$publisher_detail_html .= $products_publisher_searchlink;
+		$publisher_short_html .= $products_publisher_searchlink;
 	} else {
-		$publisher_detail_html .= $products_publisher_name;
+		$publisher_short_html .= $products_publisher_name;
 	}
-	$publisher_detail_html .= '</div>';
-	$publisher_short_html = $publisher_detail_html;
+    //$publisher_short_html .= '</div>';
+	$publisher_detail_html .= '</h5>';
+	
 }
 
-$publisher_short_html = $publisher_detail_html . '</div>';
+$publisher_short_html .= '</div>';
 
 //*** publisher image
 if ($flag_show_product_bookx_info_publisher_image &&
@@ -275,7 +293,7 @@ if ($flag_show_product_bookx_info_publisher_image &&
  	//*** publisher description
 	if ($flag_show_product_bookx_info_publisher_description &&
 		(!empty($products_publisher_description) || 2 == $flag_show_product_bookx_info_publisher_description)) {
-
+        $flag_publisher_has_detailed_info = true;
 		$publisher_detail_html .= '<div class="bookxPublisherDescription"><span class="bookxLabel">' . LABEL_PUBLISHER_DESCRIPTION . '</span>' . $products_publisher_description . '</div>';
 	}
 
@@ -312,22 +330,26 @@ if ($flag_show_product_bookx_info_publisher_image &&
 		} else {
 			$imprint_detail_html .= zen_image($products_imprint_image, $products_imprint_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
 		}
+        $imprint_short_html = $imprint_detail_html;
 		$imprint_detail_html .= '</div>';
 
 	} elseif ($flag_show_product_bookx_info_imprint &&
 		(!empty($products_imprint_name) || 2 == $flag_show_product_bookx_info_imprint)) {
 		//*** imprint name
-
+        $imprint_short_html .= '<h5 class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
 		$imprint_detail_html .= '<div class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
 		if ($flag_show_product_bookx_info_imprint_as_link && !empty($products_imprint_searchlink)) {
 			$imprint_detail_html .= $products_imprint_searchlink;
+            $imprint_short_html .= $products_imprint_searchlink;
 		} else {
 			$imprint_detail_html .= $products_imprint_name;
+            $imprint_short_html .= $products_imprint_name;
 		}
 		$imprint_detail_html .= '</div>';
+        $imprint_short_html .= '</h5>';
 	}
 
-	$imprint_short_html = $imprint_detail_html . '</div>';
+	//$imprint_short_html = $imprint_detail_html . '</div>';
 
  	//*** imprint description
  	if ($flag_show_product_bookx_info_imprint_description &&
@@ -351,17 +373,21 @@ if ($flag_show_product_bookx_info_publisher_image &&
 
  	$series_detail_html = '<!-- bof bookx series -->
 			<div id="bookxSeries">';
+    $series_detail_short = '';
  	//*** series name
  	if ($flag_show_product_bookx_info_series &&
  		(!empty($products_series_name) || 2 == $flag_show_product_bookx_info_series)) {
-
- 		$series_detail_html .= '<div class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
+        $series_detail_short .= '<div class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
+ 		$series_detail_html .= '<h5 class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
  		if ($flag_show_product_bookx_info_series_as_link && !empty($products_series_searchlink)) {
  			$series_detail_html .= $products_series_searchlink;
+            $series_detail_short .= $products_series_searchlink;
  		} else {
  			$series_detail_html .= $products_series_name;
+            $series_detail_short .= $products_series_name;
  		}
- 		$series_detail_html .= '</div>';
+ 		$series_detail_html .= '</h5>';
+        $series_detail_short .= '</div>';
  	}
 
  	//*** series image
@@ -458,10 +484,8 @@ if ($flag_show_product_bookx_info_publisher_image &&
 ?>
 <div class="centerColumn" id="docProductDisplay">
 
-
-
 <!--bof Form start-->
-<?php echo zen_draw_form('cart_quantity', zen_href_link(zen_get_info_page($_GET['products_id']), zen_get_all_get_params(array('action')) . 'action=add_product'), 'post', 'enctype="multipart/form-data"') . "\n"; ?>
+<?php echo zen_draw_form('cart_quantity', zen_href_link(zen_get_info_page($_GET['products_id']), zen_get_all_get_params(array('action')) . 'action=add_product', $request_type), 'post', 'enctype="multipart/form-data"') . "\n"; ?>
 <!--eof Form start-->
 
 <?php if ($messageStack->size('product_info') > 0) echo $messageStack->output('product_info'); ?>
@@ -485,9 +509,23 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
 <?php } ?>
 <!--eof Prev/Next top position-->
 
+<div id="prod-info-top">
+<!--bof Product Name-->
+<h1 id="productName" class="docProduct">
+    <?php
+    echo '<span class="bookxTitle">' . $products_name . '</span>'
+    . (($flag_show_product_bookx_info_volume && !empty($products_volume)) ? " <span class='bookxProdVolume'>" . sprintf(LABEL_BOOKX_VOLUME, $products_volume) . "</span>" : '')
+    . (($flag_show_product_bookx_info_volume && !empty($products_subtitle)) ? " - <span class='bookxProdSubtitle'>$products_subtitle</span>" : '');
+    ?>
+</h1>
+<!--eof Product Name-->
+
+<div id="pinfo-left" class="group">
 <!--bof Main Product Image -->
 <?php
   if (zen_not_null($products_image)) {
+  ?>
+<?php
 /**
  * display the main product image
  */
@@ -496,132 +534,62 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
   }
 ?>
 <!--eof Main Product Image-->
+<!--bof Additional Product Images -->
+<?php
+/**
+ * display the products additional images
+ */
+  require($template->get_template_dir('/tpl_modules_additional_images.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_modules_additional_images.php'); ?>
+<!--eof Additional Product Images -->
+</div>
+<div id="pinfo-right" class="group grids">
+    <!--bof Product Price block -->
+<!--bof BookX Extra data items -->
+<?php 
 
-
-<!--bof Product Name-->
-<h1 id="productName" class="docProduct"><?php echo '<span class="bookxTitle">' . $products_name . '</span>'
-												   . (($flag_show_product_bookx_info_volume && !empty($products_volume)) ? " <span class='bookxProdVolume'>" . sprintf(LABEL_BOOKX_VOLUME, $products_volume) . "</span>" : '') .
-												   (($flag_show_product_bookx_info_volume && !empty($products_subtitle)) ? " - <span class='bookxProdSubtitle'>$products_subtitle</span>" : ''); ?></h1>
-<!--eof Product Name-->
-
-	<!--bof BookX Extra data items -->
-	<div id="bookxExtra" class="docProduct">
-
-		<!--bof Product Price block -->
-		<div id="productPrices" class="docProduct">
-			<?php
-				echo $products_condition_html;
-			// base price
-			  if ($show_onetime_charges_description == 'true') {
-			    $one_time = '<span >' . TEXT_ONETIME_CHARGE_SYMBOL . TEXT_ONETIME_CHARGE_DESCRIPTION . '</span><br />';
-			  } else {
-			    $one_time = '';
-			  }
-			  echo $one_time . ((zen_has_product_attributes_values((int)$_GET['products_id']) and $flag_show_product_info_starting_at == 1) ? TEXT_BASE_PRICE : '') . zen_get_products_display_price((int)$_GET['products_id']);
-			?>
-			<!--bof Add to Cart Box -->
-			<?php
-			if (CUSTOMERS_APPROVAL == 3 and TEXT_LOGIN_FOR_PRICE_BUTTON_REPLACE_SHOWROOM == '') {
-			  // do nothing
-			} else {
-
-				$display_qty = (($flag_show_product_info_in_cart_qty == 1 and $_SESSION['cart']->in_cart($_GET['products_id'])) ? '<p>' . PRODUCTS_ORDER_QTY_TEXT_IN_CART . $_SESSION['cart']->get_quantity($_GET['products_id']) . '</p>' : '');
-				$hidden_quantity = '';
-				if ($products_qty_box_status == 0 or $products_quantity_order_max== 1) {
-					// hide the quantity box and default to 1
-					$hidden_quantity = '<input type="hidden" name="cart_quantity" value="1" />' . zen_draw_hidden_field('products_id', (int)$_GET['products_id']);
-					$the_button = zen_image_submit(BUTTON_IMAGE_IN_CART, BUTTON_IN_CART_ALT);
-			    } else {
-			        // show the quantity box
-			        $the_button = PRODUCTS_ORDER_QTY_TEXT . '<input type="text" name="cart_quantity" value="' . (zen_get_buy_now_qty($_GET['products_id'])) . '" maxlength="6" size="4" /><br />' . zen_get_products_quantity_min_units_display((int)$_GET['products_id']) . '<br />' . zen_draw_hidden_field('products_id', (int)$_GET['products_id']) . zen_image_submit(BUTTON_IMAGE_IN_CART, BUTTON_IN_CART_ALT);
-			    }
-			    $display_button = bookx_get_buy_now_button($_GET['products_id'], $the_button);
-			  ?>
-			  <?php if ($display_qty != '' or $display_button != '') { ?>
-			    <div id="cartAdd">
-			    <?php
-			      echo $display_qty . $hidden_quantity;
-			      echo $display_button;
-			            ?>
-			          </div>
-			  <?php } // display qty and button ?>
-			<?php } // CUSTOMERS_APPROVAL == 3 ?>
-			<!--eof Add to Cart Box-->
-
-			</div>
-			<!--eof Product Price block -->
-
-	<?php
-		$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_BEGIN');
-		echo $publisher_short_html;
-		echo $imprint_short_html;
-		echo $authors_short_html;
-		echo $bookx_extra_attributes_html;
-		echo $publishing_date_html;
-		echo $genres_html;
-
-		$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_BEGIN', array('products_id' => $products_id_current));
-
-		if ( ($flag_show_product_info_model == 1 and $products_model != '')
-				OR ($flag_show_product_info_weight == 1 and $products_weight !=0)
-				OR ($flag_show_product_info_quantity == 1)
-				OR ($flag_show_product_info_manufacturer == 1 AND !empty($manufacturers_name))
-	            OR ($flag_show_product_bookx_info_isbn == 1 and $products_isbn != '') ) {
-
-			echo '<!--bof Product details list  --><ul id="productDetailsList" class="floatingBox back">';
-			echo (($flag_show_product_bookx_info_isbn == 1 and $products_isbn !='') ? '<li>' . TEXT_PRODUCT_ISBN . $products_isbn . '</li>' : '') . "\n";
-			echo (($flag_show_product_info_weight == 1 and $products_weight !=0) ? '<li>' . TEXT_PRODUCT_WEIGHT .  $products_weight . TEXT_PRODUCT_WEIGHT_UNIT . '</li>'  : '') . "\n";
-			echo (($flag_show_product_info_quantity == 1) ? '<li>' . $products_quantity . TEXT_PRODUCT_QUANTITY . '</li>'  : '') . "\n";
-			echo (($flag_show_product_info_manufacturer == 1 and !empty($manufacturers_name)) ? '<li>' . TEXT_PRODUCT_MANUFACTURER . $manufacturers_name . '</li>' : '') . "\n";
-			echo (($flag_show_product_info_model == 1 and $products_model !='') ? '<li>' . TEXT_PRODUCT_MODEL . $products_model . '</li>' : '') . "\n";
-			echo '</ul><br class="clearBoth" /><!--eof Product details list -->';
-		}
-		$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_END', array('products_id' => $products_id_current));
-
-		if ($products_description != '') {
-			echo '<!--bof Product description --><div id="productDescription" class="docProduct  biggerText">' . stripslashes($products_description) . '</div><!--eof Product description -->';
-		}
-
-		echo $publisher_detail_html;
-		echo $imprint_detail_html;
-		echo $series_detail_html;
-
-
-		echo $authors_detail_html;
-		echo $authors_related_products_team_html;
-		//**** related products are placed in DIV with author. If undesired, uncomment the following line and comment above (see note next to it)
-		//echo $authors_related_products_html;
-		//*****
-		$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_END', array('products_id' => $products_id_current));
-
-	?>
-	<div class="clearBoth"></div>
-	</div>
-<!--eof BookX Extra data items -->
+$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_BEGIN');
+if (($flag_show_product_info_model == 1 and $products_model != '')
+    OR ( $flag_show_product_info_weight == 1 and $products_weight != 0)
+    OR ( $flag_show_product_info_quantity == 1)
+    OR ( $flag_show_product_info_manufacturer == 1 AND ! empty($manufacturers_name))
+    OR ( $flag_show_product_bookx_info_isbn == 1 and $products_isbn != '')) {
+    echo '<!--bof Product details list  --><ul id="productDetailsList">';
+    echo (($flag_show_product_bookx_info_isbn == 1 and $products_isbn != '') ? '<li><span class="bookxLabel">' . TEXT_PRODUCT_ISBN . '</span>'.$products_isbn . '</li>' : '') . "\n";
+    echo '<li>' . $publisher_short_html . '</li>'. "\n";
+    echo '<li>' . $imprint_short_html . '</li>'. "\n";
+    echo '<li>' . $authors_short_html . '</li>'. "\n";
+    echo '<li>' . $bookx_extra_attributes_html . '</li>'. "\n";
+    echo '<li>' . $publishing_date_html . '</li>'. "\n";
+    echo '<li>' . $genres_html . '</li>'. "\n";
+    echo (($flag_show_product_info_model == 1 and $products_model != '') ? '<li>' . TEXT_PRODUCT_MODEL . $products_model . '</li>' : '') . "\n";
+    echo (($flag_show_product_info_weight == 1 and $products_weight != 0) ? '<li>' . TEXT_PRODUCT_WEIGHT . $products_weight . TEXT_PRODUCT_WEIGHT_UNIT . '</li>' : '') . "\n";
+    echo (($flag_show_product_info_quantity == 1) ? '<li>' . $products_quantity . TEXT_PRODUCT_QUANTITY . '</li>' : '') . "\n";
+    echo (($flag_show_product_info_manufacturer == 1 and ! empty($manufacturers_name)) ? '<li>' . TEXT_PRODUCT_MANUFACTURER . $manufacturers_name . '</li>' : '') . "\n";
+    echo '</ul><!--eof Product details list -->';
+}
+?>
+<!--eof Product details list -->
 
 <!--bof free ship icon  -->
 <?php if(zen_get_product_is_always_free_shipping($products_id_current) && $flag_show_product_info_free_shipping) { ?>
 <div id="freeShippingIcon"><?php echo TEXT_PRODUCT_FREE_SHIPPING_ICON; ?></div>
 <?php } ?>
 <!--eof free ship icon  -->
-
-<div class="clearBoth"></div>
-
+</div>
+<div id="cart-box" class="grids">
+<h2 id="productPrices" class="productGeneral">
+<?php
+// base price
+  if ($show_onetime_charges_description == 'true') {
+    $one_time = '<span >' . TEXT_ONETIME_CHARGE_SYMBOL . TEXT_ONETIME_CHARGE_DESCRIPTION . '</span><br />';
+  } else {
+    $one_time = '';
+  }
+  echo $one_time . ((zen_has_product_attributes_values((int)$_GET['products_id']) and $flag_show_product_info_starting_at == 1) ? TEXT_BASE_PRICE : '') . zen_get_products_display_price((int)$_GET['products_id']);
+?></h2>
+<!--eof Product Price block -->
 
 <!--bof Attributes Module -->
-<?php
-  if ($pr_attr->fields['total'] > 0) {
-?>
-<?php
-/**
- * display the product atributes
- */
-  require($template->get_template_dir('/tpl_modules_attributes.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_modules_attributes.php'); ?>
-<?php
-  }
-?>
-<!--eof Attributes Module -->
-
 <!--bof Quantity Discounts table -->
 <?php
   if ($products_discount_type != 0) { ?>
@@ -635,13 +603,66 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
 ?>
 <!--eof Quantity Discounts table -->
 
-<!--bof Additional Product Images -->
+<!--bof Add to Cart Box -->
 <?php
-/**
- * display the products additional images
+if (CUSTOMERS_APPROVAL == 3 and TEXT_LOGIN_FOR_PRICE_BUTTON_REPLACE_SHOWROOM == '') {
+  // do nothing
+} else {
+?>
+<?php
+    $display_qty = (($flag_show_product_info_in_cart_qty == 1 and $_SESSION['cart']->in_cart($_GET['products_id'])) ? '<p>' . PRODUCTS_ORDER_QTY_TEXT_IN_CART . $_SESSION['cart']->get_quantity($_GET['products_id']) . '</p>' : '');
+    if ($products_qty_box_status == 0 or $products_quantity_order_max== 1) {
+      // hide the quantity box and default to 1
+      $the_button = '<input type="hidden" name="cart_quantity" value="1" />' . zen_draw_hidden_field('products_id', (int)$_GET['products_id']) . zen_image_submit(BUTTON_IMAGE_IN_CART, BUTTON_IN_CART_ALT);
+    } else {
+      // show the quantity box
+      $the_button = '<div class="max-qty">' . zen_get_products_quantity_min_units_display((int)$_GET['products_id']) . '</div><span class="qty-text">' . PRODUCTS_ORDER_QTY_TEXT . '</span><input type="text" name="cart_quantity" value="' . $products_get_buy_now_qty . '" maxlength="6" size="4" />' . zen_draw_hidden_field('products_id', (int)$_GET['products_id']) . zen_image_submit(BUTTON_IMAGE_IN_CART, BUTTON_IN_CART_ALT);
+    }
+    $display_button = bookx_get_buy_now_button($_GET['products_id'], $the_button);
+?>
+<?php if ($display_qty != '' or $display_button != '') { ?>
+    <div id="cartAdd">
+    <?php
+      echo $display_qty;
+      echo $display_button;
+?>
+          </div>
+<?php   } // display qty and button ?>
+<?php } // CUSTOMERS_APPROVAL == 3 ?>
+<!--eof Add to Cart Box-->
+</div>
+</div> 
+<!-- eof prod-info-top -->
+
+<!--bof Product description -->
+<?php if ($products_description != '') { ?>
+<div id="productDescription" class="productGeneral biggerText"><?php echo stripslashes($products_description); ?></div>
+<?php } ?>
+<!--eof Product description -->
+
+<!--bof BookX Extra data items -->
+<section id="bookxExtra" class="docProduct">
+    <h1>Bookx Extras</h1>
+<?php
+$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_BEGIN', array('products_id' => $products_id_current));
+
+$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_END', array('products_id' => $products_id_current));
+
+echo $publisher_detail_html;
+echo $imprint_detail_html;
+echo $series_detail_html;
+echo $authors_detail_html;
+echo $authors_related_products_team_html;
+/* 
+ * related products are placed in DIV with author. If undesired, uncomment the following line and comment above (see note next to it
  */
-  require($template->get_template_dir('/tpl_modules_additional_images.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_modules_additional_images.php'); ?>
-<!--eof Additional Product Images -->
+
+//echo $authors_related_products_html;
+//*****
+$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_END', array('products_id' => $products_id_current));
+?>
+</section>
+<!--eof BookX Extra data items -->
 
 <!--bof Prev/Next bottom position -->
 <?php if (PRODUCT_INFO_PREVIOUS_NEXT == 2 or PRODUCT_INFO_PREVIOUS_NEXT == 3) { ?>
@@ -669,7 +690,6 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
 }
 ?>
 <!--eof Reviews button and count -->
-
 
  <!--bof Product date added/available-->
 <?php
@@ -700,16 +720,6 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
   }
 ?>
 <!--eof Product URL -->
-
-<!--bof Facebook Like Button-->
-<?php
-    /**
-  if (defined(FACEBOOK_LIKE_BUTTON_STATUS) && FACEBOOK_LIKE_BUTTON_STATUS == 'true' && $_SERVER['https'] != 'on') {
-    require($template->get_template_dir('tpl_modules_facebook_like_button.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_modules_facebook_like_button.php'); 
-  }
-  */
-?>
-<!--eof Facebook Like Button-->
 
 <!--bof also purchased products module-->
 <?php require($template->get_template_dir('tpl_modules_also_purchased_products.php', DIR_WS_TEMPLATE, $current_page_base,'templates'). '/' . 'tpl_modules_also_purchased_products.php');?>

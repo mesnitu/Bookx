@@ -24,3 +24,16 @@
   define('BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY', 0);
   define('BOOKX_LAYOUT_FLAG_OPTION_DISPLAY_IF_NOT_EMPTY', 1);
   define('BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY', 2);
+  
+  /**
+   * @since v1.0.0
+   */
+  define('BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION', 350);
+  define('BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT', 3);
+  
+  
+  /**
+   * @todo stuff to be removed. Just placing it here to move along
+   */
+  define('SEE_MORE', 'See More');
+  define('BOOKX_USES_CEON_URI_MODULE', false);
