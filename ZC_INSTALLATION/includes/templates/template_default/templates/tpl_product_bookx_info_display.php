@@ -195,7 +195,7 @@ foreach ($products_authors as $author) {
             $single_author_related_products_html .= '</h5>';
             $single_author_related_products_html .= (!empty($related_product['bookx_product_status']) ? '<span class="labelBookStatus">' . constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) . '</span>' : '');
             $single_author_related_products_html .= '<div class="bookxAuthoRelatedBooks">'
-                    . '<div class="related_book_image">' . zen_image(DIR_WS_IMAGES . $related_product['author_related_book_image'], $related_product['products_name'], SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT)  . '</div>'
+                    . '<div class="related_book_image"><a href="' . $related_product['products_link'] . '">' . zen_image(DIR_WS_IMAGES . $related_product['author_related_book_image'], $related_product['products_name'], SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT)  . '</a></div>'
                     . '<div class="related_book_price">' . zen_get_products_display_price($related_product['products_id']) .'</div>'
                     . '</div>'
                 . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
