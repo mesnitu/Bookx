@@ -341,7 +341,7 @@ while (!$authors->EOF) {
     $current_author['image_copyright'] = (!empty($authors->fields['author_image_copyright']) ? $authors->fields['author_image_copyright'] : '');
     $current_author['sort_order'] = (!empty($authors->fields['author_sort_order']) ? $authors->fields['author_sort_order'] : '0');
     $current_author['url'] = (!empty($authors->fields['author_url']) ? (strpos($authors->fields['author_url'], 'http') ? $authors->fields['author_url'] : 'http://' . $authors->fields['author_url']) : '');
-    $current_author['description'] = (!empty($authors->fields['author_description']) ? bookx_truncate_paragraph($authors->fields['author_description'], BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION) : '');
+    $current_author['description'] = (!empty($authors->fields['author_description']) ? $authors->fields['author_description'] : '');
     $current_author['description_link'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name']) ? '<a href="' . $link_author_desc . '" class="bookx_searchlink">' . SEE_MORE . '</a>' : '');
 
     $current_author['type'] = (!empty($authors->fields['type_description']) ? $authors->fields['type_description'] : '');

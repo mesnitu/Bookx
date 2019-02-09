@@ -36,3 +36,4 @@
    * @todo stuff to be removed. Just placing it here to move along
    */
   define('SEE_MORE', 'See More');
+  define('BOOKX_USES_CEON_URI_MODULE', false);
