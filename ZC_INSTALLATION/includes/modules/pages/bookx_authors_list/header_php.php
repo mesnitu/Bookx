@@ -27,12 +27,12 @@ if (!defined('MAX_DISPLAY_BOOKX_AUTHOR_LISTING')) {
 $extra_fields = '';
 $extra_in_stock_join_clause = '';
 $extra_having_clause = '';
-
+$index_search = '';
 $active_bx_filter_ids = bookx_get_active_filter_ids();
 
 $extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
-if (BOOKX_AUTHOR_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['bookx_authors_list_all']) && $_GET['bookx_authors_list_all'])) {
+if (BOOKX_AUTHOR_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la'])) {
 	$extra_fields = ' , MAX(p.products_quantity) AS quantity,  MAX(p.products_date_available) AS date_available, COUNT(p.products_id) AS books_in_stock';
 	$extra_in_stock_join_clause = ' LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = batp.products_id AND p.products_status > 0';
 	$extra_having_clause = ' HAVING (quantity > 0 OR date_available >= "' . date('Y-m-d H:i:s', time()- (86400*60)) . '")'; // 86400 * 60 = 60 days
@@ -50,6 +50,10 @@ switch ((int)BOOKX_AUTHOR_LISTING_ORDER_BY) {
 
 }
 
+if(isset($_GET['qa']) && !empty($_GET['qa'])) {
+    $index_search = " AND  ba.author_name LIKE '".$_GET['qa']."%' ";
+  }
+
 if($active_bx_filter_ids['author_type_id']) {
     $author_type_filter_extra_where = ' AND batp.bookx_author_type_id ="' . $active_bx_filter_ids['author_type_id'] . '" ';
 }
@@ -64,18 +68,22 @@ $sql = 'SELECT ba.bookx_author_id, ba.author_name, ba.author_image, ba.author_ur
 		  . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = batp.products_id ' : '')
 		  . $extra_in_stock_join_clause
 		  . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('author', 'author_type'))
-		  . ' WHERE 1 ' . $author_type_filter_extra_where .  bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('author', 'author_type'))
+		  . ' WHERE 1 ' . $author_type_filter_extra_where .  bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('author', 'author_type')). $index_search 
 		  . ' GROUP BY ba.bookx_author_id '
 		  . $extra_having_clause
 		  . $sort_order_clause;
 
 $bookx_authors_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_AUTHOR_LISTING, 'ba.bookx_author_id', 'page');
 $bookx_authors_listing = $db->Execute($bookx_authors_listing_split->sql_query);
+$temp_index = array();
 
 $bookx_authors_listing_split_array = array();
 while ( ! $bookx_authors_listing->EOF ) {
 	//$temp_author_types_array = explode('#§#', $bookx_authors_listing_split->fields['author_types']);
-
+    /**
+     * @todo somw chars like Á are in some wrong encoding... still didnt find a way to fix this. 
+     */
+    $temp_index[] = mb_convert_encoding($bookx_authors_listing->fields ['author_name'][0], 'utf-8');
 	$bookx_authors_listing_split_array [] = array ('bookx_author_id' => $bookx_authors_listing->fields ['bookx_author_id']
 												   ,'author_name' => $bookx_authors_listing->fields ['author_name']
 												   ,'author_types' => (!empty($bookx_authors_listing->fields ['author_types']) ? '(' . $bookx_authors_listing->fields ['author_types'] . ')': '')
@@ -86,3 +94,5 @@ while ( ! $bookx_authors_listing->EOF ) {
 
 	$bookx_authors_listing->MoveNext ();
 }
+
+$index = array_unique($temp_index);

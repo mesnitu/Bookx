@@ -35,25 +35,57 @@
 		<script type="text/javascript">
 		<!--
 		function handleInStockOnlyCheckbox() {
-			var n = window.location.href.indexOf('&bookx_authors_list_all=');
+			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = authorsListOnlyStockedCheckbox.checked;
-			var newGetParameter = (listOutOfStock ? '&bookx_authors_list_all=true' : '');
+			var newGetParameter = (listOutOfStock ? '&la=true' : '');
 			if (0 > n) {
 				window.location.href = window.location.href + newGetParameter;
 			} else {
-				window.location.href = window.location.href.replace('&bookx_authors_list_all=true', newGetParameter);
+				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
 		-->
 		</script>
 		<div id="authorsListOnlyStockedCheckboxContainer">
-			<label><input id="authorsListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['bookx_authors_list_all']) && $_GET['bookx_authors_list_all'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_AUTHOR_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label><input id="authorsListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_AUTHOR_LIST_STOCKCHECKBOX_LABEL; ?></label>
 		</div>
 <?php } ?>
 
 <h1 id="authorListHeading"><?php echo TEXT_BOOKX_AUTHOR_LIST_TITLE; ?></h1>
-<table id="bookxAuthorListingTable">
+<?php 
 
+?>
+<style>
+    .container {
+    display: flex;
+    padding: 0.5em 0.1em;
+    background: #666;
+    margin-bottom: 1em;
+    }
+    .idx_name, .reset {
+    margin-right: 2px;
+    background: #f4f4f4;
+    padding: 2px 8px;
+    line-height: 1.5;
+    border: 1px solid #acc;
+    cursor: pointer;
+    }
+    .reset {
+       background: #ddd;     
+    }
+</style>
+
+<div class="container">
+    <?php foreach ($index as $value) {
+        echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, zen_get_all_get_params(array('qa', 'action', 'id', 'page')) . 'qa=' . $value) . '\'">' . $value . '</div>';
+    }
+    if (isset($_GET['qa']) && !empty($_GET['qa'])) {
+        echo '<div class="reset" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, 'qa=') . '\';">Reset</div>';
+    }
+    ?>
+</div>
+  
+<table id="bookxAuthorListingTable">
 <?php
 	foreach ($bookx_authors_listing_split_array as $author) {
 		echo '<tr>';
@@ -66,7 +98,6 @@
 
 	}
 ?>
-
 </table>
 
 <?php if ( ($bookx_authors_listing_split->number_of_rows > 0) && $bookx_authors_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
