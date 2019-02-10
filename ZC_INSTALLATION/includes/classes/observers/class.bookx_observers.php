@@ -507,31 +507,53 @@ class productTypeFilterObserver extends base
      */
     function insert_extra_bookx_attributes(&$callingClass, $notifier, $paramsArray)
     {
-        global $list_box_contents;
         global $listing; /* @var $listing queryFactoryResult */
-        global $column_list;
         
-        global $zco_notifier;  
-        //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
+        if (isset($listing->fields['product_type_handler']) && 'product_bookx' == $listing->fields['product_type_handler']) {
 
-        $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
-        $bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
+            $process = true; // makes sure that this is a bookx pType
+            
+            global $list_box_contents, $column_list, $zco_notifier;
 
-        $upcoming_products_array = array();
-        $new_products_array = array();
+            //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
 
-        $keywords = null;
-        if (isset($_GET['keyword']) && !empty($_GET['keyword'])) {
-            $keywords = explode(' ', trim($_GET['keyword']));
-            if (!is_array($keywords)) {
-                $keywords = array($keywords);
+            $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
+            $bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
+
+            $upcoming_products_array = array();
+            $new_products_array = array();
+
+            $keywords = null;
+            if (isset($_GET['keyword']) && !empty($_GET['keyword'])) {
+                $keywords = explode(' ', trim($_GET['keyword']));
+                if (!is_array($keywords)) {
+                    $keywords = array($keywords);
+                }
             }
         }
 
-        if (!$listing->EOF || $listing->cursor) {
+        if (!$listing->EOF || $listing->cursor && ($process == true)) {
 
             $product_name_column = null;
             $product_image_column = null;
+            $product_manufacturer_column = null;
+            $product_qty_column = null;
+            $product_price_column = null;
+            $product_weight_column = null;
+          
+            /**
+             * The listing layout can change, so to replace the button, I guess one has to set the prodcut_list_price.
+             * The others, like qty, weight, etc,.... maybe unset them, and place them together with the bookx fields.
+             * However, I not sure about the layout positions.... It's not respecting the position, but I don't know if it's a template issue. 
+             * (
+              [0] => PRODUCT_LIST_MANUFACTURER
+              [1] => PRODUCT_LIST_QUANTITY
+              [2] => PRODUCT_LIST_IMAGE
+              [3] => PRODUCT_LIST_NAME
+              [4] => PRODUCT_LIST_PRICE
+              )
+             */
+            
             for ($col = 0, $n = sizeof($column_list); $col < $n; $col++) {
                 if ('PRODUCT_LIST_NAME' == $column_list[$col]) {
                     $product_name_column = $col;
@@ -539,14 +561,27 @@ class productTypeFilterObserver extends base
                 if ('PRODUCT_LIST_IMAGE' == $column_list[$col]) {
                     $product_image_column = $col;
                 }
+                if ('PRODUCT_LIST_MANUFACTURER' == $column_list[$col]) {
+                    $product_manufacturer_column = $col;
+                }
+                if ('PRODUCT_LIST_QUANTITY' == $column_list[$col]) {
+                    $product_qty_column = $col;
+                }
+                if ('PRODUCT_LIST_WEIGHT' == $column_list[$col]) {
+                    $product_weight_column = $col;
+                }
+                if ('PRODUCT_LIST_PRICE' == $column_list[$col]) {
+                    $product_price_column = $col;
+                }
             }
 
             if ($product_name_column) {
                 $listing->Move(0);
 
                 if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
+                    
                     // don't understand why this is necessary, but without it shows the first entry twice ?!
-                    // ON zc156 this wont work @mesnitu
+                    // @mesnitu: ON zc156 this wont work 
                     $listing->cursor = 0;
                     $listing->MoveNext();
                 }
@@ -555,39 +590,14 @@ class productTypeFilterObserver extends base
                 $extra_row = 0;
                 while (!$listing->EOF) {
                     
-                    $publishing_date_flag = null;
-
-					if($this->flag_group['by_availability'] == true && isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
-						$date_diff_days = (int)((strtotime($listing->fields['flag_date']) - time()) / 86400);
-
-						switch (true) {
-							case $listing->fields['products_quantity'] < 1 && $listing->fields['flag_date'] <= date('Y-m-d 00:00:00', time() + 86400 * intval($bookx_upcoming_products_look_ahead_number_of_days)) : // publishing less than "look ahead days" in future and not yet in stock
-							//case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
-								$publishing_date_flag = 'upcoming-product';
-								break;
-
-							case $listing->fields['products_quantity'] > 0 && $listing->fields['flag_date'] >= date('Y-m-d 00:00:00', time() - 86400 * intval($bookx_new_products_look_back_number_of_days)) : // product in stock and publishing date within range of "new" products
-								$publishing_date_flag = 'new-product';
-								break;
-
-							default:
-								break;
-						}
-					}
-
                     $rows++;
-
-                    //*** only add extra bookx info if product is in fact of type bookx
-                    if (isset($listing->fields['product_type_handler']) && 
-                        'product_bookx' == $listing->fields['product_type_handler']) {
-
+                   
                         $new_product_text = '';
                         //removed the wrap span on header title.
                         $products_name = bookx_highlight_search_terms($keywords, $listing->fields['products_name']);
                         $products_name .= ($this->flag_show['volume'] && !empty($listing->fields['volume'])) ? ' <span class="bookxProdVolume">' . sprintf(LABEL_BOOKX_VOLUME, $listing->fields['volume']) . '</span>' : '';
                         $products_name .= ($this->flag_show['subtitle'] && !empty($listing->fields['products_subtitle']) ? ' - <span class="bookxProdSubtitle">' . bookx_highlight_search_terms($keywords, $listing->fields['products_subtitle']) . '</span>' : '');
                             
-
                         $active_boox_get_filters = '';
                         /**
                          * @todo adding &typefilter=bookx or keywords to the url is necessary ? 
@@ -664,7 +674,9 @@ class productTypeFilterObserver extends base
                             (!empty($listing->fields['isbn_display']) || 2 == $this->flag_show['isbn'])) {
                            $new_product_text .= '<div class="bookxISBN"><span class="bookxLabel">' . LABEL_BOOKX_ISBN . ' </span>' . $listing->fields['isbn_display'] . '</div>'; 
                         }
-                        
+                        /**
+                         * @todo About model. If the listing_layout settings is set to display the model, this will be duplicated
+                         */
                         if ($this->flag_show['model'] && 
                             (!empty($listing->fields['products_model']) || 2 == $this->flag_show['model'])) {
                             $new_product_text .= '<div class="bookxModel"><span class="bookxLabel">' . LABEL_BOOKX_MODEL . ' </span>' . bookx_highlight_search_terms($keywords, $listing->fields['products_model']) . '</div>';
@@ -692,84 +704,151 @@ class productTypeFilterObserver extends base
                             }
                             $new_product_text .= '</div>';
                         }
+                        /**
+                         * @todo Do we need manufaturer if it's set? 
+                         */
+                        unset($list_box_contents[$rows][$product_manufacturer_column]);
                         
+                        
+                    $publishing_date_flag = null;
+                    $button = false;
+                    $button_link = false;
+                    /**
+                     * @todo Why do we need the bookx_button: Mainly because a upcoming product is a pre-order book, so a customer can pre-order
+                     * However, this is calculated here and after in the bookx_button function again...
+                     * Wouldn't be better to set a common button and calculate and return from the function ? 
+                     * 
+                     */
+                    
+                    //pr($listing->fields['flag_date']);
+                    //pr($list_box_contents[$rows][$product_price_column]['text'], 'top');
+                    
+					if(isset($listing->fields['flag_date']) && !empty($listing->fields['flag_date'])) {
+						//$date_diff_days = (int)((strtotime($listing->fields['flag_date']) - time()) / 86400);
+                        $date_diff_days = zen_date_diff($_SESSION['today_is'], $listing->fields['flag_date']);
+                        if ($listing->fields['products_quantity'] <= 0 && $date_diff_days < 0) {
+                            //$button_link = false;
+                            //$button = zen_image_button(BUTTON_IMAGE_SOLD_OUT_SMALL, BUTTON_SOLD_OUT_SMALL_ALT, 'class="outofstock_product"');
+                            //we don't break here
+                            $list_box_contents[$rows]['params'] = str_replace('class="', 'class="sold-out ', $list_box_contents[$rows]['params']);
+                        }
+                        switch (true) {
+                             
+                            case $listing->fields['products_quantity'] <= 0 && $date_diff_days > 0: //case $date_diff_days >= 0 && $listing->fields['products_quantity'] < 1 : // publishing date today or in future and not yet in stock
+                                
+                                $button_link = true;
+                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT, 'class="upcoming_product"');
+                                if($this->flag_group['by_availability'] == true) {
+                                    $publishing_date_flag = 'upcoming-product';
+                                }
+
+								break;
+
+                            case $listing->fields['products_quantity'] > 0 && abs($date_diff_days) < $bookx_new_products_look_back_number_of_days: // product in stock and publishing date within range of "new" products
+                                $button_link = true;
+                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT, 'class="new_product"');
+                                if($this->flag_group['by_availability'] == true) {
+                                   $publishing_date_flag = 'new-product'; 
+                                }
+								
+								break;
+
+							default:
+								break;
+						}
+					}
+                   
                         $list_box_contents[$rows]['date_flag'] = $publishing_date_flag;
                         $list_box_contents[$rows][$product_name_column]['text'] = $new_product_text;
+                        
                         $list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
-                       
-                        /**
-                         * Check if the button should be linked
-                         */
-                        $btn_link = false;
-
+                        
                         /* @todo this is a bit fragil solution since layouts can change as they did and is not working.
                          * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
-                         * Maybe the safest way is to reset all, and rebuild $list_box_contents[$rows][2]. However, I don't know waht to expect in terms of content.
-                         * Other way is to leave the two buttons, and hide the zc button in DOM ?
+                         * For now trying to replace on $list_box_contents[$rows][$product_price_column]['text']
                          */
-                       
-                        $bsearch = strpos($list_box_contents[$rows][2]['text'], '<span class="cssB');
-                        $esearch = strpos($list_box_contents[$rows][2]['text'], 'an>', $bsearch) - 4;
+
+                        $new_content = '';
+                        if ($button) {
+                        $bsearch = strpos($list_box_contents[$rows][$product_price_column]['text'], '<span class="cssB');
+                        $esearch = strpos($list_box_contents[$rows][$product_price_column]['text'], 'an>', $bsearch) - 4;
                         $len = $esearch - $bsearch;
-                        $new_content = substr_replace($list_box_contents[$rows][2]['text'], '<!-- here -->', $bsearch, $len);
-                      
-                        switch ($publishing_date_flag) {
-							case 'upcoming-product':
-                                $button = zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT);
-                                if (0 < $listing->fields['products_quantity']) {
-                                    $btn_link = true;
-                                }
-							    //$begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
-							    //$end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink +1);
-								$list_box_contents[$rows]['params'] = str_replace('class="', 'class="upcoming-product ', $list_box_contents[$rows]['params']);
-								//$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
-								//$list_box_contents[$rows][2]['text'] = str_replace('<span class="cssButton button_sold_out_sm"', bookx_get_buy_now_button($listing->fields['products_id'], zen_image_button(BUTTON_IMAGE_BOOKX_UPCOMING, BUTTON_IMAGE_BOOKX_UPCOMING_ALT)) .'<span class="cssButton button_sold_out_sm"', $list_box_contents[$rows][2]['text']);
-								$list_box_contents[$rows][2]['text'] = $new_content . ($btn_link == true ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' :'') . bookx_get_buy_now_button($listing->fields['products_id'], $button) . ($btn_link == true ? '</a>' : '');
-								
-								$upcoming_products_array[] = $list_box_contents[$rows];
-								unset($list_box_contents[$rows]);
-								break;
+                        $new_content = substr_replace($list_box_contents[$rows][$product_price_column]['text'], '', $bsearch, $len);
 
-							case 'new-product':
-							    //$begin_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />');
-							    //$end_prodlink = strpos($list_box_contents[$rows][2]['text'], '<br /><br />', $begin_prodlink +1);
-							    $list_box_contents[$rows]['params'] = str_replace('class="', 'class="new-product ', $list_box_contents[$rows]['params']);
-								$standard_buy_now_button = zen_image_button(BUTTON_IMAGE_BUY_NOW, BUTTON_BUY_NOW_ALT, 'class="listingBuyNowButton"');
-								//$list_box_contents[$rows][2]['text'] = str_replace($standard_buy_now_button, bookx_get_buy_now_button($listing->fields['products_id'],zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)), $list_box_contents[$rows][2]['text']);
-								$list_box_contents[$rows][2]['text'] = $new_content . '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' . bookx_get_buy_now_button($listing->fields['products_id'],zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT)) . '</a>';
-								$new_products_array[] = $list_box_contents[$rows];
-								unset($list_box_contents[$rows]);
-								break;
-
-						}
+                        
+                        $new_content .= ($button_link == true ? '<a href="' . zen_href_link($_GET['main_page'], zen_get_all_get_params(array('action')) . 'action=buy_now&products_id=' . $listing->fields['products_id']) . '">' : '') . bookx_get_buy_now_button($listing->fields['products_id'], $button) . ($button_link == true ? '</a>' : '');
+                        $list_box_contents[$rows][$product_price_column]['text'] = $new_content;
                     }
+
+                    switch ($publishing_date_flag) {
+                        case 'upcoming-product':
+
+                            $list_box_contents[$rows]['params'] = str_replace('class="', 'class="upcoming-product ', $list_box_contents[$rows]['params']);
+                            $upcoming_products_array[] = $list_box_contents[$rows];
+                            unset($list_box_contents[$rows]);
+                            break;
+
+                        case 'new-product':
+                            $list_box_contents[$rows]['params'] = str_replace('class="', 'class="new-product ', $list_box_contents[$rows]['params']);
+
+                            $new_products_array[] = $list_box_contents[$rows];
+                            unset($list_box_contents[$rows]);
+
+                            break;
+                    }
+
                     $listing->MoveNext();
                 }
             }
         }
-
-        $heading_row = array();
+        
+        if ($process == true) {
+            $heading_row = array();
 
         if (!empty($new_products_array) || !empty($upcoming_products_array)) {
             $heading_row[0] = $list_box_contents[0];
             unset($list_box_contents[0]);
             if (count($list_box_contents) > 0) {
-                $published_prod_heading_row = array('params' => 'class="bookxList-publishedProductsHeading"', '0' => array('align' => 'left', 'params' => 'colspan="3"', 'text' => '<h3 class="bookxPublishedProduct"><label>' . TEXT_BOOKX_PUBLISHED_PRODUCTS_LABEL . '</label></h3>'));
+                $published_prod_heading_row = array(
+                    'params' => 'class="bookxList-publishedProductsHeading"', 
+                    '0' => array(
+                        'align' => 'left', 
+                        'params' => 'colspan="3"', 
+                        'text' => '<h3 class="bookxPublishedProduct"><label>' . TEXT_BOOKX_PUBLISHED_PRODUCTS_LABEL . '</label></h3>')
+                    );
                 array_unshift($list_box_contents, $published_prod_heading_row);
             }
         } elseif (count($list_box_contents) > 0) {
-            $published_prod_heading_row = array('params' => 'class="bookxList-publishedProductsHeading"', '0' => array('align' => 'left', 'params' => 'colspan="3"', 'text' => '<h3 class="bookxPublishedProduct"><label>' . TEXT_BOOKX_PUBLISHED_PRODUCTS_LABEL . '</label></h3>'));
+            $published_prod_heading_row = array(
+                'params' => 'class="bookxList-publishedProductsHeading"', 
+                '0' => array(
+                    'align' => 'left', 
+                    'params' => 'colspan="3"', 
+                    'text' => '<h3 class="bookxPublishedProduct"><label>' . TEXT_BOOKX_PUBLISHED_PRODUCTS_LABEL . '</label></h3>')
+                );
             array_unshift($list_box_contents, $published_prod_heading_row);
         }
 
         if (!empty($new_products_array)) {
-            $new_prod_heading_row = array('params' => 'class="bookxList-newProductsHeading"', '0' => array('align' => 'left', 'params' => 'colspan="3"', 'text' => '<h3 class="bookxNewProduct"><label>' . TEXT_BOOKX_NEW_PRODUCTS_LABEL . '</label></h3>'));
+            $new_prod_heading_row = array(
+                'params' => 'class="bookxList-newProductsHeading"', 
+                '0' => array(
+                    'align' => 'left', 
+                    'params' => 'colspan="3"', 
+                    'text' => '<h3 class="bookxNewProduct"><label>' . TEXT_BOOKX_NEW_PRODUCTS_LABEL . '</label></h3>')
+                );
             array_unshift($new_products_array, $new_prod_heading_row);
             $list_box_contents = array_merge($new_products_array, $list_box_contents);
         }
 
         if (!empty($upcoming_products_array)) {
-            $upcoming_prod_heading_row = array('params' => 'class="bookxList-upcomingProductsHeading"', '0' => array('align' => 'left', 'params' => 'colspan="3"', 'text' => '<h3 class="bookxUpcomingProduct"><label>' . TEXT_BOOKX_UPCOMING_PRODUCTS_LABEL . '</label></h3>'));
+            $upcoming_prod_heading_row = array(
+                'params' => 'class="bookxList-upcomingProductsHeading"', 
+                '0' => array(
+                    'align' => 'left', 
+                    'params' => 'colspan="3"', 
+                    'text' => '<h3 class="bookxUpcomingProduct"><label>' . TEXT_BOOKX_UPCOMING_PRODUCTS_LABEL . '</label></h3>')
+                );
             array_unshift($upcoming_products_array, $upcoming_prod_heading_row);
             $list_box_contents = array_merge($upcoming_products_array, $list_box_contents);
         }
@@ -779,6 +858,8 @@ class productTypeFilterObserver extends base
         }
 
         //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_END');
+        }
+        
     }
     
 
@@ -1237,7 +1318,7 @@ class productTypeFilterObserver extends base
                 $new_products->Move(0);
 
                 // This seemed to be necessary in ZC Versions up to 1.5.3, but not anymore in 1.5.5
-                if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' < floatval(PROJECT_VERSION_MINOR)) {
+                if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
 
                     // don't understand why this is necessary, but without it shows the first entry twice ?!
                     $new_products->cursor = 0;
