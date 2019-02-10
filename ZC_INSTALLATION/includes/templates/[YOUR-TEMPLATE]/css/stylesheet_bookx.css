@@ -23,25 +23,38 @@
     margin-bottom: 1em;
     padding: 0.5em;
 }
+/* On productDetailsList one has to unset the imgages floats */
+ul#productDetailsList li {
+    line-height: 1.5;
+    clear: both;
+}
+ul#productDetailsList li div {
+    margin: 0;
+    border-bottom: unset;
+}
 
 .labelBookStatus {
     color: white;
-    padding: 8px;
-    background-color: #2196F3;
+    padding: 2px;
+    background-color: #036f89;
+    position: absolute;
+    top: -8px;
+    right: 0;
+    font-size: small;
+    border-radius: 5px;
 }
 
 /* Bookx Extra Detailed Info DIV */
 #bookxPublisher, 
 #bookxSeries, 
 #bookxImprint {
- margin-bottom: 1em;
- border-bottom: 1px solid #eee;
- 
+    margin-bottom: 1em;
+    border-bottom: 1px solid #eee;
+
 }
 /* Bookx Extra Detailed Info Images */
 .bookxPublisherImage, 
 .bookxAuthorImage, 
-.bookxGenreImage,
 .bookxImprintImage,
 .bookxPublisherImage,
 .bookxSeriesImage {
@@ -49,36 +62,48 @@
     margin: 0 1.5em 1.5em 0;
 }
 
-/* On productDetailsList one has to unset the imgages floats */
-ul#productDetailsList li {
-    line-height: 1.5;
-}
-ul#productDetailsList li div {
+.bookxAuthorsDetail {}
+.bookxAuthorRelatedProductsHeading, .bookxTeamRelatedProductsHeading {
     clear: both;
-    margin: 0;
+}
+.bookxWrapAuthorRelatedBooks, .bookxWrapRelatedProductTeam {
+    display: inline-table;
+    width: 33.33333%;
+    width: calc(100% / 3);
+    position: relative;
+    text-align: center;
+    background: #f4f4f4;
+    padding-top: 10px;
+    line-height: 1.3;
+    box-sizing: border-box;
+    border: 5px solid #fff;
+}
+.bookxWrapAuthorRelatedBooks h5, .bookxWrapRelatedProductTeam h5 {
+    margin: 0;   
 }
 
-.bookxAuthorsDetail {
-    display: table;
-}
-.bookxAuthorRelatedProductsHeading {
-    clear: both;
-}
-.bookxWrapAuthorRelatedBooks {
-    display: inline-table;
-    width: 33%;
+.bookxAuthorImageCopyright {
+    width:170px;
+    height:10px;
+    position: absolute;
+    left: -90px;
+    bottom: 80px;
+    overflow: hidden;
+    font-size: 8px;
+    -ms-transform:rotate(270deg); /* IE 9 */
+    -moz-transform:rotate(270deg); /* Firefox */
+    -webkit-transform:rotate(270deg); /* Safari and Chrome */
+    -o-transform:rotate(270deg); /* Opera */
+    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE earlier 9 */
 }
 
 .bookxLabel {
     font-style: italic;
     font-weight: bold;
 }
-
-#bookxImprint, #bookxPublishingDate, #bookxExtraAttributes, .bookxExtraAttributes,
-.bookxSingleAuthor, .bookxSingleGenre {
-
+.bookxRelatedProduct {
+    position: relative;
 }
-
 .bookxCondition {}
 .bookxPublishingDate {}
 .bookxISBN {}
@@ -87,124 +112,76 @@ ul#productDetailsList li div {
 .bookxSubtitle {}
 .bookxVolume {}
 
-
-.bookxGenres {
-    margin-top: 5px;
-}
-
-
-.bookxAuthors {
-
-}
-
 .bookxSingleAuthor {
-    display: table-row;
+    margin-bottom: 1em;
+    border-bottom: 1px solid #eee;
+    clear: both;
 }
 
 .bookxAuthor {
     font-weight: bold;
 }
-
-
-.bookxAuthorDescription {
-
-}
-
-.bookxAuthorDescription p {
-
-
-}
-
-.bookxAuthorDescription .bookxLabel {
-
-    font-weight: bold;
-}
-
-.bookxAuthorRelatedProducts {
-
-}
-
-.bookxAuthorUrl {
-
-}
-
 .bookxAuthorRelatedProductsHeading {
     clear: both;
 }
-
-
-
-.bookxSingleGenre, .bookxGenreName, .bookxGenreImage {
-    display: inline;
+/**
+.bookxAuthorDescription {}
+.bookxAuthorRelatedProducts {}
+.bookxAuthorUrl {}
+.bookxSingleGenre, .bookxGenreName, .bookxGenreImage {}
+.bookxGenres .bookxSingleGenre {}
+.bookxProdVolume {}
+*/
+.bookxGenres {
+}
+.bookxSingleGenre {
+    display: inline-block;
+}
+.bookxSingleGenre span {
+    vertical-align: middle;
 }
 
-.bookxGenres .bookxSingleGenre {
-
-}
-
-/* display volume no. of book */
-.bookxProdVolume {
-    display: inline;
-
-}
 
 /* display subtitle of book */
 .bookxProdSubtitle {
-    display: inline;
-
     font-style: italic;
 }
 
-/* wrapper for publisher detail on product_info_display */
-
-
+/* wrapper for publisher detail on product_info_display 
 .bookxPublisherName {}
-
-
-
-.bookxPublisherDescription {
-}
-
+.bookxPublisherDescription {}
 .bookxPublisherUrl {}
 
 #bookxImprint {}
-
 .bookxImprintImage{}
-
 .bookxImprintDescription{}
-
 .bookxImprintName{}
-
 .bookxImprintUrl{}
-
-.productListing-data #bookxPublishingDate {
-
-}
+*/
+.productListing-data #bookxPublishingDate {}
 
 .listingDescription {
     margin-top: 5px;
 }
 
 .listingProductImage {
-
     margin-right: 15px;
 }
 
 .booxAuthorRelatedType { /* .bookxRelatedProduct, */
     display: inline;
 }
-
+/*
 #bookxSeries{}
-
 .bookxSeriesImage{}
 .bookxSeriesName{}
-
 .bookxSeriesDescription{}
+*/
 
 #bookxExtraAttributes a.boox_searchlink:link,
 #bookxExtraAttributes a.boox_searchlink:active,
 #bookxExtraAttributes a.boox_searchlink:visited {
-    color: #2740d6;
+
 }
 
 a.boox_searchlink:hover,
@@ -212,7 +189,7 @@ a.bookx_product_name:hover,
 a.bookx_product_name:hover .bookxTitle,
 a.bookx_product_name:hover .bookxProdSubtitle,
 #whatsNew a:hover .bookxProdSubtitle {
-    color: #06E;
+
 }
 
 a:hover .listingProductImage,
@@ -242,7 +219,7 @@ a:hover .listingProductImage,
     font-size: 1.3em;
 }
 
-#bookxRelatedProductsTeam {
+#bookxWrapRelatedProductsTeam {
     float: left;
     clear: both;
 }
@@ -281,21 +258,6 @@ a:hover .listingProductImage,
 
 .bookxAuthorImage {
     position: relative;
-}
-
-.bookxAuthorImageCopyright {
-    width:170px;
-    height:10px;
-    position: absolute;
-    left: -90px;
-    bottom: 80px;
-    overflow: hidden;
-    font-size: 8px;
-    -ms-transform:rotate(270deg); /* IE 9 */
-    -moz-transform:rotate(270deg); /* Firefox */
-    -webkit-transform:rotate(270deg); /* Safari and Chrome */
-    -o-transform:rotate(270deg); /* Opera */
-    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE earlier 9 */
 }
 
 #bookxUpcomingProductsWrapper {

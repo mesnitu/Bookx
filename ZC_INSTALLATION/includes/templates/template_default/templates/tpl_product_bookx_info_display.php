@@ -214,7 +214,7 @@ foreach ($products_authors as $author) {
 	if ($flag_show_product_bookx_info_authors_url &&
 			(!empty($author['url']) || 2 == $flag_show_product_bookx_info_authors_url)) {
 
-		$single_author_detail_html .= '<div class="bookxAuthorUrl">' . sprintf(TEXT_AUTHOR_URL, $author['url']) . '</div>' ;
+		$single_author_detail_html .= '<p class="bookxAuthorUrl">' . sprintf(TEXT_AUTHOR_URL, $author['url']) . '</p>' ;
 		// (30 < strlen($authors->fields['author_url']) ? substr($authors->fields['author_url'], 0, strpos($authors->fields['author_url'], '/', 7)) : $authors->fields['author_url'])
 	}
 
@@ -234,17 +234,21 @@ $authors_short_html .= '</div><!-- eof bookx authors short -->';
 
 if ($flag_show_product_bookx_info_authors_team_related_products && !empty($related_products_by_author_team) ) {
 	$authors_related_products_team_html = '<!-- bof bookx related products team --><div id="bookxRelatedProductsTeam">';
-	$authors_related_products_team_html .= '<h2 id="bookxTeamRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $team_names_display) . '</h2>';
-	foreach ($related_products_by_author_team as $related_product) {
-        $authors_related_products_team_html .= '<!-- bof related product --><div class="bookxRelatedProduct'
-            . (!empty($related_product['bookx_product_status']) ? '_' . $related_product['bookx_product_status'] : '') . '">'
-            . '<a href="' . $related_product['products_link'] . '">' . $related_product['products_name']
-            . (!empty($related_product['volume']) ? ' ' . $related_product['volume'] : '')
-            . (!empty($related_product['products_subtitle']) ? ' &ndash; ' . $related_product['products_subtitle'] : '')
-            . (!empty($related_product['bookx_product_status']) ? ' <span class="bookx_product_status">' . constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_product['bookx_product_status'])) : '')
-            . '</a>'
-            . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_product['author_type_name']) ? ' (' . $related_product['author_type_name'] . ')' : '') . '</div>' : '')
-            . '</div><!-- eof related product -->';
+	$authors_related_products_team_html .= '<h3 class="bookxTeamRelatedProductsHeading">' . sprintf(HEADING_AUTHOR_RELATED_PRODUCTS, $team_names_display) . '</h3>';
+   
+	foreach ($related_products_by_author_team as $related_team_product) {
+        $authors_related_products_team_html .= '<!-- bof related product --><div class="bookxWrapRelatedProductTeam'
+            . (!empty($related_team_product['bookx_product_status']) ? ' status_' . $related_team_product['bookx_product_status'] : '') . '">'
+            . '<h5><a href="' . $related_team_product['products_link'] . '">' . $related_team_product['products_name']
+            . (!empty($related_team_product['volume']) ? ' ' . $related_team_product['volume'] : '')
+            . (!empty($related_team_product['products_subtitle']) ? ' &ndash; ' . $related_team_product['products_subtitle'] : '')
+            . '</a></h5>'
+            . (!empty($related_team_product['bookx_product_status']) ? '<span class="labelBookStatus">' . constant('BOOKX_PRODUCT_STATUS_' . strtoupper($related_team_product['bookx_product_status'])) . '</span>' : '')
+            . '<div class="bookxAuthoRelatedBooks">'
+            . '<div class="related_book_image"><a href="' . $related_team_product['products_link'] . '">' . zen_image(DIR_WS_IMAGES . $related_team_product['author_related_book_image'], $related_team_product['products_name'], SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT) . '</a></div>'
+            . '<div class="related_book_price">' . zen_get_products_display_price($related_team_product['products_id']) . '</div>'
+            . ( 1 < $author['related_books_as_author_type_count'] ? '<div class="booxAuthorRelatedType">' . (!empty($related_team_product['author_type_name']) ? ' (' . $related_team_product['author_type_name'] . ')' : '') . '</div>' : '')
+            . '</div></div><!-- eof related product -->';
     }
     $authors_related_products_team_html .= '</div><!-- eof bookx related products team -->';
 }
@@ -273,222 +277,230 @@ $publisher_short_html .= '</div>';
 
 //*** publisher image
 if ($flag_show_product_bookx_info_publisher_image &&
-		(!empty($products_publisher_image) || 2 == $flag_show_product_bookx_info_publisher_image)) {
+    (!empty($products_publisher_image) || 2 == $flag_show_product_bookx_info_publisher_image)) {
 
-	$publisher_detail_html .= '<div class="bookxPublisherImage">';
-	if ($flag_show_product_bookx_info_publisher_as_link && !empty($products_publisher_image_searchlink)) {
-		if (!($flag_show_product_bookx_info_publisher && $flag_show_product_bookx_info_publisher_as_link && $products_publisher_image_searchlink == $products_publisher_searchlink)) {
-			/** if no image assigned, then only show $products_publisher_image_searchlink if $products_publisher_searchlink not shown above
-			 * (if no image assigned, then $products_publisher_image_searchlink shows the publisher name, not an <IMG> tag,
-			 * and the name would therefore be displayed twice
-			 */
-				$publisher_detail_html .=  $products_publisher_image_searchlink;
-		}
-	} else {
-		$publisher_detail_html .= zen_image($products_publisher_image, $products_publisher_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
-	}
-	$publisher_detail_html .= '</div>';
+    $publisher_detail_html .= '<div class="bookxPublisherImage">';
+    if ($flag_show_product_bookx_info_publisher_as_link && !empty($products_publisher_image_searchlink)) {
+        if (!($flag_show_product_bookx_info_publisher && $flag_show_product_bookx_info_publisher_as_link && $products_publisher_image_searchlink == $products_publisher_searchlink)) {
+            /* if no image assigned, then only show $products_publisher_image_searchlink if $products_publisher_searchlink not shown above
+             * (if no image assigned, then $products_publisher_image_searchlink shows the publisher name, not an <IMG> tag,
+             * and the name would therefore be displayed twice
+             */
+            $publisher_detail_html .= $products_publisher_image_searchlink;
+        }
+    } else {
+        $publisher_detail_html .= zen_image($products_publisher_image, $products_publisher_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
+    }
+    $publisher_detail_html .= '</div>';
 }
 
- 	//*** publisher description
-	if ($flag_show_product_bookx_info_publisher_description &&
-		(!empty($products_publisher_description) || 2 == $flag_show_product_bookx_info_publisher_description)) {
-        $flag_publisher_has_detailed_info = true;
-		$publisher_detail_html .= '<div class="bookxPublisherDescription"><span class="bookxLabel">' . LABEL_PUBLISHER_DESCRIPTION . '</span>' . $products_publisher_description . '</div>';
-	}
+//*** publisher description
+if ($flag_show_product_bookx_info_publisher_description &&
+    (!empty($products_publisher_description) || 2 == $flag_show_product_bookx_info_publisher_description)) {
+    $flag_publisher_has_detailed_info = true;
+    $publisher_detail_html .= '<p class="bookxPublisherDescription"><span class="bookxLabel">' . LABEL_PUBLISHER_DESCRIPTION . '</span>' . $products_publisher_description . '</p>';
+}
 
-	//*** publisher url
-	if ($flag_show_product_bookx_info_publisher_url &&
-		(!empty($products_publisher_url) || 2 == $flag_show_product_bookx_info_publisher_url)) {
+//*** publisher url
+if ($flag_show_product_bookx_info_publisher_url &&
+    (!empty($products_publisher_url) || 2 == $flag_show_product_bookx_info_publisher_url)) {
 
-		$publisher_detail_html .= '<div class="bookxPublisherUrl">' . sprintf(TEXT_PUBLISHER_URL, $products_publisher_url) . '</div>' ;
-	}
+    $publisher_detail_html .= '<p class="bookxPublisherUrl">' . sprintf(TEXT_PUBLISHER_URL, $products_publisher_url) . '</p>';
+}
 
-	if ($flag_publisher_has_detailed_info) {
-		$publisher_detail_html .= '</div>
+if ($flag_publisher_has_detailed_info) {
+    $publisher_detail_html .= '</div>
 				<!-- eof bookx publisher -->';
-	} else {
-	 	$publisher_detail_html = '<!-- bookx publisher description and URL empty -->';
-	}
+} else {
+    $publisher_detail_html = '<!-- bookx publisher description and URL empty -->';
+}
 
-
-	//*** imprint info
-	$imprint_detail_html = '<!-- bof bookx imprint -->
+//*** imprint info
+$imprint_detail_html = '<!-- bof bookx imprint -->
 			<div id="bookxImprint">';
-	$imprint_short_html = '';
+$imprint_short_html = '<div id="bookxImprintShort">';
 
-	//*** imprint image
-	if ($flag_show_product_bookx_info_imprint_image &&
-	(!empty($products_imprint_image) || 2 == $flag_show_product_bookx_info_imprint_image)) {
+//*** imprint image
+if ($flag_show_product_bookx_info_imprint_image &&
+    (!empty($products_imprint_image) || 2 == $flag_show_product_bookx_info_imprint_image)) {
 
-		$imprint_detail_html .= '<div class="bookxImprintImage">';
-		if ($flag_show_product_bookx_info_imprint_as_link && !empty($products_imprint_image_searchlink)) {
-			if (!($flag_show_product_bookx_info_imprint && $flag_show_product_bookx_info_imprint_as_link && $products_imprint_image_searchlink == $products_imprint_searchlink)) {
-				//** See explanation of if condition above (publisher)
-				$imprint_detail_html .=  $products_imprint_image_searchlink;
-			}
-		} else {
-			$imprint_detail_html .= zen_image($products_imprint_image, $products_imprint_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
-		}
-        $imprint_short_html = $imprint_detail_html;
-		$imprint_detail_html .= '</div>';
+    $imprint_detail_html .= '<div class="bookxImprintImage">';
+    if ($flag_show_product_bookx_info_imprint_as_link && !empty($products_imprint_image_searchlink)) {
+        if (!($flag_show_product_bookx_info_imprint && $flag_show_product_bookx_info_imprint_as_link && $products_imprint_image_searchlink == $products_imprint_searchlink)) {
+            //** See explanation of if condition above (publisher)
+            $imprint_detail_html .= $products_imprint_image_searchlink;
+        }
+    } else {
+        $imprint_detail_html .= zen_image($products_imprint_image, $products_imprint_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
+    }
+    $imprint_short_html = $imprint_detail_html;
+    $imprint_detail_html .= '</div>';
+} elseif ($flag_show_product_bookx_info_imprint &&
+    (!empty($products_imprint_name) || 2 == $flag_show_product_bookx_info_imprint)) {
+    //*** imprint name
+    $imprint_detail_html .= '<h5 class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
+    $imprint_short_html .= '<div class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
+    if ($flag_show_product_bookx_info_imprint_as_link && !empty($products_imprint_searchlink)) {
+        $imprint_detail_html .= $products_imprint_searchlink;
+        $imprint_short_html .= $products_imprint_searchlink;
+    } else {
+        $imprint_detail_html .= $products_imprint_name;
+        $imprint_short_html .= $products_imprint_name;
+    }
+    $imprint_detail_html .= '</div>';
+    $imprint_short_html .= '</h5>';
+}
 
-	} elseif ($flag_show_product_bookx_info_imprint &&
-		(!empty($products_imprint_name) || 2 == $flag_show_product_bookx_info_imprint)) {
-		//*** imprint name
-        $imprint_short_html .= '<h5 class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
-		$imprint_detail_html .= '<div class="bookxImprintName"><span class="bookxLabel">' . LABEL_IMPRINT . '</span>';
-		if ($flag_show_product_bookx_info_imprint_as_link && !empty($products_imprint_searchlink)) {
-			$imprint_detail_html .= $products_imprint_searchlink;
-            $imprint_short_html .= $products_imprint_searchlink;
-		} else {
-			$imprint_detail_html .= $products_imprint_name;
-            $imprint_short_html .= $products_imprint_name;
-		}
-		$imprint_detail_html .= '</div>';
-        $imprint_short_html .= '</h5>';
-	}
+//$imprint_short_html = $imprint_detail_html . '</div>';
+//*** imprint description
+if ($flag_show_product_bookx_info_imprint_description &&
+    (!empty($products_imprint_description) || 2 == $flag_show_product_bookx_info_imprint_description)) {
 
-	//$imprint_short_html = $imprint_detail_html . '</div>';
-
- 	//*** imprint description
- 	if ($flag_show_product_bookx_info_imprint_description &&
- 		(!empty($products_imprint_description) || 2 == $flag_show_product_bookx_info_imprint_description)) {
-
- 		$imprint_detail_html .= '<div id="bookxImprintDescription"><span class="bookxLabel">' . LABEL_IMPRINT_DESCRIPTION . '</span>' . $products_imprint_description . '</div>';
- 		$imprint_detail_html .= '</div>
+    $imprint_detail_html .= '<p id="bookxImprintDescription"><span class="bookxLabel">' . LABEL_IMPRINT_DESCRIPTION . '</span>' . $products_imprint_description . '</p>';
+    $imprint_detail_html .= '</div>
 				<!-- eof bookx imprint -->';
- 	} else {
- 		$imprint_detail_html = '<!-- bookx imprint description empty -->';
- 	}
+} else {
+    $imprint_detail_html = '<!-- bookx imprint description empty -->';
+}
 
- 	//*** publishing date
- 	if ($flag_show_product_bookx_info_publish_date &&
- 		(!empty($products_publishing_date) || 2 == $flag_show_product_bookx_info_publish_date)) {
+//*** publishing date
+if ($flag_show_product_bookx_info_publish_date &&
+    (!empty($products_publishing_date) || 2 == $flag_show_product_bookx_info_publish_date)) {
 
- 		$publishing_date_html = '<div id="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $products_publishing_date . '</div>';
- 	} else {
- 		$publishing_date_html = '';
- 	}
+    $publishing_date_html = '<div id="bookxPublishingDate"><span class="bookxLabel">' . LABEL_BOOKX_PUBLISHING_DATE . '</span>' . $products_publishing_date . '</div>';
+} else {
+    $publishing_date_html = '';
+}
 
- 	$series_detail_html = '<!-- bof bookx series -->
+//*** series
+$series_detail_html = '<!-- bof bookx series -->
 			<div id="bookxSeries">';
-    $series_detail_short = '';
- 	//*** series name
- 	if ($flag_show_product_bookx_info_series &&
- 		(!empty($products_series_name) || 2 == $flag_show_product_bookx_info_series)) {
-        $series_detail_short .= '<div class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
- 		$series_detail_html .= '<h5 class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
- 		if ($flag_show_product_bookx_info_series_as_link && !empty($products_series_searchlink)) {
- 			$series_detail_html .= $products_series_searchlink;
-            $series_detail_short .= $products_series_searchlink;
- 		} else {
- 			$series_detail_html .= $products_series_name;
-            $series_detail_short .= $products_series_name;
- 		}
- 		$series_detail_html .= '</h5>';
-        $series_detail_short .= '</div>';
- 	}
+$series_detail_short = '';
+//*** series name
+if ($flag_show_product_bookx_info_series &&
+    (!empty($products_series_name) || 2 == $flag_show_product_bookx_info_series)) {
+    $series_detail_short .= '<div class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
+    $series_detail_html .= '<h5 class="bookxSeriesName"><span class="bookxLabel">' . LABEL_SERIES . '</span>';
+    if ($flag_show_product_bookx_info_series_as_link && !empty($products_series_searchlink)) {
+        $series_detail_html .= $products_series_searchlink;
+        $series_detail_short .= $products_series_searchlink;
+    } else {
+        $series_detail_html .= $products_series_name;
+        $series_detail_short .= $products_series_name;
+    }
+    $series_detail_html .= '</h5>';
+    $series_detail_short .= '</div>';
+}
 
- 	//*** series image
- 	if ($flag_show_product_bookx_info_series_image &&
- 		(!empty($products_series_image) || 2 == $flag_show_product_bookx_info_series_image)) {
+//*** series image
+if ($flag_show_product_bookx_info_series_image &&
+    (!empty($products_series_image) || 2 == $flag_show_product_bookx_info_series_image)) {
 
- 		$series_detail_html .= '<div class="bookxSeriesImage">';
- 		if ($flag_show_product_bookx_info_series_as_link && !empty($products_series_image_searchlink)) {
-	 		if (!($flag_show_product_bookx_info_series && $flag_show_product_bookx_info_series_as_link && $products_series_image_searchlink == $products_series_searchlink)) {
-	 			//** See explanation of if condition above (publisher)
-	 			$series_detail_html .=  $products_series_image_searchlink;
- 			}
- 		} else {
- 			$series_detail_html .= zen_image($products_series_image, $products_series_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
- 		}
- 		$series_detail_html .= '</div>';
- 	}
+    $series_detail_html .= '<div class="bookxSeriesImage">';
+    if ($flag_show_product_bookx_info_series_as_link && !empty($products_series_image_searchlink)) {
+        if (!($flag_show_product_bookx_info_series && $flag_show_product_bookx_info_series_as_link && $products_series_image_searchlink == $products_series_searchlink)) {
+            //** See explanation of if condition above (publisher)
+            $series_detail_html .= $products_series_image_searchlink;
+        }
+    } else {
+        $series_detail_html .= zen_image($products_series_image, $products_series_name, BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
+    }
+    $series_detail_html .= '</div>';
+}
 
- 	//*** series description
- 	if ($flag_show_product_bookx_info_series_description &&
- 		(!empty($products_series_description) || 2 == $flag_show_product_bookx_info_series_description)) {
+//*** series description
+if ($flag_show_product_bookx_info_series_description &&
+    (!empty($products_series_description) || 2 == $flag_show_product_bookx_info_series_description)) {
 
- 		$series_detail_html .= '<div class="bookxSeriesDescription"><span class="bookxLabel">' . LABEL_SERIES_DESCRIPTION . '</span>' . $products_series_description . '</div>';
- 	}
+    $series_detail_html .= '<p class="bookxSeriesDescription"><span class="bookxLabel">' . LABEL_SERIES_DESCRIPTION . '</span>' . $products_series_description . '</p>';
+}
 
- 	$series_detail_html .= '</div>
+$series_detail_html .= '</div>
  			<!-- eof bookx series -->';
 
- 	$bookx_extra_attributes_html = '';
- 	$bookx_extra_attributes = array();
- 	if ($flag_show_product_bookx_info_pages && (!empty($products_pages) || 2 == $flag_show_product_bookx_info_pages)) $bookx_extra_attributes[] = sprintf(LABEL_BOOKX_PAGES, $products_pages);
- 	if ($flag_show_product_bookx_info_binding && (!empty($products_binding) || 2 == $flag_show_product_bookx_info_binding)) $bookx_extra_attributes[] = $products_binding;
- 	if ($flag_show_product_bookx_info_printing && (!empty($products_printing) || 2 == $flag_show_product_bookx_info_printing)) $bookx_extra_attributes[] = $products_printing;
- 	if ($flag_show_product_bookx_info_size && (!empty($products_size) || 2 == $flag_show_product_bookx_info_size)) $bookx_extra_attributes[] = $products_size;
+$bookx_extra_attributes_html = '';
+$bookx_extra_attributes = array();
+if ($flag_show_product_bookx_info_pages && (!empty($products_pages) || 2 == $flag_show_product_bookx_info_pages))
+    $bookx_extra_attributes[] = sprintf(LABEL_BOOKX_PAGES, $products_pages);
+if ($flag_show_product_bookx_info_binding && (!empty($products_binding) || 2 == $flag_show_product_bookx_info_binding))
+    $bookx_extra_attributes[] = $products_binding;
+if ($flag_show_product_bookx_info_printing && (!empty($products_printing) || 2 == $flag_show_product_bookx_info_printing))
+    $bookx_extra_attributes[] = $products_printing;
+if ($flag_show_product_bookx_info_size && (!empty($products_size) || 2 == $flag_show_product_bookx_info_size))
+    $bookx_extra_attributes[] = $products_size;
 
- 	if (0 < count($bookx_extra_attributes)) {
- 		$bookx_extra_attributes_html .= '<div id="bookxExtraAttributes">' . implode(' | ', $bookx_extra_attributes) . '</div>';
- 	}
+if (0 < count($bookx_extra_attributes)) {
+    $bookx_extra_attributes_html .= '<div id="bookxExtraAttributes">' . implode(' | ', $bookx_extra_attributes) . '</div>';
+}
 
 
- 	$products_condition_html = '';
- 	if ($flag_show_product_bookx_info_condition && (!empty($products_condition) || 2 == $flag_show_product_bookx_info_condition)) $products_condition_html = '<div class="bookxCondition">' . $products_condition . '</div>';;
+$products_condition_html = '';
+if ($flag_show_product_bookx_info_condition &&
+    (!empty($products_condition) || 2 == $flag_show_product_bookx_info_condition)) {
+    $products_condition_html = '<div class="bookxCondition">' . $products_condition . '</div>';
+}
 
 
- 	//*** genres
- 	$genres_html = '<!-- bof bookx genres -->
- 		  <div class="bookxGenres">';
- 	$genre_temp_html = '';
- 	$first_genre = true;
- 	foreach ($products_genres as $genre) {
- 	    if (!$first_genre) {
- 	       $genre_temp_html .= BOOKX_GENRE_SEPARATOR;
- 	    } else {
- 	        $first_genre = false;
- 	    }
- 		$genre_temp_html .= '<div class="bookxSingleGenre">';
- 		//*** genre image
- 		if ($flag_show_product_bookx_info_genre_images &&
- 				(!empty($genre['image']) || 2 == $flag_show_product_bookx_info_genre_images)) {
+//*** genres
+$genres_html = '<!-- bof bookx genres --><div class="bookxGenres">';
+$genre_temp_html = '';
+$first_genre = true;
 
- 			$genre_temp_html .= '<div class="bookxGenreImage">';
+foreach ($products_genres as $genre) {
+    if (!$first_genre) {
+        $genre_temp_html .= BOOKX_GENRE_SEPARATOR;
+    } else {
+        $first_genre = false;
+    }
+    $genre_temp_html .= '<!-- bof single genre --><div class="bookxSingleGenre">';
+    //*** genre image
+    if ($flag_show_product_bookx_info_genre_images &&
+        (!empty($genre['image']) || 2 == $flag_show_product_bookx_info_genre_images)) {
 
- 			if ($flag_show_product_bookx_info_genres_as_link && !empty($genre['image_searchlink'])) {
- 				if (!($flag_show_product_bookx_info_genre && $flag_show_product_bookx_info_genres_as_link && $genre['image_searchlink'] == $genre['searchlink'])) {
- 					$genre_temp_html .=  $genre['image_searchlink'];
- 				}
- 			} else {
- 				$genre_temp_html .= zen_image($genre['image'], $genre['name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
- 			}
- 			$genre_temp_html .= '</div>';
- 		}
+        $genre_temp_html .= '<span class="bookxGenreImage">';
 
- 		//*** genre name
- 		if ($flag_show_product_bookx_info_genres &&
- 			(!empty($genre['name']) || 2 == $flag_show_product_bookx_info_genres)) {
+        if ($flag_show_product_bookx_info_genres_as_link && !empty($genre['image_searchlink'])) {
+            if (!($flag_show_product_bookx_info_genre && $flag_show_product_bookx_info_genres_as_link && $genre['image_searchlink'] == $genre['searchlink'])) {
+                $genre_temp_html .= $genre['image_searchlink'];
+            }
+        } else {
+            $genre_temp_html .= zen_image($genre['image'], $genre['name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT);
+        }
+        $genre_temp_html .= '</span>';
+    }
 
- 			$genre_temp_html .= '<div class="bookxGenreName">';
+    //*** genre name
+    if ($flag_show_product_bookx_info_genres &&
+        (!empty($genre['name']) || 2 == $flag_show_product_bookx_info_genres)) {
 
- 			if ($flag_show_product_bookx_info_genres_as_link && !empty($genre['searchlink'])) {
- 				$genre_temp_html .= $genre['searchlink'];
- 			} else {
- 				$genre_temp_html .= $genre['name'];
- 			}
- 			$genre_temp_html .= '</div>';
- 		}
+        $genre_temp_html .= '<span class="bookxGenreName">';
 
-		$genre_temp_html .= '</div><!-- eof single genre -->';
+        if ($flag_show_product_bookx_info_genres_as_link && !empty($genre['searchlink'])) {
+            $genre_temp_html .= $genre['searchlink'];
+        } else {
+            $genre_temp_html .= $genre['name'];
+        }
+        $genre_temp_html .= '</span>';
+    }
 
-	}
-	if (!empty($genre_temp_html)) {
-		$genre_temp_html = '<span class="bookxLabel">' . LABEL_BOOKX_GENRE . ':</span> ' . $genre_temp_html;
-	}
-	$genres_html .= $genre_temp_html. '</div><!-- eof bookx genres -->';
+    $genre_temp_html .= '</div><!-- eof single genre -->';
+}
+if (!empty($genre_temp_html)) {
+    $genre_temp_html = '<span class="bookxLabel">' . LABEL_BOOKX_GENRE . ':</span> ' . $genre_temp_html;
+}
+$genres_html .= $genre_temp_html . '</div><!-- eof bookx genres -->';
 ?>
-<div class="centerColumn" id="docProductDisplay">
+
+<div class="centerColumn" id="docProductBookxDisplay">
 
 <!--bof Form start-->
 <?php echo zen_draw_form('cart_quantity', zen_href_link(zen_get_info_page($_GET['products_id']), zen_get_all_get_params(array('action')) . 'action=add_product', $request_type), 'post', 'enctype="multipart/form-data"') . "\n"; ?>
 <!--eof Form start-->
 
-<?php if ($messageStack->size('product_info') > 0) echo $messageStack->output('product_info'); ?>
+<?php if ($messageStack->size('product_info') > 0) {
+    echo $messageStack->output('product_info');
+}
+?>
 
 <!--bof Category Icon -->
 <?php if ($module_show_categories != 0) {
@@ -500,13 +512,15 @@ require($template->get_template_dir('/tpl_modules_category_icon_display.php',DIR
 <!--eof Category Icon -->
 
 <!--bof Prev/Next top position -->
-<?php if (PRODUCT_INFO_PREVIOUS_NEXT == 1 or PRODUCT_INFO_PREVIOUS_NEXT == 3) {
+<?php 
+if (PRODUCT_INFO_PREVIOUS_NEXT == 1 or PRODUCT_INFO_PREVIOUS_NEXT == 3) {
 
-/**
- * display the product previous/next helper
- */
-require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_products_next_previous.php'); ?>
-<?php } ?>
+    /**
+     * display the product previous/next helper
+     */
+    require($template->get_template_dir('/tpl_products_next_previous.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_products_next_previous.php');
+    
+} ?>
 <!--eof Prev/Next top position-->
 
 <div id="prod-info-top">
@@ -523,15 +537,12 @@ require($template->get_template_dir('/tpl_products_next_previous.php',DIR_WS_TEM
 <div id="pinfo-left" class="group">
 <!--bof Main Product Image -->
 <?php
-  if (zen_not_null($products_image)) {
-  ?>
-<?php
-/**
- * display the main product image
- */
-   require($template->get_template_dir('/tpl_modules_main_product_image.php',DIR_WS_TEMPLATE, $current_page_base,'templates'). '/tpl_modules_main_product_image.php'); ?>
-<?php
-  }
+if (zen_not_null($products_image)) {
+    /**
+     * display the main product image
+     */
+    require($template->get_template_dir('/tpl_modules_main_product_image.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_modules_main_product_image.php');
+}
 ?>
 <!--eof Main Product Image-->
 <!--bof Additional Product Images -->
