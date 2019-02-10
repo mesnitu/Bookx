@@ -217,9 +217,9 @@ if ($flag_show_product_bookx_info_authors_team_related_products && 1 < $authors-
         $authors->MoveNext();
     }
     $authors->Move(0);
-
+    
     // This seemed to be necessary in ZC Versions up to 1.5.3, but not anymore in 1.5.5
-    if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.6' < floatval(PROJECT_VERSION_MINOR)) {
+    if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
         $authors->cursor = 0;
         $authors->MoveNext(); // There must be a better way to reset the result, but I can't seem to find a way....
     }
@@ -260,7 +260,6 @@ $sql = 'SELECT *  FROM ' . TABLE_PRODUCT_BOOKX_PUBLISHERS . ' p
     		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION . ' pd ON 
             pd.bookx_publisher_id = p.bookx_publisher_id AND pd.languages_id = "' . (int) $_SESSION['languages_id'] . '"
     		WHERE p.bookx_publisher_id = "' . (int) $bookx_extras->fields['bookx_publisher_id'] . '"';
-
 $publisher = $db->Execute($sql);
 
 $sql = 'SELECT *  FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' s
@@ -348,7 +347,7 @@ while (!$authors->EOF) {
     $current_author['type_image'] = (!empty($authors->fields['type_image']) ? DIR_WS_IMAGES . $authors->fields['type_image'] : '');
     $current_author['type_sort_order'] = (!empty($authors->fields['type_sort_order']) ? $authors->fields['type_sort_order'] : '0');
     /*
-     * Only link if there's more than on book
+     * Only show a author link if there's more than on book
      */
     if (mb_strcut($authors->fields['related_products'], 0, 5) === '$§$$') {
         $current_author['searchlink'] = (!empty($authors->fields['bookx_author_id']) && !empty($authors->fields['author_name'])) ? $authors->fields['author_name'] : '';
