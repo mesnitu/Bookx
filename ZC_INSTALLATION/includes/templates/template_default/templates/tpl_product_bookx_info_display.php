@@ -440,7 +440,6 @@ if ($flag_show_product_bookx_info_condition &&
     $products_condition_html = '<div class="bookxCondition">' . $products_condition . '</div>';
 }
 
-
 //*** genres
 $genres_html = '<!-- bof bookx genres --><div class="bookxGenres">';
 $genre_temp_html = '';
@@ -557,15 +556,15 @@ if (zen_not_null($products_image)) {
     <!--bof Product Price block -->
 <!--bof BookX Extra data items -->
 <?php 
-
 $zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_BEGIN');
-if (($flag_show_product_info_model == 1 and $products_model != '')
-    OR ( $flag_show_product_info_weight == 1 and $products_weight != 0)
-    OR ( $flag_show_product_info_quantity == 1)
-    OR ( $flag_show_product_info_manufacturer == 1 AND ! empty($manufacturers_name))
-    OR ( $flag_show_product_bookx_info_isbn == 1 and $products_isbn != '')) {
+
+if (($flag_show_product_info_model == 1 && $products_model != '')
+    || ( $flag_show_product_info_weight == 1 and $products_weight != 0)
+    || ( $flag_show_product_info_quantity == 1)
+    || ( $flag_show_product_info_manufacturer == 1 && ! empty($manufacturers_name))
+    || ( $flag_show_product_bookx_info_isbn == 1 && $products_isbn != '')) {
     echo '<!--bof Product details list  --><ul id="productDetailsList">';
-    echo (($flag_show_product_bookx_info_isbn == 1 and $products_isbn != '') ? '<li><span class="bookxLabel">' . TEXT_PRODUCT_ISBN . '</span>'.$products_isbn . '</li>' : '') . "\n";
+    echo (($flag_show_product_bookx_info_isbn == 1 && $products_isbn != '') ? '<li><span class="bookxLabel">' . TEXT_PRODUCT_ISBN . '</span>'.$products_isbn . '</li>' : '') . "\n";
     echo '<li>' . $publisher_short_html . '</li>'. "\n";
     echo '<li>' . $imprint_short_html . '</li>'. "\n";
     echo '<li>' . $authors_short_html . '</li>'. "\n";
@@ -578,6 +577,9 @@ if (($flag_show_product_info_model == 1 and $products_model != '')
     echo (($flag_show_product_info_manufacturer == 1 and ! empty($manufacturers_name)) ? '<li>' . TEXT_PRODUCT_MANUFACTURER . $manufacturers_name . '</li>' : '') . "\n";
     echo '</ul><!--eof Product details list -->';
 }
+
+$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_END', array('products_id' => $products_id_current));
+
 ?>
 <!--eof Product details list -->
 
@@ -657,8 +659,6 @@ if (CUSTOMERS_APPROVAL == 3 and TEXT_LOGIN_FOR_PRICE_BUTTON_REPLACE_SHOWROOM == 
 <?php
 $zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_BEGIN', array('products_id' => $products_id_current));
 
-$zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_DETAILS_END', array('products_id' => $products_id_current));
-
 echo $publisher_detail_html;
 echo $imprint_detail_html;
 echo $series_detail_html;
@@ -671,6 +671,7 @@ echo $authors_related_products_team_html;
 //echo $authors_related_products_html;
 //*****
 $zco_notifier->notify('NOTIFY_TPL_PRODUCT_BOOKX_INFO_DISPLAY_DOCPRODUCT_END', array('products_id' => $products_id_current));
+
 ?>
 </section>
 <!--eof BookX Extra data items -->
