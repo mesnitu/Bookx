@@ -35,29 +35,38 @@
 		<script type="text/javascript">
 		<!--
 		function handleInStockOnlyCheckbox() {
-			var n = window.location.href.indexOf('&bookx_publishers_list_all=');
+			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = publishersListOnlyStockedCheckbox.checked;
-			var newGetParameter = (listOutOfStock ? '&bookx_publishers_list_all=true' : '');
+			var newGetParameter = (listOutOfStock ? '&la=true' : '');
 			if (0 > n) {
 				window.location.href = window.location.href + newGetParameter;
 			} else {
-				window.location.href = window.location.href.replace('&bookx_publishers_list_all=true', newGetParameter);
+				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
 		-->
 		</script>
 		<div id="publishersListOnlyStockedCheckboxContainer">
-			<label><input id="publishersListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['bookx_publishers_list_all']) && $_GET['bookx_publishers_list_all'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_PUBLISHER_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label><input id="publishersListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_PUBLISHER_LIST_STOCKCHECKBOX_LABEL; ?></label>
 		</div>
 <?php } ?>
 
 <h1 id="publisherListHeading"><?php echo TEXT_BOOKX_PUBLISHER_LIST_TITLE; ?></h1>
+<div class="container">
+    <?php foreach ($index as $value) {
+        echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_PUBLISHERS_LIST, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
+    }
+    if (isset($_GET['q']) && !empty($_GET['q'])) {
+        echo '<div class="reset" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_PUBLISHERS_LIST, 'q=') . '\';">Reset</div>';
+    }
+    ?>
+</div>
 <table id="bookxPublisherListingTable">
 
 <?php
 	foreach ($bookx_publishers_listing_split_array as $publisher) {
 		echo '<tr>';
-		echo '<td class="bookxPublisherListingImageCell">' . zen_image($publisher['publisher_image'], '', BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
+		echo '<td class="bookxPublisherListingImageCell">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
 		echo '<td class="bookxPublisherListingInfoCell"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span>' 
 		     . (!empty($publisher['publisher_description']) ? '<div class="bookxPublisherDescription">' . $publisher['publisher_description'] . '</div>' : '')
 		     . ' <a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_publisher_id=' . $publisher['bookx_publisher_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_PUBLISHER, $publisher['publisher_name']) . '</a>';

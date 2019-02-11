@@ -50,8 +50,8 @@ switch ((int)BOOKX_AUTHOR_LISTING_ORDER_BY) {
 
 }
 
-if(isset($_GET['qa']) && !empty($_GET['qa'])) {
-    $index_search = " AND  ba.author_name LIKE '".$_GET['qa']."%' ";
+if(isset($_GET['q']) && !empty($_GET['q'])) {
+    $index_search = " AND  ba.author_name LIKE '".$_GET['q']."%' ";
   }
 
 if($active_bx_filter_ids['author_type_id']) {

@@ -32,7 +32,7 @@ $active_bx_filter_ids = bookx_get_active_filter_ids();
 
 $extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
-if (BOOKX_PUBLISHER_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['bookx_publishers_list_all']) && $_GET['bookx_publishers_list_all'])) {
+if (BOOKX_PUBLISHER_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la'])) {
 	$extra_fields = ' , MAX(p.products_quantity) AS quantity,  MAX(p.products_date_available) AS date_available, COUNT(p.products_id) AS books_in_stock';
 	$extra_in_stock_join_clause = ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON be.bookx_publisher_id = bp.bookx_publisher_id
 	                                LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = be.products_id AND p.products_status > 0';
@@ -51,6 +51,10 @@ switch ((int)BOOKX_PUBLISHER_LISTING_ORDER_BY) {
 
 }
 
+if(isset($_GET['q']) && !empty($_GET['q'])) {
+    $index_search = " AND bp.publisher_name LIKE '".$_GET['q']."%' ";
+  }
+
 $sql = 'SELECT bp.bookx_publisher_id, bp.publisher_name, bp.publisher_image, bpd.publisher_description, bpd.publisher_url '
 		  . $extra_fields
 		  . ' FROM ' . TABLE_PRODUCT_BOOKX_PUBLISHERS . ' bp
@@ -59,6 +63,7 @@ $sql = 'SELECT bp.bookx_publisher_id, bp.publisher_name, bp.publisher_image, bpd
 		  . (!empty($extra_filter_query_parts['join_multi_filter'])  && empty($extra_in_stock_join_clause) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_publisher_id = bp.bookx_publisher_id ' : '')
 		  . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('publisher'))
 		  . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('publisher'))
+          . $index_search
 		  . ' GROUP BY bp.bookx_publisher_id '
 		  . $extra_having_clause
 		  . $sort_order_clause;
@@ -67,8 +72,12 @@ $bookx_publishers_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_P
 $bookx_publishers_listing = $db->Execute($bookx_publishers_listing_split->sql_query);
 
 $bookx_publishers_listing_split_array = array();
+$temp_index = array();
 while ( ! $bookx_publishers_listing->EOF ) {
-
+    /**
+     * @todo somw chars like Á are in some wrong encoding... still didnt find a way to fix this. 
+     */
+    $temp_index[] = mb_convert_encoding($bookx_publishers_listing->fields ['publisher_name'][0], 'utf-8');
 	$bookx_publishers_listing_split_array [] = array ('bookx_publisher_id' => $bookx_publishers_listing->fields ['bookx_publisher_id']
 												   ,'publisher_name' => $bookx_publishers_listing->fields ['publisher_name']
 												   ,'publisher_image' => (!empty($bookx_publishers_listing->fields ['publisher_image']) ? DIR_WS_IMAGES . $bookx_publishers_listing->fields ['publisher_image'] : '')
@@ -78,3 +87,4 @@ while ( ! $bookx_publishers_listing->EOF ) {
 
 	$bookx_publishers_listing->MoveNext ();
 }
+$index = array_unique($temp_index);

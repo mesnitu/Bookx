@@ -58,10 +58,10 @@
 
 <div class="container">
     <?php foreach ($index as $value) {
-        echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, zen_get_all_get_params(array('qa', 'action', 'id', 'page')) . 'qa=' . $value) . '\'">' . $value . '</div>';
+        echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
     }
-    if (isset($_GET['qa']) && !empty($_GET['qa'])) {
-        echo '<div class="reset" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, 'qa=') . '\';">Reset</div>';
+    if (isset($_GET['q']) && !empty($_GET['q'])) {
+        echo '<div class="reset" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, 'q=') . '\';">Reset</div>';
     }
     ?>
 </div>
@@ -70,8 +70,6 @@
 <?php
 	foreach ($bookx_authors_listing_split_array as $author) {
 		echo '<tr>';
-        pr(BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH);
-        pr(BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT);
 		echo '<td class="bookxAuthorListingImageCell" width="'. BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH.'">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
 		echo '<td class="bookxAuthorListingInfoCell"><span class="bookxAuthorName">' . $author['author_name'] . '</span>' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>': '')
 		     . (!empty($author['author_description']) ? '<div class="bookxAuthorDescription">' . $author['author_description'] . '</div>' : '')
