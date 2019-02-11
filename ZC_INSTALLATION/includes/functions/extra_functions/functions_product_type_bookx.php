@@ -481,11 +481,11 @@ function bookx_get_buy_now_button($product_id, $link, $additional_link = false) 
  * @return string
  */	
 function tpl_bookx_alphafilter_all($alpha_array, $page, $display = true)
-{
+{ 
     if (is_array($alpha_array) && !empty($page) && BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL == true && $display == true) {
         $alpha = '<div class="container">';
         foreach ($alpha_array as $value) {
-            $alpha .= '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link($page, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
+            $alpha .= '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link($page, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . mb_strtoupper($value)) . '\'">' . mb_strtoupper($value) . '</div>';
         }
         if (isset($_GET['q']) && !empty($_GET['q'])) {
             $alpha .= '<div class="reset" onclick="document.location.href=\'' . zen_href_link($page, 'q=') . '\';">Reset</div>';

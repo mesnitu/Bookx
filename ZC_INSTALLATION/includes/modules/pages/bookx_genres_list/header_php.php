@@ -27,12 +27,13 @@ if (!defined('MAX_DISPLAY_BOOKX_GENRE_LISTING')) {
 $extra_fields = '';
 $extra_in_stock_join_clause = '';
 $extra_having_clause = '';
+$index_search = '';
 
 $active_bx_filter_ids = bookx_get_active_filter_ids();
 
 $extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
-if (BOOKX_GENRE_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['bookx_genres_list_all']) && $_GET['bookx_genres_list_all'])) {
+if (BOOKX_GENRE_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la'])) {
 	$extra_fields = ' , MAX(p.products_quantity) AS quantity,  MAX(p.products_date_available) AS date_available, COUNT(p.products_id) AS books_in_stock ';
 	$extra_in_stock_join_clause = ' LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = bgtp.products_id AND p.products_status > 0 ';
 	$extra_having_clause = ' HAVING (quantity > 0 OR date_available >= "' . date('Y-m-d H:i:s', time()- (86400*60)) . '") '; // 86400 * 60 = 60 days
@@ -50,29 +51,41 @@ switch ((int)BOOKX_GENRE_LISTING_ORDER_BY) {
 
 }
 
+if (isset($_GET['q']) && !empty($_GET['q'])) {
+    $index_search = " AND bgd.genre_description LIKE '" . $_GET['q'] . "%' ";
+}
+
 $sql = 'SELECT bg.bookx_genre_id, bgd.genre_image, bgd.genre_description '
-		  . $extra_fields
-		  . ' FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg
-		    LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON bgd.bookx_genre_id = bg.bookx_genre_id AND bgd.languages_id = "' . (int)$_SESSION['languages_id'] . '"
-		    LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' bgtp ON bgtp.bookx_genre_id = bg.bookx_genre_id '
-		  . $extra_in_stock_join_clause
-		  . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = bgtp.products_id ' : '')
-          . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('genre'))
-        . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('genre'))
-        . ' GROUP BY bg.bookx_genre_id '
-		  . $extra_having_clause
-		  . $sort_order_clause;
+    . $extra_fields
+    . ' FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg
+		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON '
+    . 'bgd.bookx_genre_id = bg.bookx_genre_id AND bgd.languages_id = "' . (int) $_SESSION['languages_id'] . '"
+		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' bgtp ON bgtp.bookx_genre_id = bg.bookx_genre_id '
+    . $extra_in_stock_join_clause
+    . (!empty($extra_filter_query_parts['join_multi_filter']) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = bgtp.products_id ' : '')
+    . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('genre'))
+    . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('genre'))
+    . $index_search
+    . ' GROUP BY bg.bookx_genre_id '
+    . $extra_having_clause
+    . $sort_order_clause;
 
 $bookx_genres_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_GENRE_LISTING, 'bg.bookx_genre_id', 'page');
 $bookx_genres_listing = $db->Execute($bookx_genres_listing_split->sql_query);
 
 $bookx_genres_listing_split_array = array();
-while ( ! $bookx_genres_listing->EOF ) {
+$temp_index = array();
 
-	$bookx_genres_listing_split_array [] = array ('bookx_genre_id' => $bookx_genres_listing->fields ['bookx_genre_id']
-												 ,'genre_description' => $bookx_genres_listing->fields ['genre_description']
-	    										 ,'genre_image' => (!empty($bookx_genres_listing->fields ['genre_image']) ? DIR_WS_IMAGES . $bookx_genres_listing->fields ['genre_image'] : '')
-												 );
+while (!$bookx_genres_listing->EOF) {
+    /**
+     * @todo some chars like Á are in some wrong encoding... still didnt find a way to fix this. 
+     */
+    $temp_index[] = mb_convert_encoding($bookx_genres_listing->fields ['genre_description'][0], 'utf-8');
+    $bookx_genres_listing_split_array [] = array('bookx_genre_id' => $bookx_genres_listing->fields ['bookx_genre_id']
+        , 'genre_description' => $bookx_genres_listing->fields ['genre_description']
+        , 'genre_image' => (!empty($bookx_genres_listing->fields ['genre_image']) ? DIR_WS_IMAGES . $bookx_genres_listing->fields ['genre_image'] : BOOKX_GENRES_DEFAULT_IMAGE)
+    );
 
-	$bookx_genres_listing->MoveNext ();
+    $bookx_genres_listing->MoveNext();
 }
+$index = array_unique($temp_index);

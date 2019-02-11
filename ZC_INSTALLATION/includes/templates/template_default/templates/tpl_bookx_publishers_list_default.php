@@ -59,7 +59,7 @@
 <?php
 	foreach ($bookx_publishers_listing_split_array as $publisher) {
 		
-		 echo '<div class="row">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+		echo '<div class="row">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
 		echo '<h3 class="bookxAllListingInfo"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span></h3>' 
 		     . (!empty($publisher['publisher_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($publisher['publisher_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT) . '</p>' : '')
             . (!empty($publisher['publisher_url']) ? '<div class="bookxPublisherUrl"><a href="http://' . $publisher['publisher_url'] . '" target="_publisher_site">' . BOOKX_URL_LINK_TEXT_PUBLISHER . '</a></div>' : '')

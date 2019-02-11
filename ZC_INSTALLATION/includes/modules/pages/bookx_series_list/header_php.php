@@ -27,12 +27,12 @@ if (!defined('MAX_DISPLAY_BOOKX_SERIES_LISTING')) {
 $extra_fields = '';
 $extra_in_stock_join_clause = '';
 $extra_having_clause = '';
-
+$index_search = '';
 $active_bx_filter_ids = bookx_get_active_filter_ids();
 
 $extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
-if (BOOKX_SERIES_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['bookx_series_list_all']) && $_GET['bookx_series_list_all'])) {
+if (BOOKX_SERIES_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la'])) {
 	$extra_fields = ' , MAX(p.products_quantity) AS quantity,  MAX(p.products_date_available) AS date_available, COUNT(p.products_id) AS books_in_stock';
 	$extra_in_stock_join_clause = ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON be.bookx_series_id = bs.bookx_series_id
 									LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = be.products_id AND p.products_status > 0';
@@ -50,25 +50,33 @@ switch ((int)BOOKX_SERIES_LISTING_ORDER_BY) {
 		break;
 
 }
+if (isset($_GET['q']) && !empty($_GET['q'])) {
+    $index_search = " AND bsd.series_name LIKE '" . $_GET['q'] . "%' ";
+}
 
 $sql = 'SELECT bs.bookx_series_id, bsd.series_name, bsd.series_image, bsd.series_description '
-			. $extra_fields
-            . ' FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' bs
-		        LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' bsd ON bsd.bookx_series_id = bs.bookx_series_id AND bsd.languages_id = "' . (int)$_SESSION['languages_id'] . '" '
-		    . $extra_in_stock_join_clause
-		    . (!empty($extra_filter_query_parts['join_multi_filter'])  && empty($extra_in_stock_join_clause) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_series_id = bs.bookx_series_id ' : '')
-		    . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('series'))
-		  . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('series'))
-		  . ' GROUP BY bs.bookx_series_id '
-		    . $extra_having_clause
-		    . $sort_order_clause;
+    . $extra_fields
+    . ' FROM ' . TABLE_PRODUCT_BOOKX_SERIES . ' bs
+		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' bsd ON bsd.bookx_series_id = bs.bookx_series_id AND bsd.languages_id = "' . (int) $_SESSION['languages_id'] . '" '
+    . $extra_in_stock_join_clause
+    . (!empty($extra_filter_query_parts['join_multi_filter']) && empty($extra_in_stock_join_clause) ? $extra_filter_query_parts['join_multi_filter'] . ' ON be.bookx_series_id = bs.bookx_series_id ' : '')
+    . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('series'))
+    . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('series'))
+    . ' GROUP BY bs.bookx_series_id '
+    . $index_search
+    . $extra_having_clause
+    . $sort_order_clause;
 
 $bookx_series_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_SERIES_LISTING, 'bs.bookx_series_id', 'page');
 $bookx_series_listing = $db->Execute($bookx_series_listing_split->sql_query);
 
 $bookx_series_listing_split_array = array();
+$temp_index = array();
 while ( ! $bookx_series_listing->EOF ) {
-
+    /**
+     * @todo some chars like Á are in some wrong encoding... still didnt find a way to fix this. 
+     */
+    $temp_index[] = mb_convert_encoding($bookx_series_listing->fields['series_name'][0], 'utf-8');
 	$bookx_series_listing_split_array [] = array ('bookx_series_id' => $bookx_series_listing->fields ['bookx_series_id']
 												   ,'series_name' => $bookx_series_listing->fields ['series_name']
 												   ,'series_image' => (!empty($bookx_series_listing->fields ['series_image']) ? DIR_WS_IMAGES . $bookx_series_listing->fields ['series_image'] : '')
@@ -77,3 +85,5 @@ while ( ! $bookx_series_listing->EOF ) {
 
 	$bookx_series_listing->MoveNext ();
 }
+
+$index = array_unique($temp_index);
