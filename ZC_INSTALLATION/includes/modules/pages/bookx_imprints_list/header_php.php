@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [ZC INSTALLATION]/includes/modules/pages/bookx_imprints_list/header_php.php 2016-02-02 philou $
+ * @version BookX V 1.0.0
+ * @version $Id: [ZC INSTALLATION]/includes/modules/pages/bookx_imprints_list/header_php.php 2019-02-02 mesnitu $
  */
 
 require(DIR_WS_MODULES . zen_get_module_directory('require_languages.php'));
@@ -27,12 +27,12 @@ if (!defined('MAX_DISPLAY_BOOKX_IMPRINT_LISTING')) {
 $extra_fields = '';
 $extra_in_stock_join_clause = '';
 $extra_having_clause = '';
-
+$index_search = '';
 $active_bx_filter_ids = bookx_get_active_filter_ids();
 
 $extra_filter_query_parts = bookx_get_active_filter_query_parts($active_bx_filter_ids);
 
-if (BOOKX_IMPRINT_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['bookx_imprints_list_all']) && $_GET['bookx_imprints_list_all'])) {
+if (BOOKX_IMPRINT_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la'])) {
 	$extra_fields = ' , MAX(p.products_quantity) AS quantity,  MAX(p.products_date_available) AS date_available, COUNT(p.products_id) AS books_in_stock';
 	$extra_in_stock_join_clause = ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON be.bookx_imprint_id = bi.bookx_imprint_id
 	                                LEFT JOIN ' . TABLE_PRODUCTS . ' p ON p.products_id = be.products_id AND p.products_status > 0';
@@ -49,6 +49,9 @@ switch ((int)BOOKX_IMPRINT_LISTING_ORDER_BY) {
 		$sort_order_clause = ' ORDER BY bi.imprint_sort_order, bi.imprint_name';
 		break;
 
+}
+if (isset($_GET['q']) && !empty($_GET['q'])) {
+    $index_search = " AND bi.imprint_name LIKE '" . $_GET['q'] . "%' ";
 }
 
 $sql = 'SELECT bi.bookx_imprint_id, bi.imprint_name, bi.imprint_image, bid.imprint_description '
@@ -67,8 +70,12 @@ $bookx_imprints_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_IMP
 $bookx_imprints_listing = $db->Execute($bookx_imprints_listing_split->sql_query);
 
 $bookx_imprints_listing_split_array = array();
+$temp_index = array();
 while ( ! $bookx_imprints_listing->EOF ) {
-
+    /**
+     * @todo some chars like Á are in some wrong encoding... still didnt find a way to fix this. 
+     */
+    $temp_index[] = mb_convert_encoding($bookx_imprints_listing->fields ['imprint_name'][0], 'utf-8');
 	$bookx_imprints_listing_split_array [] = array ('bookx_imprint_id' => $bookx_imprints_listing->fields ['bookx_imprint_id']
 												   ,'imprint_name' => $bookx_imprints_listing->fields ['imprint_name']
 												   ,'imprint_image' => (!empty($bookx_imprints_listing->fields ['imprint_image']) ? DIR_WS_IMAGES . $bookx_imprints_listing->fields ['imprint_image'] : '')
@@ -77,3 +84,4 @@ while ( ! $bookx_imprints_listing->EOF ) {
 
 	$bookx_imprints_listing->MoveNext ();
 }
+$index = array_unique($temp_index);

@@ -35,37 +35,36 @@
 		<script type="text/javascript">
 		<!--
 		function handleInStockOnlyCheckbox() {
-			var n = window.location.href.indexOf('&bookx_genres_list_all=');
+			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = genresListOnlyStockedCheckbox.checked;
-			var newGetParameter = (listOutOfStock ? '&bookx_genres_list_all=true' : '');
+			var newGetParameter = (listOutOfStock ? '&la=true' : '');
 			if (0 > n) {
 				window.location.href = window.location.href + newGetParameter;
 			} else {
-				window.location.href = window.location.href.replace('&bookx_genres_list_all=true', newGetParameter);
+				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
 		-->
 		</script>
 		<div id="genresListOnlyStockedCheckboxContainer">
-			<label><input id="genresListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['bookx_genres_list_all']) && $_GET['bookx_genres_list_all'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_GENRE_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label><input id="genresListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_GENRE_LIST_STOCKCHECKBOX_LABEL; ?></label>
 		</div>
 <?php } ?>
 
 <h1 id="genreListHeading"><?php echo TEXT_BOOKX_GENRE_LIST_TITLE; ?></h1>
-<table id="bookxGenreListingTable">
 
+<?php echo tpl_bookx_alphafilter_all($index, FILENAME_BOOKX_GENRES_LIST); ?>
+
+<div id="bookxGenreListingTable" class="bookxFilterListAll">
 <?php
-	foreach ($bookx_genres_listing_split_array as $genre) {
-		echo '<tr>';
-		echo '<td class="bookxGenreListingImageCell">' . zen_image($genre['genre_image'], '', BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
-		echo '<td class="bookxGenreListingInfoCell"><span class="bookxGenreDescription">' . $genre['genre_description'] . '</span>' 
-		     . ' <a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_description']) . '</a>';
-		echo '</td></tr>';
-
-	}
+foreach ($bookx_genres_listing_split_array as $genre) {
+        echo '<div class="row">' . zen_image($genre['genre_image'], $genre['genre_description'], BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+        echo '<h3 class="bookxAllListingInfo"><span class="bookxGenreDescription">' . $genre['genre_description'] . '</span></h3>'
+        . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_description']) . '</a>';
+        echo '</div>';
+    }
 ?>
-
-</table>
+</div>
 
 <?php if ( ($bookx_genres_listing_split->number_of_rows > 0) && $bookx_genres_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>

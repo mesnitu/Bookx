@@ -35,38 +35,39 @@
 		<script type="text/javascript">
 		<!--
 		function handleStockOnlyCheckbox() {
-			var n = window.location.href.indexOf('&bookx_series_list_all=');
+			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = seriesListOnlyStockedCheckbox.checked;
-			var newGetParameter = (listOutOfStock ? '&bookx_series_list_all=true' : '');
+			var newGetParameter = (listOutOfStock ? '&la=true' : '');
 			if (0 > n) {
 				window.location.href = window.location.href + newGetParameter;
 			} else {
-				window.location.href = window.location.href.replace('&bookx_series_list_all=true', newGetParameter);
+				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
 		-->
 		</script>
 		<div id="seriesListOnlyStockedCheckboxContainer">
-			<label><input id="seriesListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['bookx_series_list_all']) && $_GET['bookx_series_list_all'] ? 'checked' : ''); ?> onClick="handleStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_SERIES_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label><input id="seriesListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleStockOnlyCheckbox()" /><?php echo TEXT_BOOKX_SERIES_LIST_STOCKCHECKBOX_LABEL; ?></label>
 		</div>
 <?php } ?>
 
 <h1 id="authorListHeading"><?php echo TEXT_BOOKX_SERIES_LIST_TITLE; ?></h1>
-<table id="bookxSeriesListingTable">
 
+<?php echo tpl_bookx_alphafilter_all($index, FILENAME_BOOKX_SERIES_LIST); ?>
+
+<div id="bookxSeriesListingTable" class="bookxFilterListAll">
 <?php
 	foreach ($bookx_series_listing_split_array as $series) {
-		echo '<tr>';
-		echo '<td class="bookxSeriesListingImageCell">' . zen_image($series['series_image'], '', BOOKX_SERIES_LISTING_IMAGE_MAX_WIDTH, BOOKX_SERIES_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
-		echo '<td class="bookxSeriesListingInfoCell"><span class="bookxSeriesName">' . $series['series_name'] . '</span>'
-		     . (!empty($series['series_description']) ? '<div class="bookxSeriesDescription">' . $series['series_description'] . '</div>' : '')
+		
+		echo '<div class="row">' . zen_image($series['series_image'], $series['series_name'], BOOKX_SERIES_LISTING_IMAGE_MAX_WIDTH, BOOKX_SERIES_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+		echo '<h3 class="bookxAllListingInfo"><span class="bookxSeriesName">' . $series['series_name'] . '</span></h3>'
+		     . (!empty($series['series_description']) ? '<p class="bookxAllListingDescription">' . $series['series_description'] . '</p>' : '')
 		     . '<a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_series_id=' . $series['bookx_series_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_OF_SERIES, $series['series_name']) . '</a>';
-		echo '</td></tr>';
+		echo '</div>';
 
 	}
 ?>
-
-</table>
+</div>
 
 <?php if ( ($bookx_series_listing_split->number_of_rows > 0) && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>

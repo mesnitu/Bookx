@@ -174,7 +174,7 @@ foreach ($products_authors as $author) {
 
 		$single_author_detail_html .= '<div class="bookxAuthorDescription">'
             . '<span class="bookxLabel">' . sprintf(LABEL_AUTHOR_DESCRIPTION, $author['name']) . '</span>' 
-            . '<p>' . bookx_truncate_paragraph($author['description'], BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION) . ' ' . $author['description_link'] 
+            . '<p>' . bookx_truncate_paragraph($author['description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT) . ' ' . $author['description_link'] 
             .'</p></div>';
 	}
     

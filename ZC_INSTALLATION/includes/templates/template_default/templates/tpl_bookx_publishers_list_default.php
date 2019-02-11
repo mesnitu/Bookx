@@ -35,43 +35,43 @@
 		<script type="text/javascript">
 		<!--
 		function handleInStockOnlyCheckbox() {
-			var n = window.location.href.indexOf('&bookx_publishers_list_all=');
+			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = publishersListOnlyStockedCheckbox.checked;
-			var newGetParameter = (listOutOfStock ? '&bookx_publishers_list_all=true' : '');
+			var newGetParameter = (listOutOfStock ? '&la=true' : '');
 			if (0 > n) {
 				window.location.href = window.location.href + newGetParameter;
 			} else {
-				window.location.href = window.location.href.replace('&bookx_publishers_list_all=true', newGetParameter);
+				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
 		-->
 		</script>
 		<div id="publishersListOnlyStockedCheckboxContainer">
-			<label><input id="publishersListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['bookx_publishers_list_all']) && $_GET['bookx_publishers_list_all'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_PUBLISHER_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label><input id="publishersListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_PUBLISHER_LIST_STOCKCHECKBOX_LABEL; ?></label>
 		</div>
 <?php } ?>
 
 <h1 id="publisherListHeading"><?php echo TEXT_BOOKX_PUBLISHER_LIST_TITLE; ?></h1>
-<table id="bookxPublisherListingTable">
 
+<?php echo tpl_bookx_alphafilter_all($index, FILENAME_BOOKX_PUBLISHERS_LIST); ?>
+
+<div id="bookxPublisherListingTable" class="bookxFilterListAll">
 <?php
 	foreach ($bookx_publishers_listing_split_array as $publisher) {
-		echo '<tr>';
-		echo '<td class="bookxPublisherListingImageCell">' . zen_image($publisher['publisher_image'], '', BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
-		echo '<td class="bookxPublisherListingInfoCell"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span>' 
-		     . (!empty($publisher['publisher_description']) ? '<div class="bookxPublisherDescription">' . $publisher['publisher_description'] . '</div>' : '')
+		
+		echo '<div class="row">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+		echo '<h3 class="bookxAllListingInfo"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span></h3>' 
+		     . (!empty($publisher['publisher_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($publisher['publisher_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT) . '</p>' : '')
+            . (!empty($publisher['publisher_url']) ? '<div class="bookxPublisherUrl"><a href="http://' . $publisher['publisher_url'] . '" target="_publisher_site">' . BOOKX_URL_LINK_TEXT_PUBLISHER . '</a></div>' : '')
 		     . ' <a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_publisher_id=' . $publisher['bookx_publisher_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_PUBLISHER, $publisher['publisher_name']) . '</a>';
-		echo '</td></tr>';
-
+		echo '</div>';
 	}
 ?>
-
-</table>
-
+</div>
 <?php if ( ($bookx_publishers_listing_split->number_of_rows > 0) && $bookx_publishers_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>
 <div id="publishersListingBottomNumber" class="navSplitPagesResult back"><?php echo $bookx_publishers_listing_split->display_count(TEXT_DISPLAY_NUMBER_OF_PUBLISHERS); ?></div>
-<div  id="publishersListingListingBottomLinks" class="navSplitPagesLinks forward"><?php echo TEXT_RESULT_PAGE . ' ' . $bookx_publishers_listing_split->display_links(MAX_DISPLAY_PAGE_LINKS, zen_get_all_get_params(array('page', 'info', 'x', 'y'))); ?></div>
+<div id="publishersListingListingBottomLinks" class="navSplitPagesLinks forward"><?php echo TEXT_RESULT_PAGE . ' ' . $bookx_publishers_listing_split->display_links(MAX_DISPLAY_PAGE_LINKS, zen_get_all_get_params(array('page', 'info', 'x', 'y'))); ?></div>
 <br class="clearBoth" />
 <?php
   }

@@ -28,12 +28,19 @@
   /**
    * @since v1.0.0
    */
-  define('BOOKX_BOOKINFO_TRUNCATE_AUTHORS_DESCRIPTION', 350);
+  define('SEE_MORE', 'See More');
+  define('BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL', true);
+  define('BOOKX_TRUNCATE_DESCRIPTION_LENGHT', 350);
   define('BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT', 3);
   
+  define('BOOKX_AUTHOR_IMAGES_FOLDER', DIR_WS_IMAGES. 'autores/'); // this should go to admin config
+  define('BOOKX_AUTHOR_DEFAULT_IMAGE', BOOKX_AUTHOR_IMAGES_FOLDER. 'author_noimage.jpg');
+  
+  define('BOOKX_PUBLISHER_DEFAULT_IMAGE', PRODUCTS_IMAGE_NO_IMAGE); 
+  define('BOOKX_GENRES_DEFAULT_IMAGE', PRODUCTS_IMAGE_NO_IMAGE);
   
   /**
    * @todo stuff to be removed. Just placing it here to move along
    */
-  define('SEE_MORE', 'See More');
+  
   define('BOOKX_USES_CEON_URI_MODULE', false);
