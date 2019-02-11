@@ -55,25 +55,6 @@
 <?php 
 
 ?>
-<style>
-    .container {
-    display: flex;
-    padding: 0.5em 0.1em;
-    background: #666;
-    margin-bottom: 1em;
-    }
-    .idx_name, .reset {
-    margin-right: 2px;
-    background: #f4f4f4;
-    padding: 2px 8px;
-    line-height: 1.5;
-    border: 1px solid #acc;
-    cursor: pointer;
-    }
-    .reset {
-       background: #ddd;     
-    }
-</style>
 
 <div class="container">
     <?php foreach ($index as $value) {
@@ -89,7 +70,9 @@
 <?php
 	foreach ($bookx_authors_listing_split_array as $author) {
 		echo '<tr>';
-		echo '<td class="bookxAuthorListingImageCell">' . zen_image($author['author_image'], '', BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
+        pr(BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH);
+        pr(BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT);
+		echo '<td class="bookxAuthorListingImageCell" width="'. BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH.'">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
 		echo '<td class="bookxAuthorListingInfoCell"><span class="bookxAuthorName">' . $author['author_name'] . '</span>' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>': '')
 		     . (!empty($author['author_description']) ? '<div class="bookxAuthorDescription">' . $author['author_description'] . '</div>' : '')
 		     . (!empty($author['author_url']) ? '<div class="bookxAuthorUrl"><a href="http://' . $author['author_url'] . '" target="_author_site">' . BOOKX_URL_LINK_TEXT_AUTHOR . '</a></div>' : '')

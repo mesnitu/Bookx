@@ -349,3 +349,22 @@ form.bxf_active select {
 .search-term-hi {
     background-color: yellow;
 }
+
+/* for filter all list */
+.container {
+    display: flex;
+    padding: 0.5em 0.1em;
+    background: #666;
+    margin-bottom: 1em;
+    }
+    .idx_name, .reset {
+    margin-right: 2px;
+    background: #f4f4f4;
+    padding: 2px 8px;
+    line-height: 1.5;
+    border: 1px solid #acc;
+    cursor: pointer;
+    }
+    .reset {
+       background: #ddd;     
+    }
