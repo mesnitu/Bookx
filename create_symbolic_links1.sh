@@ -84,6 +84,7 @@ admin_files=(
     includes/extra_datafiles/bookx/installers/bookx_update_v093.php
     includes/extra_datafiles/bookx/installers/bookx_update_v094.php
     includes/extra_datafiles/bookx/installers/bookx_update_v095.php
+    includes/extra_datafiles/bookx/installers/bookx_install_include_german.php
 	includes/extra_datafiles/bookx/libs/Parsedown.php
     includes/extra_datafiles/bookx/libs/ImageResize/ImageResize.php
     includes/extra_datafiles/bookx/libs/ImageResize/ImageResizeException.php
