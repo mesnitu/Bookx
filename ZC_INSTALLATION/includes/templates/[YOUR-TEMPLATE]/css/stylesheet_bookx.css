@@ -368,3 +368,20 @@ form.bxf_active select {
     .reset {
        background: #ddd;     
     }
+    
+    .bookxFilterListAll {
+            display: table;
+    }
+    .row {
+    margin-bottom: 1rem;
+}
+    .bookxAllListingImage {
+            float: left;
+            padding-right: 1rem;
+    }
+    .bookxAllListingInfo {
+           margin: 0; 
+    }
+    .bookxAllListingDescription{
+            
+    }

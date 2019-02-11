@@ -73,6 +73,7 @@ $bookx_publishers_listing = $db->Execute($bookx_publishers_listing_split->sql_qu
 
 $bookx_publishers_listing_split_array = array();
 $temp_index = array();
+
 while ( ! $bookx_publishers_listing->EOF ) {
     /**
      * @todo somw chars like Á are in some wrong encoding... still didnt find a way to fix this. 
@@ -80,9 +81,9 @@ while ( ! $bookx_publishers_listing->EOF ) {
     $temp_index[] = mb_convert_encoding($bookx_publishers_listing->fields ['publisher_name'][0], 'utf-8');
 	$bookx_publishers_listing_split_array [] = array ('bookx_publisher_id' => $bookx_publishers_listing->fields ['bookx_publisher_id']
 												   ,'publisher_name' => $bookx_publishers_listing->fields ['publisher_name']
-												   ,'publisher_image' => (!empty($bookx_publishers_listing->fields ['publisher_image']) ? DIR_WS_IMAGES . $bookx_publishers_listing->fields ['publisher_image'] : '')
+												   ,'publisher_image' => (!empty($bookx_publishers_listing->fields ['publisher_image']) ? DIR_WS_IMAGES . $bookx_publishers_listing->fields ['publisher_image'] : BOOKX_PUBLISHER_DEFAULT_IMAGE)
 												   ,'publisher_description' => $bookx_publishers_listing->fields ['publisher_description']
-	                                               ,'publisher_url' => $bookx_authors_listing->fields ['publisher_url']
+	                                               ,'publisher_url' => $bookx_publishers_listing->fields ['publisher_url']
 												   );
 
 	$bookx_publishers_listing->MoveNext ();

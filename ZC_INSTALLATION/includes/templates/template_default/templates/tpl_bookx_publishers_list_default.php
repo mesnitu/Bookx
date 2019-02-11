@@ -52,6 +52,8 @@
 <?php } ?>
 
 <h1 id="publisherListHeading"><?php echo TEXT_BOOKX_PUBLISHER_LIST_TITLE; ?></h1>
+<?php 
+if(BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL == true) { ?>
 <div class="container">
     <?php foreach ($index as $value) {
         echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_PUBLISHERS_LIST, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
@@ -61,26 +63,24 @@
     }
     ?>
 </div>
-<table id="bookxPublisherListingTable">
-
+<?php } ?>
+<div id="bookxPublisherListingTable" class="bookxFilterListAll">
 <?php
 	foreach ($bookx_publishers_listing_split_array as $publisher) {
-		echo '<tr>';
-		echo '<td class="bookxPublisherListingImageCell">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
-		echo '<td class="bookxPublisherListingInfoCell"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span>' 
-		     . (!empty($publisher['publisher_description']) ? '<div class="bookxPublisherDescription">' . $publisher['publisher_description'] . '</div>' : '')
+		
+		 echo '<div class="row">' . zen_image($publisher['publisher_image'], $publisher['publisher_name'], BOOKX_PUBLISHER_LISTING_IMAGE_MAX_WIDTH, BOOKX_PUBLISHER_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+		echo '<h3 class="bookxAllListingInfo"><span class="bookxPublisherName">' . $publisher['publisher_name'] . '</span></h3>' 
+		     . (!empty($publisher['publisher_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($publisher['publisher_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT) . '</p>' : '')
+            . (!empty($publisher['publisher_url']) ? '<div class="bookxPublisherUrl"><a href="http://' . $publisher['publisher_url'] . '" target="_publisher_site">' . BOOKX_URL_LINK_TEXT_PUBLISHER . '</a></div>' : '')
 		     . ' <a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_publisher_id=' . $publisher['bookx_publisher_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_PUBLISHER, $publisher['publisher_name']) . '</a>';
-		echo '</td></tr>';
-
+		echo '</div>';
 	}
 ?>
-
-</table>
-
+</div>
 <?php if ( ($bookx_publishers_listing_split->number_of_rows > 0) && $bookx_publishers_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>
 <div id="publishersListingBottomNumber" class="navSplitPagesResult back"><?php echo $bookx_publishers_listing_split->display_count(TEXT_DISPLAY_NUMBER_OF_PUBLISHERS); ?></div>
-<div  id="publishersListingListingBottomLinks" class="navSplitPagesLinks forward"><?php echo TEXT_RESULT_PAGE . ' ' . $bookx_publishers_listing_split->display_links(MAX_DISPLAY_PAGE_LINKS, zen_get_all_get_params(array('page', 'info', 'x', 'y'))); ?></div>
+<div id="publishersListingListingBottomLinks" class="navSplitPagesLinks forward"><?php echo TEXT_RESULT_PAGE . ' ' . $bookx_publishers_listing_split->display_links(MAX_DISPLAY_PAGE_LINKS, zen_get_all_get_params(array('page', 'info', 'x', 'y'))); ?></div>
 <br class="clearBoth" />
 <?php
   }

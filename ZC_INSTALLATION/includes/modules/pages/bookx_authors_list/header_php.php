@@ -87,7 +87,7 @@ while ( ! $bookx_authors_listing->EOF ) {
 	$bookx_authors_listing_split_array [] = array ('bookx_author_id' => $bookx_authors_listing->fields ['bookx_author_id']
 												   ,'author_name' => $bookx_authors_listing->fields ['author_name']
 												   ,'author_types' => (!empty($bookx_authors_listing->fields ['author_types']) ? '(' . $bookx_authors_listing->fields ['author_types'] . ')': '')
-												   ,'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : DIR_WS_IMAGES. 'bookx_authors/author_image_missing.jpg')
+												   ,'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : BOOKX_AUTHOR_DEFAULT_IMAGE)
 												   ,'author_description' => $bookx_authors_listing->fields ['author_description']
 												   ,'author_url' => $bookx_authors_listing->fields ['author_url']
 												   );

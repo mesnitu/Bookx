@@ -53,9 +53,7 @@
 
 <h1 id="authorListHeading"><?php echo TEXT_BOOKX_AUTHOR_LIST_TITLE; ?></h1>
 <?php 
-
-?>
-
+if(BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL == true) { ?>
 <div class="container">
     <?php foreach ($index as $value) {
         echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_AUTHORS_LIST, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
@@ -65,21 +63,20 @@
     }
     ?>
 </div>
-  
-<table id="bookxAuthorListingTable">
-<?php
-	foreach ($bookx_authors_listing_split_array as $author) {
-		echo '<tr>';
-		echo '<td class="bookxAuthorListingImageCell" width="'. BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH.'">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT) . '</td>';
-		echo '<td class="bookxAuthorListingInfoCell"><span class="bookxAuthorName">' . $author['author_name'] . '</span>' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>': '')
-		     . (!empty($author['author_description']) ? '<div class="bookxAuthorDescription">' . $author['author_description'] . '</div>' : '')
-		     . (!empty($author['author_url']) ? '<div class="bookxAuthorUrl"><a href="http://' . $author['author_url'] . '" target="_author_site">' . BOOKX_URL_LINK_TEXT_AUTHOR . '</a></div>' : '')
-		     . ' <a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $author['bookx_author_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_AUTHOR, $author['author_name']) . '</a>';
-		echo '</td></tr>';
+<?php } ?>
+<div id="bookxAuthorListingTable" class="bookxFilterListAll">
+    <?php
+    foreach ($bookx_authors_listing_split_array as $author) {
 
-	}
-?>
-</table>
+        echo '<div class="row">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+        echo '<h3 class="bookxAllListingInfo">' . $author['author_name'] . '' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>' : '') . '</h3>'
+        . (!empty($author['author_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($author['author_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT, SEE_MORE , true) . '</p>' : '')
+        . (!empty($author['author_url']) ? '<div class="bookxAuthorUrl"><a href="http://' . $author['author_url'] . '" target="_author_site">' . BOOKX_URL_LINK_TEXT_AUTHOR . '</a></div>' : '')
+        . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $author['bookx_author_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_AUTHOR, $author['author_name']) . '</a>';
+        echo '</div>';
+    }
+    ?>
+</div>
 
 <?php if ( ($bookx_authors_listing_split->number_of_rows > 0) && $bookx_authors_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>
