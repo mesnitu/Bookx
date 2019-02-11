@@ -52,18 +52,9 @@
 <?php } ?>
 
 <h1 id="publisherListHeading"><?php echo TEXT_BOOKX_PUBLISHER_LIST_TITLE; ?></h1>
-<?php 
-if(BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL == true) { ?>
-<div class="container">
-    <?php foreach ($index as $value) {
-        echo '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_PUBLISHERS_LIST, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value) . '\'">' . $value . '</div>';
-    }
-    if (isset($_GET['q']) && !empty($_GET['q'])) {
-        echo '<div class="reset" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_PUBLISHERS_LIST, 'q=') . '\';">Reset</div>';
-    }
-    ?>
-</div>
-<?php } ?>
+
+<?php echo tpl_bookx_alphafilter_all($index, FILENAME_BOOKX_PUBLISHERS_LIST); ?>
+
 <div id="bookxPublisherListingTable" class="bookxFilterListAll">
 <?php
 	foreach ($bookx_publishers_listing_split_array as $publisher) {
