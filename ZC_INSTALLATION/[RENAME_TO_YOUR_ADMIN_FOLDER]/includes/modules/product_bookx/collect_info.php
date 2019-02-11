@@ -366,8 +366,8 @@ $printings = $db->Execute("SELECT p.bookx_printing_id, pd.printing_description
 
 foreach ($printings as $printing) {
   $printing_array[] = [
-    'id' => $printing->fields['bookx_printing_id'],
-    'text' => $printing->fields['printing_description']
+    'id' => $printing['bookx_printing_id'],
+    'text' => $printing['printing_description']
   ];
 }
 
