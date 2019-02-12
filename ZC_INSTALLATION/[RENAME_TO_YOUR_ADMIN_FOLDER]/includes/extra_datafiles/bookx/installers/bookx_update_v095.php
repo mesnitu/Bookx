@@ -314,8 +314,9 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_db_encoding . ";");
     $update_095_msg .= $list_msg("Added TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS<br>");
 
-    $db->Execute("CREATE TABLE IF NOT EXISTS  " . TABLE_PRODUCT_BOOKX_SEARCH . " (
+    $sql = "CREATE TABLE ". TABLE_PRODUCT_BOOKX_SEARCH ." (
             search_index int(11) NOT NULL AUTO_INCREMENT,
+            language_id int(11) NOT NULL,
             product_id int(11) NOT NULL,
             publisher_name varchar(64) DEFAULT NULL,
             series_name varchar(64) DEFAULT NULL,
@@ -323,13 +324,13 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             products_subtitle varchar(128) DEFAULT NULL,
             author_name varchar(128) DEFAULT NULL,
             genre_name varchar(128) DEFAULT NULL,
-            PRIMARY KEY (search_index),
+            PRIMARY KEY (search_index, language_id),
             KEY idx_pbxs_product_id (product_id),
             KEY idx_pbxs_author_name (author_name),
             KEY idx_pbxs_publisher (publisher_name),
             KEY idx_pbxs_isbn (isbn),
             KEY idx_pbxs_series_name (series_name)
-            ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_db_encoding . ";");
+            ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_db_encoding .";";
     $update_095_msg .= $list_msg("Added TABLE_PRODUCT_BOOKX_BOOKX_SEARCH<br>");
     
    

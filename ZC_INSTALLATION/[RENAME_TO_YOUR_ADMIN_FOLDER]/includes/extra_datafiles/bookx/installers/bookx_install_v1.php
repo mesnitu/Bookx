@@ -861,6 +861,7 @@ EOT;
         
         $sql = "CREATE TABLE ". TABLE_PRODUCT_BOOKX_SEARCH ." (
             search_index int(11) NOT NULL AUTO_INCREMENT,
+            language_id int(11) NOT NULL,
             product_id int(11) NOT NULL,
             publisher_name varchar(64) DEFAULT NULL,
             series_name varchar(64) DEFAULT NULL,
@@ -868,7 +869,7 @@ EOT;
             products_subtitle varchar(128) DEFAULT NULL,
             author_name varchar(128) DEFAULT NULL,
             genre_name varchar(128) DEFAULT NULL,
-            PRIMARY KEY (search_index),
+            PRIMARY KEY (search_index, language_id),
             KEY idx_pbxs_product_id (product_id),
             KEY idx_pbxs_author_name (author_name),
             KEY idx_pbxs_publisher (publisher_name),
@@ -1125,6 +1126,7 @@ EOT;
 		    ,('Author Listing: Max. number of Authors per page', 'MAX_DISPLAY_BOOKX_AUTHOR_LISTING', '30', '<br />Maximum number of listed authors on author listing. No value defaults to 20 rows per page.', {$cf_gid}, 145, NOW(), NOW(), NULL, NULL)
 		    ,('Author Listing Photo: Maximum Height', 'BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT', '90', '<br />Maximum height in pixels for author photo on author listing. A value of 0 will show all images at their actual size without any scaling.', {$cf_gid}, 150, NOW(), NOW(), NULL, NULL)
 		    ,('Author Listing Photo: Maximum Width', 'BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH', '100', '<br />Maximum width in pixels for author photo on author listing. A value of 0 will show all images at their actual size without any scaling.', {$cf_gid}, 160, NOW(), NOW(), NULL, NULL)
+            ,('Author Image Folder Name', 'BOOKX_AUTHOR_IMAGES_FOLDER', 'authors', '<br />Where to save the authors Images. This will look for the folder name inside the images directory.', {$cf_gid}, 161, NOW(), NOW(), NULL, NULL)
 		    ,('Author Listing: Show only authors of stocked books', 'BOOKX_AUTHOR_LISTING_SHOW_ONLY_STOCKED', '1', '<br />Show only those authors in the author listing, which have a book in the shop that is in stock (i.e. product is visible <u>and</u> stock is greater than "0"). If this setting is turned on, a checkbox is displayed on top of the author listing, which allows users to override this setting. If this is not desired, set CSS "display: none" to hide it.', {$cf_gid}, 165,  now(), now(), NULL, "zen_cfg_select_drop_down(array(array('id'=>'1', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_ENABLED')), array('id'=>'0', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_DISABLED'))),")
 		    ,('Author Listing: Sort authors by', 'BOOKX_AUTHOR_LISTING_ORDER_BY', '1', '<br />Sort authors in author listing by:', {$cf_gid}, 167,  now(), now(), NULL, "zen_cfg_select_drop_down(array(array('id'=>'1', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_ORDER_BY_NAME')), array('id'=>'2', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_ORDER_BY_SORT_ORDER'))),")
 		    ,('Imprint Listing: Max. number of imprints per page', 'MAX_DISPLAY_BOOKX_IMPRINT_LISTING', '30', '<br />Maximum number of listed imprints on imprint listing. No value defaults to 20 rows per page.', {$cf_gid}, 168, NOW(), NOW(), NULL, NULL)

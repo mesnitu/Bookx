@@ -2,6 +2,9 @@
 /**
  * German Language Configuration install. 
  * Can't test this, since it appears to be a diferent zencart ( TABLE_PRODUCT_TYPE_LAYOUT_LANGUAGE ) 
+ * 
+ * THis was added to configuration
+ * ,('Author Listing Photo: Maximum Width', 'BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH', '100', '<br />Maximum width in pixels for author photo on author listing. A value of 0 will show all images at their actual size without any scaling.', {$cf_gid}, 160, NOW(), NOW(), NULL, NULL)
  */
 
 if (!defined('IS_ADMIN_FLAG')) {

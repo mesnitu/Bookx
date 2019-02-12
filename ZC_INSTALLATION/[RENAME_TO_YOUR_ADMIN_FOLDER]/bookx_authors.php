@@ -26,7 +26,7 @@
  *
  */
 require('includes/application_top.php');
-                        
+                     
 $action = (isset($_GET['action']) ? $_GET['action'] : '');
 $sort_order = (isset($_GET['list_order'])) ? '&list_order=' . $_GET['list_order'] : '';
 //pr($action);
@@ -248,10 +248,11 @@ $col_left_css = 'col-xs-12 col-sm-12 col-md-8 configurationColumnLeft';
 $col_right_css = 'col-xs-12 col-sm-12 col-md-4 configurationColumnRight';
 $form_class = 'form-horizontal';
 $form_control = ' class="form-control"';
+
 /**
  * tpl wrap form labels and input fields to dispay 
  */
-$wrap = function($label = array('name', 'for', 'style'), $input_field, $input_type = false) {
+$tpl_wrap = function($label = array('name', 'for', 'style'), $input_field, $input_type = false) {
     $class = (empty($label[2])) ? 'col-sm-3' : $label[2];
     if ($input_type == 'checkbox') {
         $display = '<div class="checkbox"><label class="' . $class . '">' . $input_field . $label[0] . '</label></div>';
@@ -479,28 +480,34 @@ switch ($action) {
         $contents = array('form' => zen_draw_form('author', FILENAME_BOOKX_AUTHORS, 'action=insert', 'post', 'class="form-horizontal" enctype="multipart/form-data"'));
         $contents[] = array('text' => '<p>' . TEXT_NEW_INTRO . '</p>');
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_NAME,
                 'author_name'
                 ), zen_draw_input_field('author_name', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_name') . $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_DEFAULT_TYPE,
                 'author_default_type'
                 ), zen_draw_pull_down_menu('author_default_type', $author_types_array, '', $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE,
                 'author_image'
                 ), zen_draw_file_field('author_image', false, $form_control))
         );
 
         $dir = @dir(DIR_FS_CATALOG_IMAGES);
-        $dir_info[] = array('id' => '', 'text' => "Main Directory");
+        /*
+         * If the default author folder is set, it will be the selected first. less time.
+         */
+        if ( BOOKX_AUTHOR_IMAGES_FOLDER != '') {
+            $dir_info[] = array('id' => BOOKX_AUTHOR_IMAGES_FOLDER . '/', 'text' => BOOKX_AUTHOR_IMAGES_FOLDER . '(default dir)');
+        }
+        $dir_info[] = array('id' => '', 'text' => " -- Main Directory --");
         while ($file = $dir->read()) {
-            if (is_dir(DIR_FS_CATALOG_IMAGES . $file) && strtoupper($file) != 'CVS' && $file != "." && $file != "..") {
+            if (is_dir(DIR_FS_CATALOG_IMAGES . $file) && strtoupper($file) != 'CVS' && $file != "." && $file != ".." && $file != BOOKX_AUTHOR_IMAGES_FOLDER) {
                 $dir_info[] = array('id' => $file . '/', 'text' => $file);
             }
         }
@@ -508,37 +515,36 @@ switch ($action) {
 
         $default_directory = 'bookx_authors/';
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 'url download',
                 'author_image_url'
                 ), zen_draw_input_field('author_image_url', '', $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_DIR,
                 'img_dir'
-                ), zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory, $form_control))
+                ), zen_draw_pull_down_menu('img_dir', $dir_info, BOOKX_AUTHOR_IMAGES_FOLDER, $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_MANUAL,
                 'author_image_manual'
                 ), zen_draw_input_field('author_image_manual', '', $form_control))
-        );
-        
+        );       
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_COPYRIGHT,
                 'author_image_copyright'
                 ), zen_draw_input_field('author_image_copyright', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_image_copyright') . $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_URL,
                 'author_url'
                 ), zen_draw_input_field('author_url', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_url') . $form_control))
         );
-
+        
         $author_description_textarea = '';
         $languages = zen_get_languages();
         for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
@@ -546,7 +552,7 @@ switch ($action) {
         }
 
         $contents[] = array('text' =>
-            $wrap(array(
+            $tpl_wrap(array(
                 TEXT_AUTHOR_DESCRIPTION,
                 'author_description',
                 'block'
@@ -555,7 +561,7 @@ switch ($action) {
 
         $default_value = ($author_sort_order) ?? '0';
         $contents[] = array('text' =>
-            $wrap(array(
+            $tpl_wrap(array(
                 TEXT_AUTHOR_SORT_ORDER,
                 'author_sort_order'
                 ), zen_draw_input_field('author_sort_order', $default_value, $form_control))
@@ -574,22 +580,22 @@ switch ($action) {
         $contents = array('form' => zen_draw_form('author', FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . $sort_order . '&mID=' . $aInfo->bookx_author_id . '&action=save' . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : ''), 'post', 'class="form-horizontal" enctype="multipart/form-data"'));
         $contents[] = array('text' => TEXT_EDIT_INTRO);
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_NAME,
                 'author_name'
                 ), zen_draw_input_field('author_name', htmlspecialchars($aInfo->author_name, ENT_COMPAT, CHARSET, true), zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_name') . $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_DEFAULT_TYPE, 
                 'author_default_type'
                 ), zen_draw_pull_down_menu('author_default_type', $author_types_array, $aInfo->author_default_type, $form_control))
         );
         $contents[] = array(
-            'text' => (null != $aInfo->author_image && '' != $aInfo->author_image) ? $wrap(array('Current', 'img'), zen_image(DIR_WS_CATALOG_IMAGES . $aInfo->author_image, $aInfo->author_name, BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="img-responsive"')) : TEXT_AUTHOR_IMAGE_NOT_DEFINED);
+            'text' => (null != $aInfo->author_image && '' != $aInfo->author_image) ? $tpl_wrap(array('Current', 'img'), zen_image(DIR_WS_CATALOG_IMAGES . $aInfo->author_image, $aInfo->author_name, BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="img-responsive"')) : TEXT_AUTHOR_IMAGE_NOT_DEFINED);
 
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE, 
                 'author_image'
                 ), zen_draw_file_field('author_image', false, $form_control) . $aInfo->author_image)
@@ -604,36 +610,38 @@ switch ($action) {
         $dir->close();
         sort($dir_info);
         $default_directory = substr($aInfo->author_image, 0, strpos($aInfo->author_image, '/') + 1);
+        
         if ('' == $aInfo->author_image) {
-            $default_directory = 'bookx_authors/';
+            $default_directory = BOOKX_AUTHOR_DEFAULT_IMAGE. '/';
         }
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 'url download',
                 'author_image_url'
                 ), zen_draw_input_field('author_image_url', '', $form_control))
         );
+        //zen_draw_pull_down_menu($name, $values, $default = '', $parameters = '', $required = false) {
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_DIR, 
                 'img_dir'
                 ), zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory, $form_control))
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_MANUAL, 
                 'author_image_manual'
                 ), zen_draw_input_field('author_image_manual', '', $form_control))
         );
         $contents[] = array('text' =>
-            $wrap(array(
+            $tpl_wrap(array(
                 TEXT_AUTHOR_IMAGE_COPYRIGHT, 
                 'author_image_copyright'
                 ), zen_draw_input_field('author_image_copyright', $aInfo->author_image_copyright, zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_image_copyright') . $form_control))
         );
 
         $contents[] = array('text' =>
-            $wrap(array(TEXT_AUTHOR_URL, 'author_url'), zen_draw_input_field('author_url', $aInfo->author_url, zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_url') . $form_control))
+            $tpl_wrap(array(TEXT_AUTHOR_URL, 'author_url'), zen_draw_input_field('author_url', $aInfo->author_url, zen_set_field_length(TABLE_PRODUCT_BOOKX_AUTHORS, 'author_url') . $form_control))
         );
         
         $author_description_textarea = '';
@@ -643,14 +651,14 @@ switch ($action) {
         }
 
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_DESCRIPTION,
                 'author_description',
                 'block'
                 ), $author_description_textarea, 'textarea')
         );
         $contents[] = array(
-            'text' => $wrap(array(
+            'text' => $tpl_wrap(array(
                 TEXT_AUTHOR_SORT_ORDER,
                 'author_sort_order'
                 ), zen_draw_input_field('author_sort_order', $aInfo->author_sort_order, $form_control))
@@ -679,7 +687,7 @@ switch ($action) {
         }
 
         $contents[] = array('text' =>
-            $wrap(array(
+            $tpl_wrap(array(
                 TEXT_APPLY_AUTHOR_LIST_OUT_OF_STOCK, 
                 'apply_authors_list_all_products'
                 ), zen_draw_checkbox_field('apply_authors_list_all_products', true, $flag_apply_authors_list_all_products, '', 'id="apply_authors_list_all_products" onClick="document.getElementById(\'remove_authors_list_all_products\').checked=this.checked; document.getElementById(\'multiple_apply\').value=true; this.form.submit()"'), 'checkbox') . zen_draw_hidden_field('multiple_apply', false, 'id="multiple_apply"')
@@ -722,7 +730,7 @@ switch ($action) {
         $contents[] = array('text' => '<h4 class="infoBoxHeading">' . TEXT_REMOVE_AUTHOR . '</h4>');
 
         $contents[] = array('text' =>
-            $wrap(array(
+            $tpl_wrap(array(
                 TEXT_APPLY_AUTHOR_LIST_OUT_OF_STOCK
                 ), zen_draw_checkbox_field('remove_authors_list_all_products', true, $flag_apply_authors_list_all_products, '', 'id="remove_authors_list_all_products" onClick="document.getElementById(\'apply_authors_list_all_products\').checked=this.checked; document.getElementById(\'multiple_apply\').value=true; this.form.submit()"'), 'checkbox'));
 
@@ -765,7 +773,7 @@ switch ($action) {
         $contents = array('form' => zen_draw_form('author', FILENAME_BOOKX_AUTHORS, 'page=' . $_GET['page'] . $sort_order . '&action=deleteconfirm' . ((isset($_GET['search']) && !empty($_GET['search'])) ? '&search=' . $_GET['search'] : ''), 'post', 'class="form-horizontal"') . zen_draw_hidden_field('mID', $aInfo->bookx_author_id));
         $contents[] = array('text' => '<p>' . sprintf(TEXT_DELETE_INTRO, $aInfo->author_name) . '</p>');
         $contents[] = array(
-            'text' => $aInfo->author_name . $wrap(array(
+            'text' => $aInfo->author_name . $tpl_wrap(array(
                 TEXT_DELETE_IMAGE, 
                 'delete_image'
                 ), zen_draw_checkbox_field('delete_image', '', true), 'checkbox')
@@ -773,7 +781,7 @@ switch ($action) {
 
         if ($aInfo->products_count > 0) {
             $contents[] = array('text' =>
-                $wrap(array(
+                $tpl_wrap(array(
                     sprintf(TEXT_DELETE_PRODUCTS, $aInfo->author_name)
                     ), zen_draw_checkbox_field('delete_products'), 'checkbox'), 'checkbox');
             $contents[] = array('text' => '<p class="text-danger">' . sprintf(TEXT_DELETE_WARNING_PRODUCTS, $aInfo->products_count, $aInfo->author_name) . '</p>');
