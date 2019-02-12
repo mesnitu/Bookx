@@ -75,9 +75,13 @@ $sql = 'SELECT ba.bookx_author_id, ba.author_name, ba.author_image, ba.author_ur
 
 $bookx_authors_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_AUTHOR_LISTING, 'ba.bookx_author_id', 'page');
 $bookx_authors_listing = $db->Execute($bookx_authors_listing_split->sql_query);
+/*
+ * @todo this should go somewhere more global, but where ? a init ? observer ?
+ */
+$authors_default_image = DIR_WS_IMAGES . BOOKX_AUTHOR_IMAGES_FOLDER .'/'. BOOKX_AUTHOR_DEFAULT_IMAGE; 
 $temp_index = array();
-
 $bookx_authors_listing_split_array = array();
+
 while ( ! $bookx_authors_listing->EOF ) {
 	//$temp_author_types_array = explode('#§#', $bookx_authors_listing_split->fields['author_types']);
     /**
@@ -87,7 +91,7 @@ while ( ! $bookx_authors_listing->EOF ) {
 	$bookx_authors_listing_split_array [] = array ('bookx_author_id' => $bookx_authors_listing->fields ['bookx_author_id']
 												   ,'author_name' => $bookx_authors_listing->fields ['author_name']
 												   ,'author_types' => (!empty($bookx_authors_listing->fields ['author_types']) ? '(' . $bookx_authors_listing->fields ['author_types'] . ')': '')
-												   ,'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : BOOKX_AUTHOR_DEFAULT_IMAGE)
+												   ,'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : $authors_default_image)
 												   ,'author_description' => $bookx_authors_listing->fields ['author_description']
 												   ,'author_url' => $bookx_authors_listing->fields ['author_url']
 												   );
