@@ -68,7 +68,51 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     $sql_data_array['products_image'] = '';
     $new_image = 'false';
   }
+  
+  /*
+   * Correct if wrong. It seens that if there's a entry error ( for some reason) and bookx extra doesn't have the product_id, 
+   * it's not going to insert anything because it's on a update state.
+   * I guess this prevents that condition ( that probably only occurs in devolepment), checking if this pID is present. If not, first insert and then
+   * continue with the update 
+   */
+  if ($action == 'update_product') {
+  $check_be = $db->Execute("SELECT products_id FROM " . TABLE_PRODUCT_BOOKX_EXTRA . " WHERE products_id =" . (int) $products_id . " ");
+    if ($check_be->RecordCount() == 0) {
+        $db->Execute("INSERT INTO " . TABLE_PRODUCT_BOOKX_EXTRA . " (products_id) VALUES ('" . (int) $products_id . "')");
+    }
+  }
+    
+  /*
+   * This data for bookx_extra it's the same of both insert & update
+   */
+  if (isset($_POST['publishing_date']) && zen_not_null($_POST['publishing_date'])) {
+      if ($_POST['date_format'] == 'MM yy') {
+        $date = DateTime::createFromFormat('F Y', $_POST['publishing_date']);
+        $publishing_date = $date->format('Y-m') . '-00';
+      } elseif ($_POST['date_format'] == 'yy' || strlen($_POST['publishing_date']) == 4) {
+        $date = DateTime::createFromFormat('Y', $_POST['publishing_date']);
+        $publishing_date = $_POST['publishing_date'] . '-00-00';
+      } else {
+        $publishing_date = $_POST['publishing_date'];
+      }
+    }
 
+    $sql_data_array_be = [
+      'products_id' => (int)$products_id,
+      'bookx_publisher_id' => (int)$_POST['bookx_publisher_id'],
+      'bookx_series_id' => (int)$_POST['bookx_series_id'],
+      'bookx_imprint_id' => (int)$_POST['bookx_imprint_id'],
+      'bookx_binding_id' => (int)$_POST['bookx_binding_id'],
+      'bookx_printing_id' => (int)$_POST['bookx_printing_id'],
+      'bookx_condition_id' => (int)$_POST['bookx_condition_id'],
+      'publishing_date' => bookx_null_check($publishing_date),
+      'pages' => bookx_null_check($_POST['pages']),
+      'volume' => bookx_null_check($_POST['volume']),
+      'size' => bookx_null_check($_POST['size']),
+      'isbn' => bookx_null_check(preg_replace('/[^0-9]/', '', $_POST['isbn']))
+    ];
+   
+    //die();
   if ($action == 'insert_product') {
     $sql_data_array['products_date_added'] = 'now()';
     $sql_data_array['master_categories_id'] = (int)$current_category_id;
@@ -87,35 +131,7 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     ///////////////////////////////////////////////////////
     //// INSERT PRODUCT-TYPE-SPECIFIC *INSERTS* HERE //////
 
-    if (isset($_POST['publishing_date']) && zen_not_null($_POST['publishing_date'])) {
-      if ($_POST['date_format'] == 'MM yy') {
-        $date = DateTime::createFromFormat('F Y', $_POST['publishing_date']);
-        $publishing_date = $date->format('Y-m') . '-00';
-      } elseif ($_POST['date_format'] == 'yy' || strlen($_POST['publishing_date']) == 4) {
-        $date = DateTime::createFromFormat('Y', $_POST['publishing_date']);
-        $publishing_date = $_POST['publishing_date'] . '-00-00';
-      } else {
-        $publishing_date = $_POST['publishing_date'];
-      }
-    }
-
-
-    $sql_data_array = [
-      'products_id' => (int)$products_id,
-      'bookx_publisher_id' => (int)$_POST['bookx_publisher_id'],
-      'bookx_series_id' => (int)$_POST['bookx_series_id'],
-      'bookx_imprint_id' => (int)$_POST['bookx_imprint_id'],
-      'bookx_binding_id' => (int)$_POST['bookx_binding_id'],
-      'bookx_printing_id' => (int)$_POST['bookx_printing_id'],
-      'bookx_condition_id' => (int)$_POST['bookx_condition_id'],
-      'publishing_date' => bookx_null_check($publishing_date),
-      'pages' => bookx_null_check($_POST['pages']),
-      'volume' => bookx_null_check($_POST['volume']),
-      'size' => bookx_null_check($_POST['size']),
-      'isbn' => bookx_null_check(preg_replace('/[^0-9]/', '', $_POST['isbn']))
-    ];
-
-    zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array);
+    zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array_be);
 
     if (isset($_POST['bookx_genre_id']) && is_array($_POST['bookx_genre_id'])) {
       foreach ($_POST['bookx_genre_id'] as $array_key => $array_value) {
@@ -210,35 +226,8 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     ///////////////////////////////////////////////////////
     //// INSERT PRODUCT-TYPE-SPECIFIC *UPDATES* HERE //////
 
-    if (isset($_POST['publishing_date']) && zen_not_null($_POST['publishing_date'])) {
-      if ($_POST['date_format'] == 'MM yy') {
-        $date = DateTime::createFromFormat('F Y', $_POST['publishing_date']);
-        $publishing_date = $date->format('Y-m') . '-00';
-      } elseif ($_POST['date_format'] == 'yy') {
-        $date = DateTime::createFromFormat('Y', $_POST['publishing_date']);
-        $publishing_date = $_POST['publishing_date'] . '-00-00';
-      } else {
-        $publishing_date = $_POST['publishing_date'];
-      }
-    }
-
-    $sql_data_array = [
-      'products_id' => (int)$products_id,
-      'bookx_publisher_id' => (int)$_POST['bookx_publisher_id'],
-      'bookx_series_id' => (int)$_POST['bookx_series_id'],
-      'bookx_imprint_id' => (int)$_POST['bookx_imprint_id'],
-      'bookx_binding_id' => (int)$_POST['bookx_binding_id'],
-      'bookx_printing_id' => (int)$_POST['bookx_printing_id'],
-      'bookx_condition_id' => (int)$_POST['bookx_condition_id'],
-      'publishing_date' => bookx_null_check($publishing_date),
-      'pages' => bookx_null_check($_POST['pages']),
-      'volume' => bookx_null_check($_POST['volume']),
-      'size' => bookx_null_check($_POST['size']),
-      'isbn' => bookx_null_check(preg_replace('/[^0-9]/', '', $_POST['isbn']))
-    ];
-
-    zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array, 'update', "products_id = " . (int)$products_id);
-
+    zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array_be, 'update', "products_id = " . (int)$products_id);
+    
     if (isset($_POST['bookx_genre_id']) && is_array($_POST['bookx_genre_id'])) {
       foreach ($_POST['bookx_genre_id'] as $array_key => $array_value) {
         $tmp_value = zen_db_prepare_input($array_value);
@@ -295,7 +284,7 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
           $tmp_value = zen_db_prepare_input($_POST['assigned_author_db_id'][$array_key]);
           $primary_id = (!zen_not_null($tmp_value) || $tmp_value == '' || $tmp_value === 0) ? null : $tmp_value;
         }
-
+       
         $atp_action = 'insert';
         $where_clause = '';
         switch (true) {
@@ -319,7 +308,7 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
               'products_id' => (int)$products_id,
               'bookx_author_id' => (int)$bookx_author_id,
               'bookx_author_type_id' => (int)$bookx_author_type_id];
-
+              
             zen_db_perform(TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS, $sql_data_array, $atp_action, $where_clause);
             break;
         }
@@ -329,8 +318,9 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
     $languages = zen_get_languages();
     for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
       $language_id = $languages[$i]['id'];
-
+      
       $sql_data_array = ['products_subtitle' => bookx_null_check($_POST['products_subtitle'][$language_id])];
+
       if ($action == 'insert_product' ||
           ($action == 'update_product' && null === bookx_get_products_subtitle($products_id, $language_id))) {
         $insert_sql_data = [
@@ -344,7 +334,7 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
         zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION, $sql_data_array, 'update', "products_id = " . (int)$products_id . " AND languages_id = " . (int)$language_id);
       }
     }
-
+   
     ////    *END OF PRODUCT-TYPE-SPECIFIC UPDATES* ////////
     ///////////////////////////////////////////////////////
   }
