@@ -330,11 +330,11 @@ a:hover .listingProductImage,
     margin-bottom: 20px;
 }
 
-form.bxf select, form.bxf_active select {
+form.bxf select {
     width: 90%;
 }
-form.bxf_active select {
-    color: #f00;
+form.bxf_active select option[selected=selected] {
+    color: #f00; 
 }
 
 #navBreadCrumb .bookxFilterBreadcrumbLabel {
