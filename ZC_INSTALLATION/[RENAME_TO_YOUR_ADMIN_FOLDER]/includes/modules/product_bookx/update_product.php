@@ -212,7 +212,6 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
         }
     } 
 
-
     $sql_data_array['products_last_modified'] = 'now()';
     $sql_data_array['master_categories_id'] = (!empty($_POST['master_category']) && (int)$_POST['master_category'] > 0 ? (int)$_POST['master_category'] : (int)$_POST['master_categories_id']);
 
