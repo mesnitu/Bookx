@@ -14,8 +14,8 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [ZC INSTALLATION]/includes/templates/[CURRENT_TEMPLATE]/sideboxes/tpl_bookx_filters_select.php 2016-02-02 philou $
+ * @version BookX V 1.0.0
+ * @version $Id: [ZC INSTALLATION]/includes/templates/[CURRENT_TEMPLATE]/sideboxes/tpl_bookx_filters_select.php 2019-02-13 mesnitu $
  */
 
 /**
@@ -70,26 +70,26 @@
 
           $destination_page = (isset($_GET['main_page']) && 'index' !=  $_GET['main_page'] && !$this_is_home_page ? $_GET['main_page'] : FILENAME_BOOKX_AUTHORS_LIST);
 
-          $content .= zen_draw_form('bookx_author_types_form', zen_href_link($destination_page, '', $request_type, false), 'get', ($active_bx_filter_ids['author_type_id'] ? 'class="bxf_active"' : ''));
+          $content .= zen_draw_form('bookx_author_types_form', zen_href_link($destination_page, '', $request_type, false), 'get', 'class="'.($active_bx_filter_ids['author_type_id'] ? 'bxf_active' : 'bxf').'"');
           if (isset($_GET['bookx_author_id']) && zen_not_null($_GET['bookx_author_id'])) {
               //*** author & author type can always be combined, so if an ATypeId is set, we keep it
               $content .= zen_draw_hidden_field('bookx_author_id', (int)$_GET['bookx_author_id']);
           }
           $content .= $hidden_publisher_id_field . $hidden_imprint_id_field . $hidden_series_id_field . $hidden_genre_id_field;
           $content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . (isset($_GET['typefilter']) && 'bookx' == $_GET['typefilter'] ? zen_draw_hidden_field('typefilter', 'bookx') : '');
-          $content .= zen_draw_pull_down_menu('bookx_author_type_id', $bookx_author_types_array, $active_bx_filter_ids['author_type_id'], $author_type_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+          $content .= zen_draw_pull_down_menu('bookx_author_type_id', $bookx_author_types_array, $active_bx_filter_ids['author_type_id'], $author_type_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
           $content .= '</form>';
       } else {
           $content .= '<div class="bookx_filter_sidebox_popup_label">' . LABEL_FILTER_AUTHOR . '</div>';
       }
-      $content .= zen_draw_form('bookx_authors_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', ($active_bx_filter_ids['author_id'] ? 'class="bxf_active"' : ''));
+      $content .= zen_draw_form('bookx_authors_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', 'class="'.($active_bx_filter_ids['author_id'] ? 'bxf_active' : 'bxf').'"');
       if (isset($_GET['bookx_author_type_id']) && zen_not_null($_GET['bookx_author_type_id'])) {
           //*** author & author type can always be combined, so if an ATypeId is set, we keep it
           $content .= zen_draw_hidden_field('bookx_author_type_id', (int)$_GET['bookx_author_type_id']);
       }
 	  $content .= $hidden_publisher_id_field . $hidden_imprint_id_field . $hidden_series_id_field . $hidden_genre_id_field;
 	  $content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . zen_draw_hidden_field('typefilter', 'bookx');
-	  $content .= zen_draw_pull_down_menu('bookx_author_id', $bookx_authors_array, $active_bx_filter_ids['author_id'], $author_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+	  $content .= zen_draw_pull_down_menu('bookx_author_id', $bookx_authors_array, $active_bx_filter_ids['author_id'], $author_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
 	  $content .= '</form>';
   }
 
@@ -101,10 +101,10 @@
 
   if ($show_publisher_filter) {
   	$content .= '<div class="bookx_filter_sidebox_popup_label">' . LABEL_FILTER_PUBLISHER . '</div>';
-  	$content .= zen_draw_form('bookx_publishers_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', ('' != $active_bx_filter_ids['publisher_id'] ? 'class="bxf_active"' : ''));
+  	$content .= zen_draw_form('bookx_publishers_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', 'class="'.('' != $active_bx_filter_ids['publisher_id'] ? 'bxf_active' : 'bxf').'"');
   	$content .= $hidden_author_id_field . $hidden_author_type_id_field . $hidden_imprint_id_field . $hidden_series_id_field . $hidden_genre_id_field;
   	$content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . zen_draw_hidden_field('typefilter', 'bookx');
-  	$content .= zen_draw_pull_down_menu('bookx_publisher_id', $bookx_publishers_array, $active_bx_filter_ids['publisher_id'], $publisher_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+  	$content .= zen_draw_pull_down_menu('bookx_publisher_id', $bookx_publishers_array, $active_bx_filter_ids['publisher_id'], $publisher_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
   	$content .= '</form>';
   }
   
@@ -115,10 +115,10 @@
 
   if ($show_imprint_filter) {
   	  $content .= '<div class="bookx_filter_sidebox_popup_label">' . LABEL_FILTER_IMPRINT . '</div>';
-  	$content .= zen_draw_form('bookx_imprints_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', ($active_bx_filter_ids['imprint_id'] ? 'class="bxf_active"' : ''));
+  	$content .= zen_draw_form('bookx_imprints_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', 'class="'.($active_bx_filter_ids['imprint_id'] ? 'bxf_active' : 'bxf').'"');
   	$content .= $hidden_author_id_field . $hidden_author_type_id_field .  $hidden_publisher_id_field . $hidden_series_id_field . $hidden_genre_id_field;
   	$content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . zen_draw_hidden_field('typefilter', 'bookx');
-  	$content .= zen_draw_pull_down_menu('bookx_imprint_id', $bookx_imprints_array, $active_bx_filter_ids['imprint_id'], $imprint_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+  	$content .= zen_draw_pull_down_menu('bookx_imprint_id', $bookx_imprints_array, $active_bx_filter_ids['imprint_id'], $imprint_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
   	$content .= '</form>';
   }
   
@@ -129,10 +129,10 @@
 
   if ($show_series_filter) {
   	  $content .= '<div class="bookx_filter_sidebox_popup_label">' . LABEL_FILTER_SERIES . '</div>';
-  	$content .= zen_draw_form('bookx_series_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', ($active_bx_filter_ids['series_id'] ? 'class="bxf_active"' : ''));
+  	$content .= zen_draw_form('bookx_series_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', 'class="'.($active_bx_filter_ids['series_id'] ? 'bxf_active' : 'bxf').'"');
   	$content .= $hidden_author_id_field . $hidden_author_type_id_field .  $hidden_publisher_id_field . $hidden_imprint_id_field . $hidden_genre_id_field;
   	$content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . zen_draw_hidden_field('typefilter', 'bookx');
-  	$content .= zen_draw_pull_down_menu('bookx_series_id', $bookx_series_array, $active_bx_filter_ids['series_id'], $series_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+  	$content .= zen_draw_pull_down_menu('bookx_series_id', $bookx_series_array, $active_bx_filter_ids['series_id'], $series_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
   	$content .= '</form>';
   }
 
@@ -143,10 +143,10 @@
 
   if ($show_genre_filter) {
   	$content .= '<div class="bookx_filter_sidebox_popup_label">' . LABEL_FILTER_GENRE . '</div>';
-  	$content .= zen_draw_form('bookx_genres_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', ($active_bx_filter_ids['genre_id'] ? 'class="bxf_active"' : ''));
+  	$content .= zen_draw_form('bookx_genres_form', zen_href_link(FILENAME_DEFAULT, '', $request_type, false), 'get', 'class="'.($active_bx_filter_ids['genre_id'] ? 'bxf_active' : 'bxf').'"');
   	$content .= $hidden_author_id_field . $hidden_publisher_id_field . $hidden_imprint_id_field . $hidden_series_id_field;
   	$content .= zen_draw_hidden_field('main_page', FILENAME_DEFAULT) . zen_hide_session_id() . zen_draw_hidden_field('typefilter', 'bookx');
-  	$content .= zen_draw_pull_down_menu('bookx_genre_id', $bookx_genres_array, $active_bx_filter_ids['genre_id'], $genre_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '" style="width: 90%; margin: auto;"');
+  	$content .= zen_draw_pull_down_menu('bookx_genre_id', $bookx_genres_array, $active_bx_filter_ids['genre_id'], $genre_filter_select_disabled . ' onchange="this.form.submit();" size="' . BOOKX_MAX_SIZE_FILTER_LIST . '"');
   	$content .= '</form>';
   }
   

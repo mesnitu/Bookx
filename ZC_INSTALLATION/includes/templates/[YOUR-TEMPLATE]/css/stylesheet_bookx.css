@@ -330,6 +330,9 @@ a:hover .listingProductImage,
     margin-bottom: 20px;
 }
 
+form.bxf select, form.bxf_active select {
+    width: 90%;
+}
 form.bxf_active select {
     color: #f00;
 }
