@@ -963,19 +963,33 @@ class productTypeFilterObserver extends base
             $extra_html = '';
 
             if (isset($_GET['bookx_author_id']) && !empty($_GET['bookx_author_id'])) {
+                
+                /*
+                 * Trying to  not duplicate necessary queries. To display proper metatags for authors, etc, the query must happen before to populate
+                 * metatags, and then will happen here again. 
+                 * Not sure what's the best way, maybe someone can have another way. 
+                 * Because this file is getting big and hard to read, I created a new observer to deal with canonical and metatags (dinamic metatags)
+                 * So this information is comming from that file on a global scope. 
+                 * 
+                 */
+                
+                global $author_meta_info; // this is comming from class.bookx_observers_canonical.php
+                
+                $author = $author_meta_info; // assign author to author_meta_tags , so now everything is the same. 
+
                 $this->bookx_filter_active ++;
                 $this->filtered_author_id = (int) $_GET['bookx_author_id'];
-
+                
                 $this->flag_show_product_bookx_filter_author_extra_info = bookx_get_show_product_switch('author', 'SHOW_', '_FILTER_EXTRA_INFO');
                 if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_author_extra_info) {
-                    $sql = 'SELECT ba.author_name, ba.author_image, bad.author_description, ba.author_url
-							FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba
-							LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . ' bad ON bad.bookx_author_id = ba.bookx_author_id AND bad.languages_id = "' . (int) $_SESSION['languages_id'] . '"
-							WHERE ba.bookx_author_id = "' . (int) $this->filtered_author_id . '"';
-                    $author = $db->Execute($sql);
-
+//                    $sql = 'SELECT ba.author_name, ba.author_image, bad.author_description, ba.author_url
+//							FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba
+//							LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . ' bad ON bad.bookx_author_id = ba.bookx_author_id AND bad.languages_id = "' . (int) $_SESSION['languages_id'] . '"
+//							WHERE ba.bookx_author_id = "' . (int) $this->filtered_author_id . '"';
+//                    $author = $db->Execute($sql);
+                    //pr($author);
                     if (!empty($author->fields['author_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_author_extra_info) {
-                        $extra_html .= '<div id="bookx_filter_author_image">' . zen_image(DIR_WS_IMAGES . $author->fields['author_image'], $author->fields['author_name'], BOOKX_AUTHOR_IMAGE_WIDTH, BOOKX_AUTHOR_IMAGE_MAX_HEIGHT) . '</div>';
+                        $extra_html .= '<div id="bookx_filter_author_image">' . zen_image(DIR_WS_IMAGES . $author->fields['author_image'], $author->fields['author_name'], BOOKX_AUTHOR_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_IMAGE_MAX_HEIGHT) . '</div>';
                     }
 
                     if (!empty($author->fields['author_description']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_author_extra_info) {

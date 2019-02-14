@@ -31,9 +31,10 @@ if (!defined('IS_ADMIN_FLAG')) {
     $autoLoadConfig[10][] = array('autoType'=>'class',
 			'loadFile'=>'observers/class.bookx_observers_canonical.php');
 	
-	$autoLoadConfig[161][] = array('autoType'=>'classInstantiate',
+	$autoLoadConfig[90][] = array('autoType'=>'classInstantiate',
 			'className'=>'bookxCanonicalObserver',
 			'objectName'=>'bookxCanonicalObserver');
+
     
 //    $autoLoadConfig[80][] = array('autoType'=>'init_script',
 //                                 'loadFile'=> 'init_bookx.php');
