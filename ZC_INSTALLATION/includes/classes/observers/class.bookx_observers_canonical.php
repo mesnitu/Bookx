@@ -78,7 +78,7 @@ class bookxCanonicalObserver extends base
                 $this->updateNotifyModuleMetaTagsBuildkeywords($callingClass, $notifier, $paramsArray);
                 break;
             case 'NOTIFY_MAIN_TEMPLATE_VARS_EXTRA_PRODUCT_BOOKX_INFO':
-                $this->updateNotifyProductTypeVarsProductBookxInfo($callingClass, $notifier, $paramsArray);
+                //$this->updateNotifyProductTypeVarsProductBookxInfo($callingClass, $notifier, $paramsArray);
                 break;
             
         }
