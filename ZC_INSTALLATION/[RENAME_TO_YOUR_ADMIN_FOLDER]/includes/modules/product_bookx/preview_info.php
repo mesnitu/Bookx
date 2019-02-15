@@ -63,7 +63,7 @@ if (zen_not_null($_POST)) {
     if (isset ($_POST['bookx_genre_id']) && is_array ($_POST['bookx_genre_id'])) {
         $bookx_genre_ids = $_POST['bookx_genre_id'];
         foreach ($bookx_genre_ids as $genre) {
-            $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . bookx_get_binding_name ($genre, (int) $_SESSION['languages_id']);
+            $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . bookx_get_genre_name($genre, (int) $_SESSION['languages_id']);
         }
     }
 
@@ -231,7 +231,7 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
         if (!empty ($bookx_genre_ids) && is_array ($bookx_genre_ids)) {
             $pInfo->genres = array();
             foreach ($bookx_genre_ids as $genre_id) {
-                $pInfo->genres[] = bookx_get_binding_name ($genre_id, $languages[$i]['id']);
+                $pInfo->genres[] = bookx_get_genre_name ($genre_id, $languages[$i]['id']);
             }
         }
 
