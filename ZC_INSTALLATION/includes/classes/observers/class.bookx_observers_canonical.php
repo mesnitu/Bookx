@@ -77,9 +77,7 @@ class bookxCanonicalObserver extends base
             case 'NOTIFY_MODULE_META_TAGS_BUILDKEYWORDS':
                 $this->updateNotifyModuleMetaTagsBuildkeywords($callingClass, $notifier, $paramsArray);
                 break;
-            case 'NOTIFY_MAIN_TEMPLATE_VARS_EXTRA_PRODUCT_BOOKX_INFO':
-                //$this->updateNotifyProductTypeVarsProductBookxInfo($callingClass, $notifier, $paramsArray);
-                break;
+            
             
         }
     }
@@ -190,15 +188,18 @@ class bookxCanonicalObserver extends base
     {
         global $metatags_title, $metatags_description, $metatags_keywords;
         global $bookx_tpl_meta_info;
+        if ($this->bookx_page == true) {
+            
+        } else {
+            $this->metatags_title = BOOKX_META_MULTIPLE_FILTERS_PREFIX;
+            $this->metatags_description = $this->metatags_title;
+            $name = null;
 
-        $this->metatags_title = BOOKX_META_MULTIPLE_FILTERS_PREFIX;
-        $this->metatags_description = $this->metatags_title;
-        $name = null;
-        
-        $wrap = function ($label, $name=null) {
-            return $label . ' ' . $name . BOOKX_META_DIVIDER;
-        };
-        
+            $wrap = function ($label, $name = null) {
+                return $label . ' ' . $name . BOOKX_META_DIVIDER;
+            };
+        }
+
         if (!empty($this->active_filters['bookx_author_id'])) {
             if ($this->count_filters == 1) {
                 global $author_meta_info;
@@ -287,6 +288,7 @@ class bookxCanonicalObserver extends base
         $metatags_title = $this->metatags_title . $page;
         $metatags_description = $this->metatags_description . $page;
         $metatags_keywords = $this->metatags_keywords;
+        pr($this);
     }
 
     /**
@@ -397,37 +399,6 @@ class bookxCanonicalObserver extends base
         }
         
     }
-    
-    
-    
-    /*
-     * This function will trigger in
-     * C:\xampp\htdocs\vhosts\zencart\includes\modules\pages\product_bookx_info\main_template_vars_product_type.php 
-     */
-//    function updateNotifyProductTypeVarsProductBookxInfo($callingClass, $notifier, $paramsArray) {
-//        
-//        global $db, $products_id_current;
-//        $products_id_current = $_GET['products_id'];
-//        if ($this->bookx_page == true) {
-//            global $bookx_extras;
-//            
-//            $sql = 'SELECT be.*, bed.products_subtitle,
-//        CASE WHEN DAYOFMONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '")
-//        WHEN MONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")
-//        ELSE YEAR(be.publishing_date)
-//        END AS formatted_publishing_date,
-//        CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1))              AS isbn_display FROM ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be
-//        LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . ' bed ON 
-//        bed.products_id = be.products_id AND bed.languages_id = "' . (int) $_SESSION['languages_id'] . '"
-//        WHERE be.products_id = "' . (int) $products_id_current . '"';
-//
-//// IF(DAYOFMONTH(be.publishing_date), DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '"), DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")) AS formatted_publishing_date
-//            $this->bookx_extras = $db->Execute($sql);
-//            //$bookx_extras = $db->Execute($sql);
-//            
-//        }
-//    }
-    
     
     private function count_filters()
     {
