@@ -142,3 +142,29 @@ define('PULL_DOWN_ALL_PUBLISHERS', 'Filter Publishers');
  * @since version 096
  */
 define('LABEL_EXTRA_ATTRIBUTES', 'Attributes: ');
+
+/*
+ * For MetaTags on Filters.
+ * %s is the author, publisher, etc, name
+ */
+define('BOOKX_METATAGS_TITLE', array(
+    'author' => '%s Books at ' . STORE_NAME,
+    'publisher' => 'Publisher %s Books at ' . STORE_NAME,
+    'imprint' => 'Imprint %s Books at ' . STORE_NAME,
+    'genre' => 'Genres %s Books at ' . STORE_NAME,
+    'series' => 'Series %s Books at ' . STORE_NAME
+));
+
+/*
+ * This will be based on array key 'author', 'publisher', etc. 
+ * If you change this keys, you have to change also in the observer
+ * %s is the author, publisher, etc, name
+ */
+define('BOOKX_META_FILTERS_EMPTY_DESCRIPTION', array(
+    'author' => 'Find Books in Our BookShop from %s',
+    'publisher' => 'Find Books in Our BookShop from %s',
+    'imprint' => 'Find Books in Our BookShop from %s',
+    'genre' => 'Find Books in Our BookShop from %s',
+    'series' => 'Find Books in Our BookShop from %s'
+    )
+);
