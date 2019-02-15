@@ -61,7 +61,7 @@
 
         echo '<div class="row">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
         echo '<h3 class="bookxAllListingInfo">' . $author['author_name'] . '' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>' : '') . '</h3>'
-        . (!empty($author['author_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($author['author_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT, SEE_MORE , true) . '</p>' : '')
+        . (!empty($author['author_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($author['author_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT, TEXT_BOOKX_MORE_PRODUCT_INFO , true) . '</p>' : '')
         . (!empty($author['author_url']) ? '<div class="bookxAuthorUrl"><a href="http://' . $author['author_url'] . '" target="_author_site">' . BOOKX_URL_LINK_TEXT_AUTHOR . '</a></div>' : '')
         . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $author['bookx_author_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_AUTHOR, $author['author_name']) . '</a>';
         echo '</div>';

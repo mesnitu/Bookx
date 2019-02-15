@@ -188,102 +188,107 @@ class bookxCanonicalObserver extends base
      //$zco_notifier->notify('NOTIFY_MODULE_META_TAGS_OVERRIDE', $metatag_page_name, $meta_tags_over_ride, $metatags_title, $metatags_description, $metatags_keywords);
     function updateNotifyModuleMetaTagsOverride(&$callingClass, $notifier, $paramsArray)
     {
-        global $db, $metatags_title, $metatags_description, $metatags_keywords;
+        global $metatags_title, $metatags_description, $metatags_keywords;
         global $bookx_tpl_meta_info;
+
+        $this->metatags_title = BOOKX_META_MULTIPLE_FILTERS_PREFIX;
+        $this->metatags_description = $this->metatags_title;
+        $name = null;
         
-        $bookx_metatag_author_keywords = '';
+        $wrap = function ($label, $name=null) {
+            return $label . ' ' . $name . BOOKX_META_DIVIDER;
+        };
         
-        if ($this->count_filters == 1) {
+        if (!empty($this->active_filters['bookx_author_id'])) {
+            if ($this->count_filters == 1) {
+                global $author_meta_info;
+                /*
+                 * send $author_meta_info result as global to be used in main bookx observer
+                 */
+                $author_meta_info = $this->bookxGetMetaTagsInfo('author');
+                /*
+                 * send $bookx_tpl_meta_info result as global to be used in others scopes such as open_graph
+                 */
+                $bookx_tpl_meta_info = $this->metaInfo;
 
-            switch ($this->active_filters) {
-
-                case !empty($this->active_filters['bookx_author_id']):
-                    
-                    global $author_meta_info;
-                    
-                    /*
-                     * send $author_meta_info result as global to be used in main bookx observer
-                     */
-                    $author_meta_info = $this->bookxGetMetaTagsInfo('author');
-                    /*
-                     * send $bookx_tpl_meta_info result as global to be used in others scopes such as open_graph
-                     */
-                    $bookx_tpl_meta_info = $this->metaInfo;
-          
-                    $this->bookxSetMetaTags('author', $description = array(
-                        $this->metaInfo['author_name'],
-                        $this->metaInfo['author_books_names']
-                        ), $this->metaInfo['author_books_names']
-                    );
-
-                    break;
-                
-                case !empty($this->active_filters['bookx_publisher_id']):
-                    
-                    global $publisher_meta_info;
-                    
-                    $publisher_meta_info = $this->bookxGetMetaTagsInfo('publisher');
-                    $bookx_tpl_meta_info = $this->metaInfo;
-                    $this->bookxSetMetaTags('publisher', '', $this->metaInfo['publisher_books_names']);
-                    
-                break;
-                    
-                case !empty($this->active_filters['bookx_imprint_id']):
-                    
-                    global $imprint_meta_info;
-                    
-                    $imprint_meta_info = $this->bookxGetMetaTagsInfo('imprint');
-                    $bookx_tpl_meta_info = $this->metaInfo;
-                    $this->bookxSetMetaTags('imprint', $description = array(
-                        $this->metaInfo['imprint_name']
-                        ), $this->metaInfo['publisher_books_names']);
-
-                    break;
-                case !empty($this->active_filters['bookx_series_id']):
-                    
-                    global $series_meta_info;
-                    
-                    $series_meta_info = $this->bookxGetMetaTagsInfo('series');
-                    $bookx_tpl_meta_info = $this->metaInfo;
-                    
-                    $this->bookxSetMetaTags('series', $description = array(
-                        $this->metaInfo['series_name']
-                        ), $this->metaInfo['series_books_names']);
-
-                    break;
-                
-                case !empty($this->active_filters['bookx_genre_id']):
-                    
-                    global $genre_meta_info;
-                    
-                    $genre_meta_info = $this->bookxGetMetaTagsInfo('genre');
-                    $bookx_tpl_meta_info = $this->metaInfo;
-                    
-                    $this->bookxSetMetaTags('genre', $description = array(
-                        $this->metaInfo['genre_name']
-                        ), $this->metaInfo['genre_books_names']);
-
-                    break;
-
-                default:
-                    break;
+                $this->bookxSetMetaTags('author', $description = array(
+                    $this->metaInfo['author_name'],
+                    $this->metaInfo['author_books_names']
+                    ), $this->metaInfo['author_books_names']
+                );
+            } else {
+                $name = bookx_get_author_name($this->active_filters['bookx_author_id']);
+                $this->metatags_title .= $wrap(LABEL_BOOKX_AUTHOR, $name);
+                $this->metatags_description .= $wrap(sprintf(BOOKX_METATAGS_TITLE['author'],$name), '');
             }
-            $page = (!empty($this->pagination) ? ', page - '. $this->pagination : '');
-            $metatags_title = $this->metatags_title . $page;
-            $metatags_description = $this->metatags_description . $page;
-            $metatags_keywords = $this->metatags_keywords;
-        } else {
-            $metatags_title = '';
-            foreach ($this->active_filters as $filter) {
-                $sql = 'SELECT author_name FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' WHERE '
-                    . 'ba.bookx_author_id = "' . (int) $filter . '"';
-                //$author = $db->Execute($sql);
-            }
-            pr($this);
         }
-        
+        if (!empty($this->active_filters['bookx_publisher_id'])) {
+            if ($this->count_filters == 1) {
+                global $publisher_meta_info;
+
+                $publisher_meta_info = $this->bookxGetMetaTagsInfo('publisher');
+                $bookx_tpl_meta_info = $this->metaInfo;
+                $this->bookxSetMetaTags('publisher', '', $this->metaInfo['publisher_books_names']);
+            } else {
+                $name = bookx_get_publisher_name($this->active_filters['bookx_publisher_id']);
+                $this->metatags_title .= $wrap(LABEL_BOOKX_PUBLISHER, $name);
+                $this->metatags_description .= $wrap(sprintf(BOOKX_METATAGS_TITLE['publisher'],$name));
+            }
+        }
+        if (!empty($this->active_filters['bookx_imprint_id'])) {
+            if ($this->count_filters == 1) {
+                global $imprint_meta_info;
+
+                $imprint_meta_info = $this->bookxGetMetaTagsInfo('imprint');
+                $bookx_tpl_meta_info = $this->metaInfo;
+                $this->bookxSetMetaTags('imprint', $description = array(
+                    $this->metaInfo['imprint_name']
+                    ), $this->metaInfo['publisher_books_names']);
+            } else {
+                $name = bookx_get_imprint_name($this->active_filters['bookx_imprint_id']);
+                $this->metatags_title .= $wrap(LABEL_BOOKX_IMPRINT . $name);
+                $this->metatags_description .= $wrap(sprintf(BOOKX_METATAGS_TITLE['imprint'],$name));
+            }
+        }
+        if (!empty($this->active_filters['bookx_series_id'])) {
+            if ($this->count_filters == 1) {
+                global $series_meta_info;
+
+                $series_meta_info = $this->bookxGetMetaTagsInfo('series');
+                $bookx_tpl_meta_info = $this->metaInfo;
+
+                $this->bookxSetMetaTags('series', $description = array(
+                    $this->metaInfo['series_name']
+                    ), $this->metaInfo['series_books_names']);
+            } else {
+                $name = bookx_get_series_name($this->active_filters['bookx_series_id'], $_SESSION['languages_id']);
+                $this->metatags_title .= $wrap(LABEL_BOOKX_SERIE, $name);
+                $this->metatags_description .= $wrap(sprintf(BOOKX_METATAGS_TITLE['series'],$name));
+            }
+        }
+        if (!empty($this->active_filters['bookx_genre_id'])) {
+            if ($this->count_filters == 1) {
+                global $genre_meta_info;
+
+                $genre_meta_info = $this->bookxGetMetaTagsInfo('genre');
+                $bookx_tpl_meta_info = $this->metaInfo;
+
+                $this->bookxSetMetaTags('genre', $description = array(
+                    $this->metaInfo['genre_name']
+                    ), $this->metaInfo['genre_books_names']);
+            } else {
+                $name = bookx_get_genre_name($this->active_filters['bookx_genre_id'], $_SESSION['languages_id']);
+                $this->metatags_title .= $wrap(LABEL_BOOKX_GENRE, $name);
+                $this->metatags_description .= $wrap(sprintf(BOOKX_METATAGS_TITLE['publisher'],$name));
+            }
+        }
+
+        $page = (!empty($this->pagination) ? ', page - ' . $this->pagination : '');
+        $metatags_title = $this->metatags_title . $page;
+        $metatags_description = $this->metatags_description . $page;
+        $metatags_keywords = $this->metatags_keywords;
     }
-    
+
     /**
      * 
      * @param type $scope the filter scope 'author', 'genre', etc

@@ -43,6 +43,9 @@ define('LABEL_BOOKX_ISBN', 'ISBN');
 define('LABEL_BOOKX_AUTHOR', 'Author');
 define('LABEL_BOOKX_AUTHORS', 'Authors');
 define('LABEL_BOOKX_MODEL', 'Model No.');
+define('LABEL_BOOKX_SERIE', 'Serie');
+define('LABEL_BOOKX_PUBLISHER', 'Publisher');
+define('LABEL_BOOKX_IMPRINT', 'Imprint');
 define('LABEL_BOOKX_PUBLISHING_DATE', 'Date of publication: ');
 
 
@@ -168,3 +171,6 @@ define('BOOKX_META_FILTERS_EMPTY_DESCRIPTION', array(
     'series' => 'Find Books in Our BookShop from %s'
     )
 );
+
+define('BOOKX_META_MULTIPLE_FILTERS_PREFIX', 'Filtering ');
+define('BOOKX_META_DIVIDER', ', ');

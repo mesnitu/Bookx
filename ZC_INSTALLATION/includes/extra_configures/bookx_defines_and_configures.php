@@ -28,7 +28,7 @@
   /**
    * @since v1.0.0
    */
-  define('SEE_MORE', 'See More');
+  define('TEXT_BOOKX_MORE_PRODUCT_INFO', 'See More');
   define('BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL', true);
   define('BOOKX_TRUNCATE_DESCRIPTION_LENGHT', 350);
   define('BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT', 3);
