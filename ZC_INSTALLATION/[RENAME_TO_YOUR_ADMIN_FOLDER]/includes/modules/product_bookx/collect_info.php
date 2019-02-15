@@ -304,16 +304,16 @@ $genre_array = [
     'id' => '',
     'text' => TEXT_NONE
     ]];
-$genres = $db->Execute("SELECT g.bookx_genre_id, gd.genre_description
+$genres = $db->Execute("SELECT g.bookx_genre_id, gd.genre_name
                        FROM " . TABLE_PRODUCT_BOOKX_GENRES . " g
                        LEFT JOIN " . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . " gd ON g.bookx_genre_id = gd.bookx_genre_id
                          AND gd.languages_id = " . (int)$_SESSION['languages_id'] . "
-                       ORDER BY gd.genre_description ASC");
+                       ORDER BY gd.genre_name ASC");
 
 foreach ($genres as $genre) {
   $genre_array[] = [
     'id' => $genre['bookx_genre_id'],
-    'text' => $genre['genre_description']
+    'text' => $genre['genre_name']
   ];
 }
 

@@ -58,9 +58,9 @@
 <div id="bookxGenreListingTable" class="bookxFilterListAll">
 <?php
 foreach ($bookx_genres_listing_split_array as $genre) {
-        echo '<div class="row">' . zen_image($genre['genre_image'], $genre['genre_description'], BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
-        echo '<h3 class="bookxAllListingInfo"><span class="bookxGenreDescription">' . $genre['genre_description'] . '</span></h3>'
-        . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_description']) . '</a>';
+        echo '<div class="row">' . zen_image($genre['genre_image'], $genre['genre_name'], BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+        echo '<h3 class="bookxAllListingInfo"><span class="bookxGenreDescription">' . $genre['genre_name'] . '</span></h3>'
+        . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_name']) . '</a>';
         echo '</div>';
     }
 ?>

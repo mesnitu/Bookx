@@ -237,7 +237,7 @@ if ($flag_show_product_bookx_info_authors_team_related_products && 1 < $authors-
     }
 }
 
-$sql = 'SELECT g.bookx_genre_id, g.genre_sort_order, gd.genre_description, gd.genre_image FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' g
+$sql = 'SELECT g.bookx_genre_id, g.genre_sort_order, gd.genre_name, gd.genre_image FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' g
     		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' gd ON
             gd.bookx_genre_id = g.bookx_genre_id AND gd.languages_id = "' . (int) $_SESSION['languages_id'] . '"
     		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' gtp ON 
@@ -246,11 +246,11 @@ $sql = 'SELECT g.bookx_genre_id, g.genre_sort_order, gd.genre_description, gd.ge
 
 switch ((int) $flag_order_product_bookx_info_genres_by) {
     case 1:
-        $sql .= 'ORDER BY gd.genre_description ASC';
+        $sql .= 'ORDER BY gd.genre_name ASC';
         break;
 
     case 2:
-        $sql .= 'ORDER BY g.genre_sort_order ASC, gd.genre_description ASC';
+        $sql .= 'ORDER BY g.genre_sort_order ASC, gd.genre_name ASC';
         break;
 }
 
@@ -417,11 +417,11 @@ while (!$authors->EOF) {
 $products_genres = array();
 while (!$genres->EOF) {
     $products_genres[] = array(
-        'name' => (!empty($genres->fields['genre_description']) ? $genres->fields['genre_description'] : ''),
+        'name' => (!empty($genres->fields['genre_name']) ? $genres->fields['genre_name'] : ''),
         'sort_order' => (!empty($genres->fields['genre_sort_order']) ? $genres->fields['genre_sort_order'] : '0'),
         'image' => (!empty($genres->fields['genre_image']) ? DIR_WS_IMAGES . $genres->fields['genre_image'] : ''),
-        'searchlink' => (!empty($genres->fields['bookx_genre_id']) && !empty($genres->fields['genre_description']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genres->fields['bookx_genre_id']) . '" class="bookx_searchlink">' . $genres->fields['genre_description'] . '</a>' : ''),
-        'image_searchlink' => (!empty($genres->fields['bookx_genre_id']) && !empty($genres->fields['genre_image']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genres->fields['bookx_genre_id']) . '" class="bookx_searchlink">' . zen_image(DIR_WS_IMAGES . $genres->fields['genre_image'], $genres->fields['genre_description'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT) . '</a>' : '')
+        'searchlink' => (!empty($genres->fields['bookx_genre_id']) && !empty($genres->fields['genre_name']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genres->fields['bookx_genre_id']) . '" class="bookx_searchlink">' . $genres->fields['genre_name'] . '</a>' : ''),
+        'image_searchlink' => (!empty($genres->fields['bookx_genre_id']) && !empty($genres->fields['genre_image']) ? '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genres->fields['bookx_genre_id']) . '" class="bookx_searchlink">' . zen_image(DIR_WS_IMAGES . $genres->fields['genre_image'], $genres->fields['genre_name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT) . '</a>' : '')
     );
     $genres->MoveNext();
 }

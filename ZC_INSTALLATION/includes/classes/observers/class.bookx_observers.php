@@ -379,11 +379,11 @@ class productTypeFilterObserver extends base
 
         //** genres
         if ($this->flag_show['genres']) {
-            $additional_fields .= ', GROUP_CONCAT(DISTINCT bgd.genre_description ORDER BY bg.genre_sort_order ASC SEPARATOR "' . BOOKX_GENRE_SEPARATOR . '")  AS genres';
+            $additional_fields .= ', GROUP_CONCAT(DISTINCT bgd.genre_name ORDER BY bg.genre_sort_order ASC SEPARATOR "' . BOOKX_GENRE_SEPARATOR . '")  AS genres';
             if ($this->flag_show['genres_as_link']) {
                 $genre_link_atag_firstpart = '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookxfilter=bookx_genre_id&bookx_genre_id=');
                 $genre_link_atag_middlepart = '" class="bookx_searchlink">';
-                $additional_fields .= ", GROUP_CONCAT(DISTINCT CONCAT_WS('', '" . $genre_link_atag_firstpart . "', bgd.bookx_genre_id, '" . $genre_link_atag_middlepart . "', bgd.genre_description, '</a>') ORDER BY bg.genre_sort_order ASC SEPARATOR ' | ')  AS genres_as_links";
+                $additional_fields .= ", GROUP_CONCAT(DISTINCT CONCAT_WS('', '" . $genre_link_atag_firstpart . "', bgd.bookx_genre_id, '" . $genre_link_atag_middlepart . "', bgd.genre_name, '</a>') ORDER BY bg.genre_sort_order ASC SEPARATOR ' | ')  AS genres_as_links";
             }
             $join_genres = true;
             $join_bx_extra = true;
@@ -1115,7 +1115,7 @@ class productTypeFilterObserver extends base
                     global $genre_meta_info;
                     $genre = $genre_meta_info;
                     
-                    /*$sql = 'SELECT gd.genre_description AS genre_name, gd.genre_image
+                    /*$sql = 'SELECT gd.genre_name AS genre_name, gd.genre_image
 							FROM ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' gd
 							WHERE gd.bookx_genre_id = "' . (int) $this->filtered_genre_id . '" AND gd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
                     $genre = $db->Execute($sql);*/
@@ -1125,7 +1125,7 @@ class productTypeFilterObserver extends base
                     }
 
                     if (!empty($genre->fields['genre_name']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int)$this->flag_show_product_bookx_filter_genre_extra_info) {
-                      $extra_html .= '<div id="bookx_filter_genre_description">' . $genre->fields['genre_name'] . '</div>';
+                      $extra_html .= '<div id="bookx_filter_binding_name">' . $genre->fields['genre_name'] . '</div>';
                       } 
                 }
             }
@@ -1209,7 +1209,7 @@ class productTypeFilterObserver extends base
 									  OR srchba.author_name LIKE '%:keywords%'
 									  OR srchbpub.publisher_name LIKE '%:keywords%'
 									  OR srchbsd.series_name LIKE '%:keywords%'
-									  OR srchbgd.genre_description LIKE '%:keywords%'
+									  OR srchbgd.genre_name LIKE '%:keywords%'
 									  OR srchbi.imprint_name LIKE '%:keywords%'";
 
                     $isbn_test = str_replace('-', '', $search_keywords[$i]);

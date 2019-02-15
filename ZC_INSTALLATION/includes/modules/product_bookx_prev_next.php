@@ -215,7 +215,7 @@ if (PRODUCT_INFO_PREVIOUS_NEXT != 0) {
 									  OR srchba.author_name LIKE '%:keywords%'
 									  OR srchbpub.publisher_name LIKE '%:keywords%'
 									  OR srchbsd.series_name LIKE '%:keywords%'
-									  OR srchbgd.genre_description LIKE '%:keywords%'
+									  OR srchbgd.genre_name LIKE '%:keywords%'
 									  OR srchbi.imprint_name LIKE '%:keywords%'";
 
                 $isbn_test = str_replace('-', '', $search_keywords[$i]);

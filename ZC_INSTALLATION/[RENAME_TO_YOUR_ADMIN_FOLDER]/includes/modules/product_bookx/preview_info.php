@@ -63,7 +63,7 @@ if (zen_not_null($_POST)) {
     if (isset ($_POST['bookx_genre_id']) && is_array ($_POST['bookx_genre_id'])) {
         $bookx_genre_ids = $_POST['bookx_genre_id'];
         foreach ($bookx_genre_ids as $genre) {
-            $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . bookx_get_genre_description ($genre, (int) $_SESSION['languages_id']);
+            $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . bookx_get_binding_name ($genre, (int) $_SESSION['languages_id']);
         }
     }
 
@@ -123,15 +123,15 @@ else {
         $authors->MoveNext ();
     }
 
-    $genres = $db->Execute ('SELECT gd.genre_description
+    $genres = $db->Execute ('SELECT gd.genre_name
                            FROM ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' gtp
     					   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' gd ON gtp.bookx_genre_id = gd.bookx_genre_id AND gd.languages_id = "' . $_SESSION['languages_id'] . '"
     					   WHERE gtp.products_id = "' . (int) $_GET['pID'] . '"
-    					   ORDER BY gd.genre_description');
+    					   ORDER BY gd.genre_name');
 
     $pInfo->genres_display = '';
     while (!$genres->EOF) {
-        $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . $genres->fields['genre_description'];
+        $pInfo->genres_display .= (!empty ($pInfo->genres_display) ? ' | ' : '') . $genres->fields['genre_name'];
         $genres->MoveNext ();
     }
 }
@@ -231,7 +231,7 @@ for ($i = 0, $n = sizeof ($languages); $i < $n; $i++) {
         if (!empty ($bookx_genre_ids) && is_array ($bookx_genre_ids)) {
             $pInfo->genres = array();
             foreach ($bookx_genre_ids as $genre_id) {
-                $pInfo->genres[] = bookx_get_genre_description ($genre_id, $languages[$i]['id']);
+                $pInfo->genres[] = bookx_get_binding_name ($genre_id, $languages[$i]['id']);
             }
         }
 

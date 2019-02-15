@@ -63,7 +63,7 @@
         }
 
         $languages = zen_get_languages();
-        $genre_description_array = $_POST['genre_description'];
+        $binding_name_array = $_POST['genre_name'];
         $genre_image_manual_array = $_POST['genre_image_manual'];
         for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
         	$language_id = $languages[$i]['id'];
@@ -88,7 +88,7 @@
         	}
 
 
-          $sql_data_array = array('genre_description' => zen_db_prepare_input($genre_description_array[$language_id]), 'genre_image' => $genre_image_name);
+          $sql_data_array = array('genre_name' => zen_db_prepare_input($binding_name_array[$language_id]), 'genre_image' => $genre_image_name);
 
           if ($action == 'insert' ||
           	  ($action == 'save' && null === bookx_get_genre_image_url($bookx_genre_id, $language_id))) {
@@ -231,7 +231,7 @@
                 <td class="dataTableHeadingContent" align="right"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
               </tr>
 <?php
-  $genre_query_raw = 'select g.*, gd.genre_description, gd.genre_image from ' . TABLE_PRODUCT_BOOKX_GENRES . ' g LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION. ' gd ON gd.bookx_genre_id = g.bookx_genre_id AND gd.languages_id = ' . $_SESSION['languages_id'] . ' order by g.genre_sort_order, gd.genre_description';
+  $genre_query_raw = 'select g.*, gd.genre_name, gd.genre_image from ' . TABLE_PRODUCT_BOOKX_GENRES . ' g LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION. ' gd ON gd.bookx_genre_id = g.bookx_genre_id AND gd.languages_id = ' . $_SESSION['languages_id'] . ' order by g.genre_sort_order, gd.genre_name';
   $genre_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $genre_query_raw, $genre_query_numrows);
   $genre = $db->Execute($genre_query_raw);
 
@@ -254,7 +254,7 @@
       echo '              <tr class="dataTableRow" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . zen_href_link(FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&mID=' . $genre->fields['bookx_genre_id'] . '&action=edit') . '\'">' . "\n";
     }
 ?>
-                <td class="dataTableContent"><?php echo $genre->fields['genre_description']; ?></td>
+                <td class="dataTableContent"><?php echo $genre->fields['genre_name']; ?></td>
                 <td class="dataTableContent"><?php echo $genre->fields['genre_sort_order']; ?></td>
                 <td class="dataTableContent" align="right">
                   <?php echo '<a href="' . zen_href_link(FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&mID=' . $genre->fields['bookx_genre_id'] . '&action=edit') . '">' . zen_image(DIR_WS_IMAGES . 'icon_edit.gif', ICON_EDIT) . '</a>'; ?>
@@ -307,16 +307,16 @@
 
       $genre_image_fields = '';
       $genre_manual_image_fields = '';
-      $genre_description_textareas = '';
+      $binding_name_textareas = '';
       $languages = zen_get_languages();
       for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
 		$language_image = zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']);
 		$genre_image_fields .= '<br>' . $language_image . '&nbsp;' . zen_draw_file_field('genre_image-' . $languages[$i]['id']);
 
 		$genre_manual_image_fields .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_image_manual[' . $languages[$i]['id'] . ']', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_image'));
-      	$genre_description_textareas .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_description[' . $languages[$i]['id'] . ']', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_description'));
+      	$binding_name_textareas .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_name[' . $languages[$i]['id'] . ']', '', zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_name'));
 	  }
-	  $contents[] = array('text' => '<br>' . TEXT_GENRE_DESCRIPTION . $genre_description_textareas);
+	  $contents[] = array('text' => '<br>' . TEXT_GENRE_DESCRIPTION . $binding_name_textareas);
 
 	  $contents[] = array('text' => '<BR />' . TEXT_GENRE_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
 
@@ -351,24 +351,24 @@
 
       $genre_image_fields = '';
       $genre_manual_image_fields = '';
-      $genre_description_textareas = '';
+      $binding_name_textareas = '';
       $languages = zen_get_languages();
       for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
 		$language_image = zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']);
-		$genre_description = bookx_get_genre_description($aInfo->bookx_genre_id, $languages[$i]['id']);
+		$genre_name = bookx_get_binding_name($aInfo->bookx_genre_id, $languages[$i]['id']);
 		$genre_image_fields .= '<br>' . $language_image . '&nbsp;' . zen_draw_file_field('genre_image-' . $languages[$i]['id']);
 
 		$genre_manual_image_url = bookx_get_genre_image_url($aInfo->bookx_genre_id, $languages[$i]['id']);
 		$genre_manual_image_fields .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_image_manual[' . $languages[$i]['id'] . ']', $genre_manual_image_url, zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_image'));
-		$genre_manual_image_fields .= '<br />' . (null != $genre_manual_image_url && '' != $genre_manual_image_url ? zen_info_image($genre_manual_image_url, $genre_description) : TEXT_GENRE_IMAGE_NOT_DEFINED);
-		$genre_description_textareas .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_description[' . $languages[$i]['id'] . ']', $genre_description, zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_description'));
+		$genre_manual_image_fields .= '<br />' . (null != $genre_manual_image_url && '' != $genre_manual_image_url ? zen_info_image($genre_manual_image_url, $genre_name) : TEXT_GENRE_IMAGE_NOT_DEFINED);
+		$binding_name_textareas .= '<br>' . $language_image . '&nbsp;' . zen_draw_input_field('genre_name[' . $languages[$i]['id'] . ']', $genre_name, zen_set_field_length(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_name'));
       }
-      $contents[] = array('text' => '<br>' . TEXT_GENRE_DESCRIPTION . $genre_description_textareas);
+      $contents[] = array('text' => '<br>' . TEXT_GENRE_DESCRIPTION . $binding_name_textareas);
 
       $contents[] = array('text' => '<BR />' . TEXT_GENRE_IMAGE_DIR . zen_draw_pull_down_menu('img_dir', $dir_info, $default_directory));
       $contents[] = array('text' => '<br>' . TEXT_GENRE_IMAGE . '<br>' . $genre_image_fields);
       $contents[] = array('text' => '<br />' . TEXT_GENRE_IMAGE_MANUAL . '&nbsp;' . $genre_manual_image_fields);
-     // $contents[] = array('text' => '<br />' . (null != $aInfo->genre_image && '' != $aInfo->genre_image ? zen_info_image($aInfo->genre_image, $aInfo->genre_description) : TEXT_GENRE_IMAGE_NOT_DEFINED));
+     // $contents[] = array('text' => '<br />' . (null != $aInfo->genre_image && '' != $aInfo->genre_image ? zen_info_image($aInfo->genre_image, $aInfo->genre_name) : TEXT_GENRE_IMAGE_NOT_DEFINED));
 
 
 
@@ -473,13 +473,13 @@
       $heading[] = array('text' => '<b>' . TEXT_HEADING_DELETE_GENRE . '</b>');
 
       $contents = array('form' => zen_draw_form('genre', FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&action=deleteconfirm') . zen_draw_hidden_field('mID', $aInfo->bookx_genre_id));
-      $contents[] = array('text' => sprintf(TEXT_DELETE_INTRO, $aInfo->genre_description));
-      $contents[] = array('text' => '<br><b>' . $aInfo->genre_description . '</b>');
+      $contents[] = array('text' => sprintf(TEXT_DELETE_INTRO, $aInfo->genre_name));
+      $contents[] = array('text' => '<br><b>' . $aInfo->genre_name . '</b>');
       $contents[] = array('text' => '<br>' . zen_draw_checkbox_field('delete_image', '', true) . ' ' . TEXT_DELETE_IMAGE);
 
       if ($aInfo->products_count > 0) {
-        $contents[] = array('text' => '<br>' . zen_draw_checkbox_field('delete_products') . ' ' . sprintf(TEXT_DELETE_PRODUCTS, $aInfo->genre_description));
-        $contents[] = array('text' => '<br>' . sprintf(TEXT_DELETE_WARNING_PRODUCTS, $aInfo->products_count, $aInfo->genre_description));
+        $contents[] = array('text' => '<br>' . zen_draw_checkbox_field('delete_products') . ' ' . sprintf(TEXT_DELETE_PRODUCTS, $aInfo->genre_name));
+        $contents[] = array('text' => '<br>' . sprintf(TEXT_DELETE_WARNING_PRODUCTS, $aInfo->products_count, $aInfo->genre_name));
       }
 
       $contents[] = array('align' => 'center', 'text' => '<br>' . zen_image_submit('button_delete.gif', IMAGE_DELETE) . ' <a href="' . zen_href_link(FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&mID=' . $aInfo->bookx_genre_id) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
@@ -487,12 +487,12 @@
 
     default:
       if (isset($aInfo) && is_object($aInfo)) {
-        $heading[] = array('text' => '<b>' . $aInfo->genre_description . '</b>');
+        $heading[] = array('text' => '<b>' . $aInfo->genre_name . '</b>');
 
         $contents[] = array('align' => 'center', 'text' => '<a href="' . zen_href_link(FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&mID=' . $aInfo->bookx_genre_id . '&action=edit') . '">' . zen_image_button('button_edit.gif', IMAGE_EDIT) . '</a> <a href="' . zen_href_link(FILENAME_BOOKX_GENRES, 'page=' . $_GET['page'] . '&mID=' . $aInfo->bookx_genre_id . '&action=delete') . '">' . zen_image_button('button_delete.gif', IMAGE_DELETE) . '</a>');
         $contents[] = array('text' => '<br>' . TEXT_DATE_ADDED . ' ' . zen_date_short($aInfo->date_added));
         if (zen_not_null($aInfo->last_modified)) $contents[] = array('text' => TEXT_LAST_MODIFIED . ' ' . zen_date_short($aInfo->last_modified));
-        $contents[] = array('text' => '<br>' . zen_info_image($aInfo->genre_image, $aInfo->genre_description));
+        $contents[] = array('text' => '<br>' . zen_info_image($aInfo->genre_image, $aInfo->genre_name));
         $contents[] = array('text' => '<br>' . TEXT_PRODUCTS . ' ' . $aInfo->products_count);
       }
       break;

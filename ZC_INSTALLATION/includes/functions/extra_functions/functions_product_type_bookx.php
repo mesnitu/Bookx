@@ -19,29 +19,6 @@
  */
 
 
-/*
- * Look up SHOW_XXX_INFO switch for product type bookx
-*/
-function bookx_get_show_product_switch($field, $suffix= 'SHOW_', $prefix= '_INFO', $field_prefix= '_', $field_suffix='') {
-	global $db;
-
-	$zv_key = strtoupper($suffix . 'PRODUCT_BOOKX' . $prefix . $field_prefix . $field . $field_suffix);
-
-	$sql = "select configuration_key, configuration_value from " . TABLE_PRODUCT_TYPE_LAYOUT . " where configuration_key='" . $zv_key . "'";
-	$zv_key_value = $db->Execute($sql);
-	if ($zv_key_value->RecordCount() > 0) {
-		return $zv_key_value->fields['configuration_value'];
-	} else {
-		$sql = "select configuration_key, configuration_value from " . TABLE_CONFIGURATION . " where configuration_key='" . $zv_key . "'";
-		$zv_key_value = $db->Execute($sql);
-		if ($zv_key_value->RecordCount() > 0) {
-			return $zv_key_value->fields['configuration_value'];
-		} else {
-			return false;
-		}
-	}
-}
-
 ////
 // Switch buy now button based on call for price sold out etc.
 function bookx_get_buy_now_button($product_id, $link, $additional_link = false) {

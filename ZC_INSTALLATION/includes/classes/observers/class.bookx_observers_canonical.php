@@ -224,7 +224,6 @@ class bookxCanonicalObserver extends base
                     
                     $publisher_meta_info = $this->bookxGetMetaTagsInfo('publisher');
                     $bookx_tpl_meta_info = $this->metaInfo;
-                    
                     $this->bookxSetMetaTags('publisher', '', $this->metaInfo['publisher_books_names']);
                     
                 break;
@@ -235,7 +234,6 @@ class bookxCanonicalObserver extends base
                     
                     $imprint_meta_info = $this->bookxGetMetaTagsInfo('imprint');
                     $bookx_tpl_meta_info = $this->metaInfo;
-                    
                     $this->bookxSetMetaTags('imprint', $description = array(
                         $this->metaInfo['imprint_name']
                         ), $this->metaInfo['publisher_books_names']);
@@ -274,6 +272,14 @@ class bookxCanonicalObserver extends base
             $metatags_title = $this->metatags_title . $page;
             $metatags_description = $this->metatags_description . $page;
             $metatags_keywords = $this->metatags_keywords;
+        } else {
+            $metatags_title = '';
+            foreach ($this->active_filters as $filter) {
+                $sql = 'SELECT author_name FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' WHERE '
+                    . 'ba.bookx_author_id = "' . (int) $filter . '"';
+                //$author = $db->Execute($sql);
+            }
+            pr($this);
         }
         
     }
@@ -308,7 +314,7 @@ class bookxCanonicalObserver extends base
             $sql = "SELECT batp.bookx_author_id, ba.author_name, ba.author_image, ba.author_url, bad.author_description,
                  GROUP_CONCAT(DISTINCT pd.products_name ORDER BY pd.products_id ASC SEPARATOR ',') AS author_books_names,
                  GROUP_CONCAT(DISTINCT pd.products_id ORDER BY pd.products_id ASC SEPARATOR ',') AS author_books_id,
-                 GROUP_CONCAT(DISTINCT bgd.genre_description ORDER BY bgd.genre_description ASC SEPARATOR ',') AS author_books_genres 
+                 GROUP_CONCAT(DISTINCT bgd.genre_name ORDER BY bgd.genre_name ASC SEPARATOR ',') AS author_books_genres 
                  FROM " . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . " batp
                  LEFT JOIN " . TABLE_PRODUCT_BOOKX_AUTHORS . " ba ON ba.bookx_author_id = batp.bookx_author_id 
                  LEFT JOIN " . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . " bad ON 
@@ -327,11 +333,9 @@ class bookxCanonicalObserver extends base
             
             return $author;
         }
-        
-        if ($param == 'author_type') {
-            
-        }
-        
+                
+        //if ($param == 'author_type') {}  // author_types filter are not working at present time 
+
         if ( $param == 'publisher' ) {
             
             $sql = "SELECT bep.bookx_publisher_id as publisher_id, bp.publisher_name, bp.publisher_image, bpd.publisher_description, bpd.publisher_url,
@@ -378,7 +382,7 @@ class bookxCanonicalObserver extends base
         
         if ( $param == 'genre' ) {
 
-            $sql = "SELECT bgd.genre_description as genre_name,  bgd.genre_image FROM " . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . " bgd
+            $sql = "SELECT bgd.genre_name as genre_name,  bgd.genre_image FROM " . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . " bgd
                  WHERE bgd.bookx_genre_id = :bookx_genre_id: AND bgd.languages_id = :languages_id: ";
             $sql = $db->bindVars($sql, ':bookx_genre_id:', (int)$this->active_filters['bookx_genre_id'], 'integer');
             $sql = $db->bindVars($sql, ':languages_id:', $_SESSION['languages_id'], 'integer');

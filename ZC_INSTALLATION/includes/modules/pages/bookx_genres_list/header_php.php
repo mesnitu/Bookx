@@ -42,20 +42,20 @@ if (BOOKX_GENRE_LISTING_SHOW_ONLY_STOCKED && !(isset($_GET['la']) && $_GET['la']
 $sort_order_clause = '';
 switch ((int)BOOKX_GENRE_LISTING_ORDER_BY) {
 	case 1: // order by Name first
-		$sort_order_clause = ' ORDER BY bgd.genre_description, bg.genre_sort_order';
+		$sort_order_clause = ' ORDER BY bgd.genre_name, bg.genre_sort_order';
 		break;
 
 	case 2: // order by sort order first
-		$sort_order_clause = ' ORDER BY bg.genre_sort_order, bgd.genre_description';
+		$sort_order_clause = ' ORDER BY bg.genre_sort_order, bgd.genre_name';
 		break;
 
 }
 
 if (isset($_GET['q']) && !empty($_GET['q'])) {
-    $index_search = " AND bgd.genre_description LIKE '" . $_GET['q'] . "%' ";
+    $index_search = " AND bgd.genre_name LIKE '" . $_GET['q'] . "%' ";
 }
 
-$sql = 'SELECT bg.bookx_genre_id, bgd.genre_image, bgd.genre_description '
+$sql = 'SELECT bg.bookx_genre_id, bgd.genre_image, bgd.genre_name '
     . $extra_fields
     . ' FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg
 		LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON '
@@ -80,9 +80,9 @@ while (!$bookx_genres_listing->EOF) {
     /**
      * @todo some chars like Á are in some wrong encoding... still didnt find a way to fix this. 
      */
-    $temp_index[] = mb_convert_encoding($bookx_genres_listing->fields ['genre_description'][0], 'utf-8');
+    $temp_index[] = mb_convert_encoding($bookx_genres_listing->fields ['genre_name'][0], 'utf-8');
     $bookx_genres_listing_split_array [] = array('bookx_genre_id' => $bookx_genres_listing->fields ['bookx_genre_id']
-        , 'genre_description' => $bookx_genres_listing->fields ['genre_description']
+        , 'genre_name' => $bookx_genres_listing->fields ['genre_name']
         , 'genre_image' => (!empty($bookx_genres_listing->fields ['genre_image']) ? DIR_WS_IMAGES . $bookx_genres_listing->fields ['genre_image'] : BOOKX_GENRES_DEFAULT_IMAGE)
     );
 

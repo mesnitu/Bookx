@@ -111,6 +111,7 @@ catalog_files=(
     includes/extra_configures/bookx_defines_and_configures.php
     includes/extra_datafiles/bookx_type_database_names.php
     includes/functions/extra_functions/functions_product_type_bookx.php
+    includes/functions/extra_functions/functions_product_type_bookx_common.php
     includes/index_filters/bookx_filter.php
     #files in includes/languages/english
     includes/languages/english/product_bookx_info.php
