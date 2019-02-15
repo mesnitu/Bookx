@@ -63,7 +63,7 @@
         }
 
         $languages = zen_get_languages();
-        $binding_name_array = $_POST['genre_name'];
+        $genre_name_array = $_POST['genre_name'];
         $genre_image_manual_array = $_POST['genre_image_manual'];
         for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
         	$language_id = $languages[$i]['id'];
@@ -88,7 +88,7 @@
         	}
 
 
-          $sql_data_array = array('genre_name' => zen_db_prepare_input($binding_name_array[$language_id]), 'genre_image' => $genre_image_name);
+          $sql_data_array = array('genre_name' => zen_db_prepare_input($genre_name_array[$language_id]), 'genre_image' => $genre_image_name);
 
           if ($action == 'insert' ||
           	  ($action == 'save' && null === bookx_get_genre_image_url($bookx_genre_id, $language_id))) {
