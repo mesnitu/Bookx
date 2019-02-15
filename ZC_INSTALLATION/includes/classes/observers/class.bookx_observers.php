@@ -761,9 +761,11 @@ class productTypeFilterObserver extends base
                    
                         $list_box_contents[$rows]['date_flag'] = $publishing_date_flag;
                         $list_box_contents[$rows][$product_name_column]['text'] = $new_product_text;
-                        
-                        $list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
-                        
+                        /*
+                         * If you want to add $url_keywords and $active_boox_get_filters params to the url uncomment the following line
+                         */
+                        //$list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
+                       
                         /* @todo this is a bit fragil solution since layouts can change as they did and is not working.
                          * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
                          * For now trying to replace on $list_box_contents[$rows][$product_price_column]['text']
