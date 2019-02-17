@@ -70,20 +70,18 @@ $sql = 'SELECT bs.bookx_series_id, bsd.series_name, bsd.series_image, bsd.series
 $bookx_series_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_SERIES_LISTING, 'bs.bookx_series_id', 'page');
 $bookx_series_listing = $db->Execute($bookx_series_listing_split->sql_query);
 
-$bookx_series_listing_split_array = array();
-$temp_index = array();
-while ( ! $bookx_series_listing->EOF ) {
-    /**
-     * @todo some chars like Á are in some wrong encoding... still didnt find a way to fix this. 
-     */
-    $temp_index[] = mb_convert_encoding($bookx_series_listing->fields['series_name'][0], 'utf-8');
-	$bookx_series_listing_split_array [] = array ('bookx_series_id' => $bookx_series_listing->fields ['bookx_series_id']
-												   ,'series_name' => $bookx_series_listing->fields ['series_name']
-												   ,'series_image' => (!empty($bookx_series_listing->fields ['series_image']) ? DIR_WS_IMAGES . $bookx_series_listing->fields ['series_image'] : '')
-												   ,'series_description' => $bookx_series_listing->fields ['series_description']
-												   );
+$bookx_series_listing_split_array = [];
 
-	$bookx_series_listing->MoveNext ();
+while (!$bookx_series_listing->EOF) {
+
+    $bookx_series_listing_split_array [] = [
+        'bookx_series_id' => $bookx_series_listing->fields ['bookx_series_id'],
+        'series_name' => $bookx_series_listing->fields ['series_name'],
+        'series_image' => (!empty($bookx_series_listing->fields ['series_image']) ? DIR_WS_IMAGES . $bookx_series_listing->fields ['series_image'] : ''),
+        'series_description' => $bookx_series_listing->fields ['series_description']
+    ];
+
+    $bookx_series_listing->MoveNext();
 }
 
-$index = array_unique($temp_index);
+//$bookx_alphafilter = tpl_bookx_alphafilter_all('series_name', TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION, FILENAME_BOOKX_SERIES_LIST);

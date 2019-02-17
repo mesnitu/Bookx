@@ -53,15 +53,15 @@
 
 <h1 id="authorListHeading"><?php echo TEXT_BOOKX_AUTHOR_LIST_TITLE; ?></h1>
 
-<?php echo tpl_bookx_alphafilter_all($index, FILENAME_BOOKX_AUTHORS_LIST); ?>
+<?php echo $bookx_alphafilter; ?>
 
 <div id="bookxAuthorListingTable" class="bookxFilterListAll">
     <?php
     foreach ($bookx_authors_listing_split_array as $author) {
-
-        echo '<div class="row">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
+        //bookx_truncate_paragraph($text, $length = 100, $ending = '...', $exact = false, $considerHtml = true, $endWithSentence = true)
+        echo '<div class="row clearfix">' . zen_image($author['author_image'], $author['author_name'], BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
         echo '<h3 class="bookxAllListingInfo">' . $author['author_name'] . '' . (!empty($author['author_types']) ? ' <span class="bookxAuthorType">' . $author['author_types'] . '<span>' : '') . '</h3>'
-        . (!empty($author['author_description']) ? '<p class="bookxAllListingDescription">' . bookx_truncate_paragraph($author['author_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT, TEXT_BOOKX_MORE_PRODUCT_INFO , true) . '</p>' : '')
+        . (!empty($author['author_description']) ? '<div class="bookxAllListingDescription">' . zen_html_entity_decode(bookx_truncate_paragraph($author['author_description'], BOOKX_TRUNCATE_DESCRIPTION_LENGHT, TEXT_BOOKX_MORE_PRODUCT_INFO , true)) . '</div>' : '')
         . (!empty($author['author_url']) ? '<div class="bookxAuthorUrl"><a href="http://' . $author['author_url'] . '" target="_author_site">' . BOOKX_URL_LINK_TEXT_AUTHOR . '</a></div>' : '')
         . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_author_id=' . $author['bookx_author_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_AUTHOR, $author['author_name']) . '</a>';
         echo '</div>';

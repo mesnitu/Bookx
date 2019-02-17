@@ -189,9 +189,14 @@ class bookxCanonicalObserver extends base
     private function setMetaBookInfo($pID) {
         
         if(empty($this->zencart_metatags)) {
-            $as = $this->bookxGetMetaTagsInfo('page');
+           $this->bookxGetMetaTagsInfo('page');
         }
-        pr($this);
+        
+        $this->metaInfo['bookx_series_id'] = bookx_get_series_name($this->metaInfo['bookx_series_id'], $_SESSION['languages_id']);
+        $this->metaInfo['bookx_condition_id'] = bookx_get_condition_description($this->metaInfo['bookx_condition_id'], $_SESSION['languages_id']);
+        $this->metaInfo['bookx_imprint_id'] = bookx_get_imprint_name($this->metaInfo['bookx_imprint_id']);
+        $this->metaInfo['bookx_binding_id'] = bookx_get_binding_description($this->metaInfo['bookx_binding_id'], $_SESSION['languages_id']);
+        $this->metaInfo['bookx_printing_id'] = bookx_get_printing_description($this->metaInfo['bookx_printing_id'], $_SESSION['languages_id']);
     }
     
     private function checkZenProductMetaTags($pID) {
@@ -217,7 +222,7 @@ class bookxCanonicalObserver extends base
                 $this->setMetaBookInfo($pID);
 
                 break;
-            case 'filters':
+            case 'filter':
                 
                 $this->metatags_title = BOOKX_META_MULTIPLE_FILTERS_PREFIX;
                 $this->metatags_description = $this->metatags_title;
@@ -358,8 +363,8 @@ class bookxCanonicalObserver extends base
              * 2 - Have a duplicate info
              * 3 - Some other way
              */
-            $sql = 'SELECT be.*, bed.products_subtitle, bcd.condition_description, bp.publisher_name, bpd.printing_description,
-					CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display,
+            $sql = 'SELECT be.isbn, be.publishing_date, be.pages, be.volume, be.size, bed.products_subtitle, bcd.condition_description, bp.publisher_name, bpd.printing_description, bsd.series_name,
+					
 					GROUP_CONCAT(DISTINCT ba.author_name ORDER BY ba.author_name ASC SEPARATOR ", ") AS authors,
                     GROUP_CONCAT(DISTINCT bgd.genre_name ORDER BY bg.genre_sort_order ASC SEPARATOR ", ")  AS genres
 					FROM ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be
@@ -372,14 +377,16 @@ class bookxCanonicalObserver extends base
 								   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg ON bgtp.bookx_genre_id = bg.bookx_genre_id
 								   LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON bgd.bookx_genre_id = bgtp.bookx_genre_id AND bgd.languages_id = :languages_id:
                       LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' bpd ON bpd.bookx_printing_id = bgtp.bookx_genre_id AND bpd.languages_id = :languages_id:
+                    LEFT JOIN ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' bsd ON bsd.bookx_series_id = be.bookx_series_id AND bsd.languages_id = :languages_id:
 					WHERE be.products_id = :products_id:
 					GROUP BY be.products_id';
             $sql = $db->bindVars($sql, ':languages_id:', $_SESSION['languages_id'], 'integer');
             $sql = $db->bindVars($sql, ':products_id:', $_GET['products_id'], 'integer');
+            pr($sql);
             $book_tags = $db->Execute($sql);
             $this->setMetaInfo($book_tags->fields);
             
-            return $book_tags;
+            //return $book_tags;
         }
         
         if ($param == 'author') {
@@ -399,6 +406,7 @@ class bookxCanonicalObserver extends base
                 WHERE ba.bookx_author_id = :bookx_author_id:";
             $sql = $db->bindVars($sql, ':bookx_author_id:', $this->active_filters['bookx_author_id'], 'integer');
             $sql = $db->bindVars($sql, ':languages_id:', $_SESSION['languages_id'], 'integer');
+            pr($sql);
             $author = $db->Execute($sql);
             
             $this->setMetaInfo($author->fields);

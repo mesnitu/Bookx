@@ -18,6 +18,7 @@ class BookxFamilies
 
     var $pID;
     protected $method;
+    var $use_families = false;
     var $families_list;
     var $family_name;
     var $family_id;
@@ -29,13 +30,17 @@ class BookxFamilies
         global $db, $current_page;
        
         if ($current_page == 'product.php' && !$on_page) {
-            $this->setFamilies_list();
+            
             $this->pID = (isset($_POST['product_id'])) ? $_POST['product_id'] : $_GET['pID'];
             $set_family_id_by = (!empty($_POST['bookx_family_id'])) ? $_POST['bookx_family_id'] : $this->pID;
+            $this->setFamilies_list();
+            if($this->use_families == true) {
+                $this->setFamily_id($set_family_id_by);
+                $this->setFamilyInfo();
+                $this->method = (empty($set_family_id_by)) ? 'new_product' : 'update_product';
+            }
             
-            $this->method = (empty($set_family_id_by)) ? 'new_product' : 'update_product';
-            $this->setFamily_id($set_family_id_by);
-            $this->setFamilyInfo();
+            
             
         } elseif (!empty($on_page)) {
             if ( $current_page == $on_page) {
@@ -48,6 +53,9 @@ class BookxFamilies
             $this->method = 'csv';
             // @todo csv import / export
         }
+        pr($this);
+        
+        pr($_POST);
        
     }
 
@@ -74,17 +82,21 @@ class BookxFamilies
     function setFamilies_list()
     {
         global $db;
-        
+
         $sql = "SELECT * FROM " . TABLE_PRODUCT_BOOKX_FAMILIES . " ORDER BY bookx_family_id;";
         $res = $db->Execute($sql);
-        while (!$res->EOF) {
-            $this->families_list[] = array(
-                'bookx_family_id' => $res->fields['bookx_family_id'],
-                'bookx_family_name' => $res->fields['bookx_family_name'],
-                'bookx_family_discount' => $res->fields['bookx_family_discount'],
-                'bookx_family_stock_online' => $res->fields['bookx_family_stock_online']
-            );
-            $res->MoveNext();
+        if ($res->RecordCount() > 0) {
+            while (!$res->EOF) {
+                $this->families_list[] = array(
+                    'bookx_family_id' => $res->fields['bookx_family_id'],
+                    'bookx_family_name' => $res->fields['bookx_family_name'],
+                    'bookx_family_discount' => $res->fields['bookx_family_discount'],
+                    'bookx_family_stock_online' => $res->fields['bookx_family_stock_online']
+                );
+                $res->MoveNext();
+            }
+        } else {
+            $this->use_families = false;
         }
 
         return $this;
@@ -92,7 +104,7 @@ class BookxFamilies
 
     function setFamily_name($family_id, $pID = false)
     {
-        global $db;
+        
         $this->family_name = $this->searchOnFamiliesList('bookx_family_name');
         return $this;
     }
@@ -100,14 +112,15 @@ class BookxFamilies
     function setFamily_id($set_family_id_by)
     {
         global $db;
-            $res = $db->Execute("SELECT bookx_family_id FROM " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " WHERE products_id = " . (int) $set_family_id_by . ";");
-            
-            if ($res->RecordCount() > 0) {
-                $this->family_id = $res->fields['bookx_family_id'];
-            }else {
-                $this->family_id = $this->searchOnFamiliesList('bookx_family_id', $set_family_id_by);
-            }
-        
+        $res = $db->Execute("SELECT bookx_family_id FROM " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . " WHERE products_id = " . (int)$set_family_id_by . ";");
+
+        if ($res->RecordCount() > 0) {
+
+            $this->family_id = $res->fields['bookx_family_id'];
+        } else {
+            $this->family_id = $this->searchOnFamiliesList('bookx_family_id', $set_family_id_by);
+        }
+
         return $this;
     }
 

@@ -217,7 +217,7 @@ function bookx_get_imprint_description($bookx_imprint_id, $language_id)
   }
 }
 
-function bookx_get_binding_name($bookx_genre_id, $language_id)
+function bookx_get_genre_name($bookx_genre_id, $language_id)
 {
   global $db;
   $genre = $db->Execute("SELECT genre_name

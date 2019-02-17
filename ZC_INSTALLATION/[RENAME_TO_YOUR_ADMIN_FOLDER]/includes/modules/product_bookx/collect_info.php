@@ -392,7 +392,8 @@ foreach ($conditions as $condition) {
 /**
  * @since v1.0.0
  */
-$families_array = [
+if($objBookxFamily->use_families == true) {
+    $families_array = [
   [
     'id' => '',
     'text' => TEXT_NONE
@@ -403,7 +404,7 @@ foreach ($objBookxFamily->families_list as $family) {
     'text' => $family['bookx_family_name']
   ];
 }
-
+}
 
 $category_lookup = $db->Execute("SELECT *
                                  FROM " . TABLE_CATEGORIES . " c,
@@ -1063,7 +1064,7 @@ $check_configure = $db->Execute($sql_config_value);
     /**
      * @TODO In future, series, authors, could be inserted on product insert
      */
-    if (1 < count($families_array)) { // no families defined
+    if(!empty($objBookxFamily->use_families)) { // no families defined
       ?>
       <div class="form-group">
           <?php echo zen_draw_label(TEXT_PRODUCTS_BOOKX_FAMILY, 'bookx_family_id', 'class="col-sm-3 control-label"'); ?>
