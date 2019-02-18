@@ -2,7 +2,7 @@
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5
+ * shop system. Tested for compatibility on ZC v. 1.56a
  *
  * For latest version and support visit:
  * https://sourceforge.net/p/zencartbookx
@@ -15,7 +15,7 @@
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
  * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [ZC INSTALLATION]/includes/templates/[CURRENT_TEMPLATE]/templates/tpl_bookx_genres_list_default.php 2016-02-02 philou $
+ * @version $Id: [ZC INSTALLATION]/includes/templates/[CURRENT_TEMPLATE]/templates/tpl_bookx_genres_list_default.php 2019-02-02 mesnitu $
  */
 
 /**
@@ -33,7 +33,6 @@
 
 	if (BOOKX_GENRE_LISTING_SHOW_ONLY_STOCKED) { ?>
 		<script type="text/javascript">
-		<!--
 		function handleInStockOnlyCheckbox() {
 			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = genresListOnlyStockedCheckbox.checked;
@@ -44,7 +43,6 @@
 				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
-		-->
 		</script>
 		<div id="genresListOnlyStockedCheckboxContainer">
 			<label><input id="genresListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleInStockOnlyCheckbox()" /> <?php echo TEXT_BOOKX_GENRE_LIST_STOCKCHECKBOX_LABEL; ?></label>
@@ -58,15 +56,20 @@
 <div id="bookxGenreListingTable" class="bookxFilterListAll">
 <?php
 foreach ($bookx_genres_listing_split_array as $genre) {
-        echo '<div class="row clearfix">' . zen_image($genre['genre_image'], $genre['genre_name'], BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
-        echo '<h3 class="bookxAllListingInfo"><span class="bookxGenreDescription">' . $genre['genre_name'] . '</span></h3>'
-        . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_name']) . '</a>';
-        echo '</div>';
+    if ($display_image == true) {
+        $image = ($display_image == true && !empty($series['genre_image'])) ? zen_image($genre['genre_image'], $genre['genre_name'], BOOKX_GENRE_LISTING_IMAGE_MAX_WIDTH, BOOKX_GENRE_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"') : '<div class="placeHolder"></div>';
     }
+    echo '<div class="row clearfix">' . $image;
+    ;
+    echo '<h3 class="bookxAllListingInfo"><span class="bookxGenreDescription">' . $genre['genre_name'] . '</span></h3>'
+    . ' <a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_genre_id=' . $genre['bookx_genre_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_BY_GENRE, $genre['genre_name']) . '</a>';
+    echo '</div>';
+}
+unset($display_image, $image); 
 ?>
 </div>
 
-<?php if ( ($bookx_genres_listing_split->number_of_rows > 0) && $bookx_genres_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
+<?php if (($bookx_genres_listing_split->number_of_rows > 0) && $bookx_genres_listing_split->number_of_pages > 1 && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {
 ?>
 <div id="genresListingBottomNumber" class="navSplitPagesResult back"><?php echo $bookx_genres_listing_split->display_count(TEXT_DISPLAY_NUMBER_OF_GENRES); ?></div>
 <div  id="genresListingListingBottomLinks" class="navSplitPagesLinks forward"><?php echo TEXT_RESULT_PAGE . ' ' . $bookx_genres_listing_split->display_links(MAX_DISPLAY_PAGE_LINKS, zen_get_all_get_params(array('page', 'info', 'x', 'y'))); ?></div>

@@ -33,7 +33,6 @@
 
 	if (BOOKX_SERIES_LISTING_SHOW_ONLY_STOCKED) { ?>
 		<script type="text/javascript">
-		<!--
 		function handleStockOnlyCheckbox() {
 			var n = window.location.href.indexOf('&la=');
 			var listOutOfStock = seriesListOnlyStockedCheckbox.checked;
@@ -44,33 +43,34 @@
 				window.location.href = window.location.href.replace('&la=true', newGetParameter);
 			}
 		}
-		-->
+		
 		</script>
 		<div id="seriesListOnlyStockedCheckboxContainer">
-			<label><input id="seriesListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleStockOnlyCheckbox()" /><?php echo TEXT_BOOKX_SERIES_LIST_STOCKCHECKBOX_LABEL; ?></label>
+			<label>
+                <input id="seriesListOnlyStockedCheckbox" type="checkbox" <?php echo ( isset($_GET['la']) && $_GET['la'] ? 'checked' : ''); ?> onClick="handleStockOnlyCheckbox()" /><?php echo TEXT_BOOKX_SERIES_LIST_STOCKCHECKBOX_LABEL; ?>
+            </label>
 		</div>
 <?php } ?>
 
 <h1 id="authorListHeading"><?php echo TEXT_BOOKX_SERIES_LIST_TITLE; ?></h1>
-
 <?php echo $bookx_alphafilter; ?>
-
 <div id="bookxSeriesListingTable" class="bookxFilterListAll">
-<?php
-
-	foreach ($bookx_series_listing_split_array as $series) {
-		
-		echo '<div class="row clearfix">';
-        if(BOOKX_FILTER_ALL_OPTIONS['show_series_image'] == true) {
-            echo zen_image($series['series_image'], $series['series_name'], BOOKX_SERIES_LISTING_IMAGE_MAX_WIDTH, BOOKX_SERIES_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"');
-        }
-		echo '<h3 class="bookxAllListingInfo"><span class="bookxSeriesName">' . $series['series_name'] . '</span></h3>'
-		     . (!empty($series['series_description']) ? '<div class="bookxAllListingDescription">' . $series['series_description'] . '</div>' : '')
-		     . '<a href="' .  zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_series_id=' . $series['bookx_series_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_OF_SERIES, $series['series_name']) . '</a>';
-		echo '</div>';
-
-	}
+    
+<?php 
+foreach ($bookx_series_listing_split_array as $series) {
+    if ($display_image == true) {
+        $image = (!empty($series['series_image'])) ? zen_image($series['series_image'], $series['series_name'], BOOKX_SERIES_LISTING_IMAGE_MAX_WIDTH, BOOKX_SERIES_LISTING_IMAGE_MAX_HEIGHT, 'class="bookxAllListingImage"') : '<div class="placeHolder"></div>';
+    }
+    echo '<div class="row clearfix">' . $image;
+    echo '<h3 class="bookxAllListingInfo"><span class="bookxSeriesName">' . $series['series_name'] . '</span></h3>'
+        . (!empty($series['series_description']) ? '<div class="bookxAllListingDescription">' 
+        . zen_html_entity_decode(bookx_truncate_paragraph($series['series_description']), BOOKX_TRUNCATE_DESCRIPTION_LENGHT, TEXT_BOOKX_MORE_PRODUCT_INFO) . '</div>' : '')
+        . '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookx_series_id=' . $series['bookx_series_id']) . '" class="bookx_searchlink">' . sprintf(TEXT_BOOKX_LIST_PRODUCTS_OF_SERIES, $series['series_name']) . '</a>';
+    echo '</div>';
+}
+unset($display_image, $image); 
 ?>
+    
 </div>
 
 <?php if ( ($bookx_series_listing_split->number_of_rows > 0) && ((PREV_NEXT_BAR_LOCATION == '2') || (PREV_NEXT_BAR_LOCATION == '3')) ) {

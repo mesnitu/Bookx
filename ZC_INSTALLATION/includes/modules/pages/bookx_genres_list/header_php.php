@@ -73,6 +73,9 @@ $sql = 'SELECT bg.bookx_genre_id, bgd.genre_image, bgd.genre_name '
 $bookx_genres_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_GENRE_LISTING, 'bg.bookx_genre_id', 'page');
 $bookx_genres_listing = $db->Execute($bookx_genres_listing_split->sql_query);
 
+$display_image = BOOKX_FILTER_ALL_DISPLAY_OPTIONS['genre_image'];
+$default_image = DIR_WS_IMAGES . BOOKX_DEFAULT_IMAGE_FOR['genre'];
+
 $bookx_genres_listing_split_array = [];
 
 while (!$bookx_genres_listing->EOF) {
@@ -80,10 +83,10 @@ while (!$bookx_genres_listing->EOF) {
     $bookx_genres_listing_split_array [] = [
         'bookx_genre_id' => $bookx_genres_listing->fields['bookx_genre_id'],
         'genre_name' => $bookx_genres_listing->fields ['genre_name'],
-        'genre_image' => (!empty($bookx_genres_listing->fields ['genre_image']) ? DIR_WS_IMAGES . $bookx_genres_listing->fields['genre_image'] : BOOKX_GENRES_DEFAULT_IMAGE)
+        'genre_image' => (!empty($bookx_genres_listing->fields ['genre_image']) ? DIR_WS_IMAGES . $bookx_genres_listing->fields['genre_image'] : $default_image)
     ];
 
     $bookx_genres_listing->MoveNext();
 }
-
+unset($default_image);
 $bookx_alphafilter = tpl_bookx_alphafilter_all('genre_name', TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, FILENAME_BOOKX_GENRES_LIST);

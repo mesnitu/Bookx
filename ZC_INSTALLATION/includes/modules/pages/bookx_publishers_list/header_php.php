@@ -70,19 +70,23 @@ $sql = 'SELECT bp.bookx_publisher_id, bp.publisher_name, bp.publisher_image, bpd
 $bookx_publishers_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_PUBLISHER_LISTING, 'bp.bookx_publisher_id', 'page');
 $bookx_publishers_listing = $db->Execute($bookx_publishers_listing_split->sql_query);
 
+$display_image = BOOKX_FILTER_ALL_DISPLAY_OPTIONS['publisher_image'];
+$default_image = DIR_WS_IMAGES . BOOKX_DEFAULT_IMAGE_FOR['publisher'];
+
 $bookx_publishers_listing_split_array = [];
 
 while (!$bookx_publishers_listing->EOF) {
 
     $bookx_publishers_listing_split_array [] = [
-        'bookx_publisher_id' => $bookx_publishers_listing->fields ['bookx_publisher_id'],
-        'publisher_name' => $bookx_publishers_listing->fields ['publisher_name'],
-        'publisher_image' => (!empty($bookx_publishers_listing->fields ['publisher_image']) ? DIR_WS_IMAGES . $bookx_publishers_listing->fields ['publisher_image'] : BOOKX_PUBLISHER_DEFAULT_IMAGE),
-        'publisher_description' => $bookx_publishers_listing->fields ['publisher_description'],
-        'publisher_url' => $bookx_publishers_listing->fields ['publisher_url']
+        'bookx_publisher_id' => $bookx_publishers_listing->fields['bookx_publisher_id'],
+        'publisher_name' => $bookx_publishers_listing->fields['publisher_name'],
+        'publisher_image' => (!empty($bookx_publishers_listing->fields ['publisher_image']) ? DIR_WS_IMAGES . $bookx_publishers_listing->fields['publisher_image'] : $default_image),
+        'publisher_description' => $bookx_publishers_listing->fields['publisher_description'],
+        'publisher_url' => $bookx_publishers_listing->fields['publisher_url']
     ];
 
     $bookx_publishers_listing->MoveNext();
 }
 
+unset($default_image);
 $bookx_alphafilter = tpl_bookx_alphafilter_all('publisher_name', TABLE_PRODUCT_BOOKX_PUBLISHERS, FILENAME_BOOKX_PUBLISHERS_LIST);

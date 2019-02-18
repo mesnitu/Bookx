@@ -68,17 +68,20 @@ $sql = 'SELECT bi.bookx_imprint_id, bi.imprint_name, bi.imprint_image, bid.impri
 $bookx_imprints_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_IMPRINT_LISTING, 'bi.bookx_imprint_id', 'page');
 $bookx_imprints_listing = $db->Execute($bookx_imprints_listing_split->sql_query);
 
+$display_image = BOOKX_FILTER_ALL_DISPLAY_OPTIONS['imprint_image'];
+$default_image = DIR_WS_IMAGES . BOOKX_DEFAULT_IMAGE_FOR['imprint'];
+
 $bookx_imprints_listing_split_array = [];
 
 while (!$bookx_imprints_listing->EOF) {
     $bookx_imprints_listing_split_array [] = [
         'bookx_imprint_id' => $bookx_imprints_listing->fields ['bookx_imprint_id'],
         'imprint_name' => $bookx_imprints_listing->fields ['imprint_name'],
-        'imprint_image' => (!empty($bookx_imprints_listing->fields ['imprint_image']) ? DIR_WS_IMAGES . $bookx_imprints_listing->fields ['imprint_image'] : DIR_WS_IMAGES . BOOKX_DEFAULT_SERIES_IMAGE),
+        'imprint_image' => (!empty($bookx_imprints_listing->fields ['imprint_image']) ? DIR_WS_IMAGES . $bookx_imprints_listing->fields ['imprint_image'] : $default_image),
         'imprint_description' => $bookx_imprints_listing->fields ['imprint_description']
     ];
 
     $bookx_imprints_listing->MoveNext();
 }
-
+unset($default_image);
 $bookx_alphafilter = tpl_bookx_alphafilter_all('imprint_name', TABLE_PRODUCT_BOOKX_IMPRINTS, FILENAME_BOOKX_IMPRINTS_LIST);

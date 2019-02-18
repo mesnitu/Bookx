@@ -341,7 +341,7 @@ function bookx_update_plugin_release($now = true, $days = null)
   return $msg;
 }
 
-function pr($v, $die = null, $dedug = null)
+function pr($v, $vn=null, $dedug = null, $die=null)
 {
   echo '<pre>';
   echo $vn;
@@ -350,8 +350,7 @@ function pr($v, $die = null, $dedug = null)
     debug_print_backtrace();
   }
   echo '</pre>';
-  if ($die)
-    die();
+  if ($die) die();
 }
 
 function vd($v, $n = null)
@@ -359,4 +358,16 @@ function vd($v, $n = null)
   echo "<pre>$n";
   var_dump($v);
   echo "</pre>";
+}
+
+function bookx_get_config($like) {
+    global $db;
+    $res = $db->Execute("SELECT * FROM ".TABLE_CONFIGURATION." WHERE configuration_key LIKE '%".$like."%'");
+    
+    $temp = [];
+    while(!$res->EOF) {
+        $temp[$res->fields['configuration_key']] = $res->fields['configuration_value'];
+        $res->MoveNext();
+    }
+    pr($temp);
 }

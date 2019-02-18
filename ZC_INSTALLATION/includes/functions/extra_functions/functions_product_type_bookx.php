@@ -473,19 +473,20 @@ function bookx_set_alphafilter($name, $table)
     global $db;
     
     $index = [];
-    if (BOOKX_SHOW_ALPHAINDEX_COUNTER == true) {
+    if (BOOKX_FILTER_ALL_DISPLAY_OPTIONS['alpha_index_counter'] == true) {
         $counter = ", COUNT(*) AS counter";
-    }
+    }  
+    $where_lang = ($name == 'series_name') ? ' WHERE languages_id =\'' . (int)$_SESSION['languages_id'] . '\'' : '';
     $sql = "SELECT DISTINCT SUBSTRING(UPPER(" . $name . ") FROM 1 FOR 1) AS firstletter " . $counter . " FROM 
-         ". $table . " GROUP BY firstletter";
+         ". $table . $where_lang . " GROUP BY firstletter";
     $res = $db->Execute($sql, '', (BOOKX_DEFAULT_SQL_CACHE_TIME !== false ? true : false), BOOKX_DEFAULT_SQL_CACHE_TIME);
+    
     while (!$res->EOF) {
-        echo $res->fields['firstletter'] . ' - ';
-        $index[] = $res->fields['firstletter'] . (BOOKX_SHOW_ALPHAINDEX_COUNTER == true ? '<span>&nbsp;(' . $res->fields['counter'] . ')</span>' : '');
+        $index[] = $res->fields['firstletter'] . (BOOKX_FILTER_ALL_DISPLAY_OPTIONS['alpha_index'] == true ? '<span>&nbsp;(' . $res->fields['counter'] . ')</span>' : '');
         $res->MoveNext();
     }
-    return $index;
     
+    return $index;    
 }
 
 /**
@@ -495,21 +496,20 @@ function bookx_set_alphafilter($name, $table)
  * @return string
  */
 function tpl_bookx_alphafilter_all($field, $table, $page, $display = true)
-{
-    
-    if (BOOKX_SHOW_ALPHAINDEX_ON_FILTER_ALL == true && !empty($page) && $display == true) {
+{ 
+    if (BOOKX_FILTER_ALL_DISPLAY_OPTIONS['alpha_index'] == true && !empty($page) && $display == true) {
         
         $index = bookx_set_alphafilter($field, $table);
         
         if (is_array($index)) {
-            $alpha = '<div class="container">';
+            $alpha = '<!-- alpha --><div class="container alphaFilter">' . "\n";
             foreach ($index as $value) {
-                $alpha .= '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link($page, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value[0]) . '\'">' . $value . '</div>';
+                $alpha .= '<div class="idx_name" onclick="document.location.href=\'' . zen_href_link($page, zen_get_all_get_params(array('q', 'action', 'id', 'page')) . 'q=' . $value[0]) . '\'">' . $value . '</div>' . "\n";
             }
             if (isset($_GET['q']) && !empty($_GET['q'])) {
                 $alpha .= '<div class="reset" onclick="document.location.href=\'' . zen_href_link($page, 'q=') . '\';">Reset</div>';
             }
-            $alpha .= '</div>';
+            $alpha .= '</div><!-- alpha_filter -->' . "\n";
             return $alpha;
         }
     }

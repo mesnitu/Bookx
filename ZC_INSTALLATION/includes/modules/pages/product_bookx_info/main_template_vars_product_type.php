@@ -40,7 +40,6 @@ $flag_show_product_bookx_info_author_type = (int) zen_get_show_product_switch($p
 $flag_show_product_bookx_info_author_type_image = (int) zen_get_show_product_switch($products_id_current, 'author_type_image');
 $flag_order_product_bookx_info_authors_by = zen_get_show_product_switch($products_id_current, 'authors', 'ORDER_');
 
-
 $flag_show_product_bookx_info_binding = (int) zen_get_show_product_switch($products_id_current, 'binding');
 $flag_show_product_bookx_info_condition = (int) zen_get_show_product_switch($products_id_current, 'condition');
 
@@ -48,7 +47,6 @@ $flag_show_product_bookx_info_genres = (int) zen_get_show_product_switch($produc
 $flag_show_product_bookx_info_genres_as_link = (int) zen_get_show_product_switch($products_id_current, 'genres_as_link');
 $flag_show_product_bookx_info_genre_images = (int) zen_get_show_product_switch($products_id_current, 'genre_images');
 $flag_order_product_bookx_info_genres_by = zen_get_show_product_switch($products_id_current, 'genres', 'ORDER_');
-
 
 $flag_show_product_bookx_info_imprint = (int) zen_get_show_product_switch($products_id_current, 'imprint');
 $flag_show_product_bookx_info_imprint_as_link = (int) zen_get_show_product_switch($products_id_current, 'imprint_as_link');
