@@ -42,8 +42,11 @@ define('LABEL_BOOKX_PAGES', '%s Seiten');
 define('LABEL_BOOKX_VOLUME', 'Band %s');
 define('LABEL_BOOKX_ISBN', 'ISBN');
 define('LABEL_BOOKX_AUTHOR', 'Autor');
+define('LABEL_BOOKX_SERIE', 'Serie');
+define('LABEL_BOOKX_PUBLISHER', 'Publisher');
 define('LABEL_BOOKX_AUTHORS', 'Autoren');
 define('LABEL_BOOKX_MODEL', 'Art.Nr.');
+define('LABEL_BOOKX_IMPRINT', 'Imprint');
 define('LABEL_BOOKX_PUBLISHING_DATE', 'Erscheinungsdatum: ');
 
 

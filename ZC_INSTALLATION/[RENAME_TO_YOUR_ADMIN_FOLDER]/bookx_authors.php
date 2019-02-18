@@ -29,10 +29,6 @@ require('includes/application_top.php');
                      
 $action = (isset($_GET['action']) ? $_GET['action'] : '');
 $sort_order = (isset($_GET['list_order'])) ? '&list_order=' . $_GET['list_order'] : '';
-//pr($action);
-//pr($_GET);
-//pr($_POST);
-//pr($sanitizer);
 
 if (zen_not_null($action)) {
     
@@ -612,7 +608,7 @@ switch ($action) {
         $default_directory = substr($aInfo->author_image, 0, strpos($aInfo->author_image, '/') + 1);
         
         if ('' == $aInfo->author_image) {
-            $default_directory = BOOKX_AUTHOR_DEFAULT_IMAGE. '/';
+            $default_directory = BOOKX_AUTHOR_IMAGES_FOLDER . '/';
         }
         $contents[] = array(
             'text' => $tpl_wrap(array(

@@ -2,7 +2,7 @@
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5
+ * shop system. Tested for compatibility on ZC v. 1.56a
  *
  * For latest version and support visit:
  * https://sourceforge.net/p/zencartbookx
@@ -15,7 +15,7 @@
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
  * @version BookX V 0.9.4-revision8 BETA
- * @version $Id: [ZC INSTALLATION]/includes/modules/pages/product_bookx_info/main_template_vars.php 2016-02-02 philou $
+ * @version $Id: [ZC INSTALLATION]/includes/modules/pages/product_bookx_info/main_template_vars.php 2019-02-17 mesnitu $
  */
 
 /*
@@ -24,35 +24,15 @@
 
   // This should be first line of the script:
   $zco_notifier->notify('NOTIFY_MAIN_TEMPLATE_VARS_START_PRODUCT_BOOKX_INFO');
-
-  $module_show_categories = PRODUCT_INFO_CATEGORIES;
-
-  $sql = "select count(*) as total
-          from " . TABLE_PRODUCTS . " p, " .
-                   TABLE_PRODUCTS_DESCRIPTION . " pd
-          where    p.products_status = '1'
-          and      p.products_id = '" . (int)$_GET['products_id'] . "'
-          and      pd.products_id = p.products_id
-          and      pd.language_id = '" . (int)$_SESSION['languages_id'] . "'";
-
-
-  $res = $db->Execute($sql);
-
-  if ( $res->fields['total'] < 1 ) {
-
-    $tpl_page_body = '/tpl_product_info_noproduct.php';
-
+  pr("main_template"); 
+  
+  if($page_not_found == true) {
+      $tpl_page_body = '/tpl_product_info_noproduct.php';
   } else {
-
-    $tpl_page_body = '/tpl_product_info_display.php';
-
-    $sql = "update " . TABLE_PRODUCTS_DESCRIPTION . "
-            set        products_viewed = products_viewed+1
-            where      products_id = '" . (int)$_GET['products_id'] . "'
-            and        language_id = '" . (int)$_SESSION['languages_id'] . "'";
-
-    $res = $db->Execute($sql);
-
+    $tpl_page_body = '/tpl_product_bookx_info_display.php';
+    
+    $zco_notifier->notify('NOTIFY_PRODUCT_VIEWS_HIT_INCREMENTOR', (int)$_GET['products_id']);
+    
     $sql = "select p.products_id, pd.products_name,
                   pd.products_description, p.products_model,
                   p.products_quantity, p.products_image,
@@ -76,7 +56,7 @@
     $products_price = $currencies->display_price($product_info->fields['products_price'],
                       zen_get_tax_rate($product_info->fields['products_tax_class_id']));
 
-    $manufacturers_name= zen_get_products_manufacturers_name((int)$_GET['products_id']);
+    $manufacturers_name = zen_get_products_manufacturers_name((int)$_GET['products_id']);
 
     if ($new_price = zen_get_products_special_price($product_info->fields['products_id'])) {
 
@@ -101,9 +81,8 @@
                        $review_status;
 
     $reviews = $db->Execute($reviews_query);
-
   }
-
+  
   require(DIR_WS_MODULES . zen_get_module_directory('product_prev_next.php'));
 
   $products_name = $product_info->fields['products_name'];
@@ -183,7 +162,7 @@
   if ($dir = @dir($extras_dir)) {
     while ($file = $dir->read()) {
       if (!is_dir($extras_dir . '/' . $file)) {
-        if (preg_match('/\.php$/', $file) > 0) {
+        if (preg_match('~^[^\._].*\.php$~i', $file) > 0) {
           $directory_array[] = '/' . $file;
         }
       }

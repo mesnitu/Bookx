@@ -199,12 +199,12 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
      * TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION
      */
     $db->Execute("ALTER TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION']} " . $table_character_set . ", 
-               CHANGE COLUMN genre_description genre_description VARCHAR(64) " . $column_character_set . " NULL DEFAULT NULL;");
-    //ADD UNIQUE INDEX idx_bxgd_genre_description (genre_description ASC) ;");
-    alter_indexes(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_description', 'idx_bxgd_genre_description');
-    $update_095_msg .= $list_msg("Added INDEX idx_bxgd_genre_description to TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION<br>");
+               CHANGE COLUMN genre_description genre_name VARCHAR(64) " . $column_character_set . " NULL DEFAULT NULL;");
+    //ADD UNIQUE INDEX idx_bxgd_genre_description (genre_name ASC) ;");
+    alter_indexes(TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION, 'genre_name', 'idx_bxgd_genre_name');
+    $update_095_msg .= $list_msg("Added INDEX idx_bxgd_genre_name to TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION<br>");
     $db->Execute("UPDATE " . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . " SET
-        genre_description = CASE genre_description WHEN '' THEN NULL ELSE genre_description END,
+        genre_name = CASE genre_name WHEN '' THEN NULL ELSE genre_name END,
         genre_image = CASE genre_image WHEN '' THEN NULL ELSE genre_image END;");
     $update_095_msg .= $list_msg("Converted all empty database fields to NULL on TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION");
     $analyze .= ', ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION;
@@ -287,7 +287,8 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
     $update_095_msg .= $list_msg("Converted all empty database fields to NULL on TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION");
     $analyze .= ', ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION;
 
-
+    $db->Execute("UPDATE ".TABLE_GET_TERMS_TO_FILTER ." SET get_term_name_field='genre_name' WHERE get_term_name ='bookx_genre_id';");
+    
     /**
      * @since v1.0.0
      */
@@ -357,6 +358,8 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
     $update_095_msg .= $list_msg("Bookx Updated to version " . $bookx_version);
 
     zen_register_admin_page('bookxFamilies', 'BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'FILENAME_BOOKX_FAMILIES', '', 'extras', 'Y', 91);
+    
+    $db->Execute("INSERT INTO {$const['TABLE_CONFIGURATION']} ('Author Listing Photo: Maximum Width', 'BOOKX_AUTHOR_LISTING_IMAGE_MAX_WIDTH', '100', '<br />Maximum width in pixels for author photo on author listing. A value of 0 will show all images at their actual size without any scaling.', {$cf_gid}, 160, NOW(), NOW(), NULL, NULL)");
     
     if (isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
 

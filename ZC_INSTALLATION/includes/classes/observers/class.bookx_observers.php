@@ -78,6 +78,7 @@ class productTypeFilterObserver extends base
     var $flag_show_product_bookx_filter_imprint_extra_info = false;
     var $flag_show_product_bookx_filter_series_extra_info = false;
     var $flag_show_product_bookx_filter_genre_extra_info = false;
+    
     var $bookx_filter_active = 0;
     var $filtered_author_id = null;
     var $filtered_author_type_id = null;
@@ -378,11 +379,11 @@ class productTypeFilterObserver extends base
 
         //** genres
         if ($this->flag_show['genres']) {
-            $additional_fields .= ', GROUP_CONCAT(DISTINCT bgd.genre_description ORDER BY bg.genre_sort_order ASC SEPARATOR "' . BOOKX_GENRE_SEPARATOR . '")  AS genres';
+            $additional_fields .= ', GROUP_CONCAT(DISTINCT bgd.genre_name ORDER BY bg.genre_sort_order ASC SEPARATOR "' . BOOKX_GENRE_SEPARATOR . '")  AS genres';
             if ($this->flag_show['genres_as_link']) {
                 $genre_link_atag_firstpart = '<a href="' . zen_href_link(FILENAME_DEFAULT, '&typefilter=bookx&bookxfilter=bookx_genre_id&bookx_genre_id=');
                 $genre_link_atag_middlepart = '" class="bookx_searchlink">';
-                $additional_fields .= ", GROUP_CONCAT(DISTINCT CONCAT_WS('', '" . $genre_link_atag_firstpart . "', bgd.bookx_genre_id, '" . $genre_link_atag_middlepart . "', bgd.genre_description, '</a>') ORDER BY bg.genre_sort_order ASC SEPARATOR ' | ')  AS genres_as_links";
+                $additional_fields .= ", GROUP_CONCAT(DISTINCT CONCAT_WS('', '" . $genre_link_atag_firstpart . "', bgd.bookx_genre_id, '" . $genre_link_atag_middlepart . "', bgd.genre_name, '</a>') ORDER BY bg.genre_sort_order ASC SEPARATOR ' | ')  AS genres_as_links";
             }
             $join_genres = true;
             $join_bx_extra = true;
@@ -760,14 +761,16 @@ class productTypeFilterObserver extends base
                    
                         $list_box_contents[$rows]['date_flag'] = $publishing_date_flag;
                         $list_box_contents[$rows][$product_name_column]['text'] = $new_product_text;
-                        
-                        $list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
-                        
-                        /* @todo this is a bit fragil solution since layouts can change as they did and is not working.
+                        /*
+                         * If you want to add $url_keywords and $active_boox_get_filters params to the url uncomment the following line
+                         */
+                        //$list_box_contents[$rows][$product_image_column]['text'] = str_replace('&amp;products_id=', $active_boox_get_filters . $url_keywords . '&amp;products_id=', $list_box_contents[$rows][$product_image_column]['text']);
+                       
+                        /* 
+                         * @todo this is a bit fragil solution since layouts can change as they did and is not working.
                          * <br /><br /> is no longer in responsive layout. Now there is a <br> coming from somewhere that is also wrong.
                          * For now trying to replace on $list_box_contents[$rows][$product_price_column]['text']
                          */
-
                         $new_content = '';
                         if ($button) {
                         $bsearch = strpos($list_box_contents[$rows][$product_price_column]['text'], '<span class="cssB');
@@ -963,19 +966,28 @@ class productTypeFilterObserver extends base
             $extra_html = '';
 
             if (isset($_GET['bookx_author_id']) && !empty($_GET['bookx_author_id'])) {
+
+                /*
+                 * Trying to  not duplicate necessary queries. To display proper metatags for authors, etc, the query must happen before to populate
+                 * metatags, and then will happen here again. 
+                 * Not sure what's the best way, maybe someone can have another way. 
+                 * Because this file is getting big and hard to read, I created a new observer to deal with canonical and metatags (dinamic metatags)
+                 * So this information is comming from that file on a global scope.
+                 * Maybe latter this two observers files will be combined in to one. 
+                 * 
+                 */
+
                 $this->bookx_filter_active ++;
                 $this->filtered_author_id = (int) $_GET['bookx_author_id'];
 
                 $this->flag_show_product_bookx_filter_author_extra_info = bookx_get_show_product_switch('author', 'SHOW_', '_FILTER_EXTRA_INFO');
                 if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_author_extra_info) {
-                    $sql = 'SELECT ba.author_name, ba.author_image, bad.author_description, ba.author_url
-							FROM ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba
-							LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . ' bad ON bad.bookx_author_id = ba.bookx_author_id AND bad.languages_id = "' . (int) $_SESSION['languages_id'] . '"
-							WHERE ba.bookx_author_id = "' . (int) $this->filtered_author_id . '"';
-                    $author = $db->Execute($sql);
+
+                    global $author_meta_info; // this is comming from class.bookx_observers_canonical.php
+                    $author = $author_meta_info; // assign author to author_meta_tags , so now everything is the same. 
 
                     if (!empty($author->fields['author_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_author_extra_info) {
-                        $extra_html .= '<div id="bookx_filter_author_image">' . zen_image(DIR_WS_IMAGES . $author->fields['author_image'], $author->fields['author_name'], BOOKX_AUTHOR_IMAGE_WIDTH, BOOKX_AUTHOR_IMAGE_MAX_HEIGHT) . '</div>';
+                        $extra_html .= '<div id="bookx_filter_author_image">' . zen_image(DIR_WS_IMAGES . $author->fields['author_image'], $author->fields['author_name'], BOOKX_AUTHOR_IMAGE_MAX_WIDTH, BOOKX_AUTHOR_IMAGE_MAX_HEIGHT) . '</div>';
                     }
 
                     if (!empty($author->fields['author_description']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_author_extra_info) {
@@ -1016,12 +1028,11 @@ class productTypeFilterObserver extends base
 
                 $this->flag_show_product_bookx_filter_publisher_extra_info = bookx_get_show_product_switch('publisher', 'SHOW_', '_FILTER_EXTRA_INFO');
                 if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_publisher_extra_info) {
-                    $sql = 'SELECT pub.publisher_name, pub.publisher_image, pubd.publisher_description, pubd.publisher_url
-							FROM ' . TABLE_PRODUCT_BOOKX_PUBLISHERS . ' pub
-							LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION . ' pubd ON pubd.bookx_publisher_id = pub.bookx_publisher_id AND pubd.languages_id = "' . (int) $_SESSION['languages_id'] . '"
-							WHERE pub.bookx_publisher_id = "' . (int) $this->filtered_publisher_id . '"';
-                    $publisher = $db->Execute($sql);
-                    if (!empty($publisher->fields['publisher_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_publisher_extra_info) {
+
+                    global $publisher_meta_info;
+                    $publisher = $publisher_meta_info; // same logic here and so on
+
+                    if (!empty($publisher->fields['publisher_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int)$this->flag_show_product_bookx_filter_publisher_extra_info) {
                         $extra_html .= '<div id="bookx_filter_publisher_image">' . zen_image(DIR_WS_IMAGES . $publisher->fields['publisher_image'], $publisher->fields['publisher_name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT) . '</div>';
                     }
 
@@ -1042,11 +1053,10 @@ class productTypeFilterObserver extends base
 
                 $this->flag_show_product_bookx_filter_imprint_extra_info = bookx_get_show_product_switch('imprint', 'SHOW_', '_FILTER_EXTRA_INFO');
                 if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_imprint_extra_info) {
-                    $sql = 'SELECT i.imprint_name, i.imprint_image, id.imprint_description
-							FROM ' . TABLE_PRODUCT_BOOKX_IMPRINTS . ' i
-							LEFT JOIN ' . TABLE_PRODUCT_BOOKX_IMPRINTS_DESCRIPTION . ' id ON id.bookx_imprint_id = i.bookx_imprint_id AND id.languages_id = "' . (int) $_SESSION['languages_id'] . '"
-							WHERE i.bookx_imprint_id = "' . (int) $this->filtered_imprint_id . '"';
-                    $imprint = $db->Execute($sql);
+
+                    global $imprint_meta_info;
+                    $imprint = $imprint_meta_info;
+
                     if (!empty($imprint->fields['imprint_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_imprint_extra_info) {
                         $extra_html .= '<div id="bookx_filter_imprint_image">' . zen_image(DIR_WS_IMAGES . $imprint->fields['imprint_image'], $imprint->fields['imprint_name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT) . '</div>';
                     }
@@ -1062,16 +1072,18 @@ class productTypeFilterObserver extends base
                 $this->filtered_series_id = (int) $_GET['bookx_series_id'];
 
                 $this->flag_show_product_bookx_filter_series_extra_info = bookx_get_show_product_switch('series', 'SHOW_', '_FILTER_EXTRA_INFO');
-                if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_series_extra_info) {
-                    $sql = 'SELECT sd.series_name, sd.series_image, sd.series_description
-							FROM ' . TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION . ' sd
-							WHERE sd.bookx_series_id = "' . (int) $this->filtered_series_id . '" AND sd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
-                    $series = $db->Execute($sql);
-                    if (!empty($series->fields['series_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_series_extra_info) {
+                if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int)$this->flag_show_product_bookx_filter_series_extra_info) {
+                    global $series_meta_info;
+                    $series = $series_meta_info;
+
+
+                    if (!empty($series->fields['series_image']) ||
+                        BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_series_extra_info) {
                         $extra_html .= '<div id="bookx_filter_series_image_container">' . zen_image(DIR_WS_IMAGES . $series->fields['series_image'], $series->fields['series_name'], '', '', 'id="bookx_filter_series_image"') . '</div>';
                     }
 
-                    if (!empty($series->fields['series_description']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_series_extra_info) {
+                    if (!empty($series->fields['series_description']) || 
+                        BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_series_extra_info) {
                         $extra_html .= '<div id="bookx_filter_series_description">' . zen_html_entity_decode($series->fields['series_description']) . '</div>';
                     }
                 }
@@ -1083,18 +1095,17 @@ class productTypeFilterObserver extends base
 
                 $this->flag_show_product_bookx_filter_genre_extra_info = bookx_get_show_product_switch('genre', 'SHOW_', '_FILTER_EXTRA_INFO');
                 if (BOOKX_LAYOUT_FLAG_OPTION_DONT_DISPLAY < (int) $this->flag_show_product_bookx_filter_genre_extra_info) {
-                    $sql = 'SELECT gd.genre_description AS genre_name, gd.genre_image
-							FROM ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' gd
-							WHERE gd.bookx_genre_id = "' . (int) $this->filtered_genre_id . '" AND gd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
-                    $genre = $db->Execute($sql);
+
+                    global $genre_meta_info;
+                    $genre = $genre_meta_info;
 
                     if (!empty($genre->fields['genre_image']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_genre_extra_info) {
                         $extra_html .= '<div id="bookx_filter_genre_image">' . zen_image(DIR_WS_IMAGES . $genre->fields['genre_image'], $genre->fields['genre_name'], BOOKX_ICONS_MAX_WIDTH, BOOKX_ICONS_MAX_HEIGHT) . '</div>';
                     }
 
-                    /* if (!empty($genre->fields['genre_description']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int)$this->flag_show_product_bookx_filter_genre_extra_info) {
-                      $extra_html .= '<div id="bookx_filter_genre_description">' . $genre->fields['genre_description'] . '</div>';
-                      } */
+                    if (!empty($genre->fields['genre_name']) || BOOKX_LAYOUT_FLAG_OPTION_ALWAYS_DISPLAY == (int) $this->flag_show_product_bookx_filter_genre_extra_info) {
+                        $extra_html .= '<div id="bookx_filter_binding_name">' . $genre->fields['genre_name'] . '</div>';
+                    }
                 }
             }
 
@@ -1177,7 +1188,7 @@ class productTypeFilterObserver extends base
 									  OR srchba.author_name LIKE '%:keywords%'
 									  OR srchbpub.publisher_name LIKE '%:keywords%'
 									  OR srchbsd.series_name LIKE '%:keywords%'
-									  OR srchbgd.genre_description LIKE '%:keywords%'
+									  OR srchbgd.genre_name LIKE '%:keywords%'
 									  OR srchbi.imprint_name LIKE '%:keywords%'";
 
                     $isbn_test = str_replace('-', '', $search_keywords[$i]);

@@ -363,13 +363,13 @@ if (bookx_get_show_product_switch ( 'genres_list', 'SHOW_', '_LINK' )) {
 if (bookx_get_show_product_switch ( 'genre', 'SHOW_', '_FILTER' )) {
 	$show_genre_filter = true;
 	
-	$bookx_filter_values_query = 'SELECT DISTINCT bg.bookx_genre_id, bgd.genre_description AS genre_name
+	$bookx_filter_values_query = 'SELECT DISTINCT bg.bookx_genre_id, bgd.genre_name AS genre_name
 		                          FROM ' . TABLE_PRODUCT_BOOKX_GENRES . ' bg
 		                          LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION . ' bgd ON bg.bookx_genre_id = bgd.bookx_genre_id AND bgd.languages_id = "' . (int)$_SESSION['languages_id'] . '"'
 		                        . (!empty($extra_filter_query_parts['join_multi_filter']) ? ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . ' bgtp ON bgtp.bookx_genre_id = bg.bookx_genre_id ' . $extra_filter_query_parts['join_multi_filter'] . ' ON be.products_id = bgtp.products_id ' : '')
 		                        . bookx_assemble_filter_extra_join($extra_filter_query_parts['join'], array('genre'))
                                 . ' WHERE 1 ' . bookx_assemble_filter_extra_where($extra_filter_query_parts['where'], array('genre'))
-		                       .' ORDER by bg.genre_sort_order, bgd.genre_description';
+		                       .' ORDER by bg.genre_sort_order, bgd.genre_name';
 
 	$bookx_genres = $db->Execute ( $bookx_filter_values_query );
 

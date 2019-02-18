@@ -492,7 +492,7 @@ switch (true) {
 	    			('bookx_author_type_id', 'TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION', 'type_description'),
 	    			('bookx_binding_id', 'TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION', 'binding_description'),
 	    			('bookx_condition_id', 'TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION', 'condition_description'),
-	    			('bookx_genre_id', 'TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION', 'genre_description'),
+	    			('bookx_genre_id', 'TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION', 'genre_name'),
 	    			('bookx_imprint_id', 'TABLE_PRODUCT_BOOKX_IMPRINTS', 'imprint_name'),
 	    			('bookx_printing_id', 'TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION', 'printing_description'),
 	    			('bookx_publisher_id', 'TABLE_PRODUCT_BOOKX_PUBLISHERS', 'publisher_name'),
@@ -687,10 +687,10 @@ EOT;
                CREATE TABLE {$const['TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION']} (
                  bookx_genre_id int(11) NOT NULL DEFAULT 0,
                  languages_id int(11) NOT NULL DEFAULT 0,
-                 genre_description VARCHAR(64) DEFAULT NULL,
+                 genre_name VARCHAR(64) DEFAULT NULL,
                  genre_image VARCHAR(64) DEFAULT NULL,
                  PRIMARY KEY  (bookx_genre_id, languages_id),
-                UNIQUE KEY idx_bxgd_genre_description (genre_description) 
+                UNIQUE KEY idx_bxgd_genre_name (genre_name) 
                ) ENGINE=MyISAM DEFAULT CHARSET={$default_db_encoding};
 EOT;
     $db->Execute($sql);

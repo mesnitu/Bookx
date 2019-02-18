@@ -130,8 +130,10 @@ if (isset($_POST['edit_x']) || isset($_POST['edit_y'])) {
 
     ///////////////////////////////////////////////////////
     //// INSERT PRODUCT-TYPE-SPECIFIC *INSERTS* HERE //////
-
-    zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array_be);
+    $sql_data_array_be = [
+      'products_id' => (int)$products_id
+      ];
+        zen_db_perform(TABLE_PRODUCT_BOOKX_EXTRA, $sql_data_array_be);
 
     if (isset($_POST['bookx_genre_id']) && is_array($_POST['bookx_genre_id'])) {
       foreach ($_POST['bookx_genre_id'] as $array_key => $array_value) {
