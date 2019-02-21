@@ -46,7 +46,6 @@ if (zen_not_null($_POST)) {
      * @since v1.0.0
      * This family obj is initiated in BookX admin observer -> bookx_notify_begin_admin_products
      */
-    pr($_POST['bookx_family_id']);
     if(isset($_POST['bookx_family_id']) && $_POST['bookx_family_id'] !='' ) {
         $pInfo->bookx_family = $objBookxFamily->family_name;
     }

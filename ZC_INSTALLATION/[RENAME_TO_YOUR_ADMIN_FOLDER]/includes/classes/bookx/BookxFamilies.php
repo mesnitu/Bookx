@@ -53,10 +53,6 @@ class BookxFamilies
             $this->method = 'csv';
             // @todo csv import / export
         }
-        pr($this);
-        
-        pr($_POST);
-       
     }
 
     function getFamilies_list()
@@ -95,6 +91,7 @@ class BookxFamilies
                 );
                 $res->MoveNext();
             }
+            $this->use_families = true;
         } else {
             $this->use_families = false;
         }
