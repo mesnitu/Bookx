@@ -1289,7 +1289,7 @@ class productTypeFilterObserver extends base
             }
 
             $new_products_query = str_replace('pd.products_name', $name_replacement_field . $additional_bookx_fields, $new_products_query);
-            $new_products_query = str_replace(' where ', $extra_join . ' where ', $new_products_query);
+            $new_products_query = str_replace(' WHERE ', $extra_join . ' WHERE ', $new_products_query);
             $new_products_query .= $group_by . $extra_having;
             $new_products_query .= ' ORDER BY be.publishing_date DESC, p.products_date_available DESC';
         }
