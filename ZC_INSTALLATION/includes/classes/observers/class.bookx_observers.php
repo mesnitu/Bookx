@@ -93,9 +93,6 @@ class productTypeFilterObserver extends base
     var $filtered_binding_id = null;
     var $filtered_values_loaded = false;
     
-    var $new_look_back_number_of_days;
-    
-
     function loadFilterValues()
     {
         // Bookx specific flags
@@ -1378,7 +1375,7 @@ class productTypeFilterObserver extends base
 
         if (!empty($expected_query)) {
             $this->loadFilterValues();
-
+            //pr($this);
             // @TODO new stuff added by phill. Check this
 
             $additional_bookx_fields = '';
@@ -1411,7 +1408,7 @@ class productTypeFilterObserver extends base
                   )) '; */
 
                 //$extra_having = ' AND p.products_quantity < 1';
-                $extra_having = ' HAVING (be.publishing_date IS NOT NULL)  /* we have a BookX publishing date entered */
+                $extra_having .= ' HAVING (be.publishing_date IS NOT NULL)  /* we have a BookX publishing date entered */
     		                    AND (
     		                    /* pub date is less than "number of days to look AHEAD" into the future */
     		                    (pubdate_diff_today BETWEEN -' . intval(self::UPCOMING_BOOK_LOOK_AHEAD) . ' AND 0)
@@ -1494,9 +1491,9 @@ class productTypeFilterObserver extends base
 
                 $group_by .= ' GROUP BY p.products_id ';
             }
-
+            
             $expected_query = str_replace('pd.products_name', $name_replacement_field . $additional_bookx_fields, $expected_query);
-            $expected_query = str_replace(' where ', $extra_join . ' where ', $expected_query);
+            $expected_query = str_replace(' WHERE ', $extra_join . ' WHERE ', $expected_query);
             $date_available_clause = zen_get_upcoming_date_range();
             $expected_query = str_replace($date_available_clause, '', $expected_query);
 
