@@ -24,7 +24,6 @@
 
   // This should be first line of the script:
   $zco_notifier->notify('NOTIFY_MAIN_TEMPLATE_VARS_START_PRODUCT_BOOKX_INFO');
-  pr("main_template"); 
   
   if($page_not_found == true) {
       $tpl_page_body = '/tpl_product_info_noproduct.php';
