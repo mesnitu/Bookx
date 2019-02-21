@@ -23,7 +23,9 @@
  */
 class productTypeFilterObserver extends base
 {
-
+    const NEW_BOOK_LOOK_BACK = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
+    const UPCOMING_BOOK_LOOK_AHEAD = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
+    
     var $flag_group = array(
         'by_availability' => false);
     var $flag_show = array(
@@ -90,6 +92,9 @@ class productTypeFilterObserver extends base
     var $filtered_printing_id = null;
     var $filtered_binding_id = null;
     var $filtered_values_loaded = false;
+    
+    var $new_look_back_number_of_days;
+    
 
     function loadFilterValues()
     {
@@ -107,7 +112,8 @@ class productTypeFilterObserver extends base
     function __construct()
     {
         global $zco_notifier;
-
+        
+        //$this->upcoming_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
         $zco_notifier->attach($this, array(
             'NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
             , 'NOTIFY_MODULE_PRODUCT_LISTING_RESULTCOUNT'
@@ -518,9 +524,6 @@ class productTypeFilterObserver extends base
 
             //$zco_notifier->notify('NOTIFY_BOOKX_ADD_EXTRA_INFO_TO_PRODUCT_LISTING_TABULAR_DISPLAY_BEGIN');
 
-            $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
-            $bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
-
             $upcoming_products_array = array();
             $new_products_array = array();
 
@@ -745,7 +748,7 @@ class productTypeFilterObserver extends base
 
 								break;
 
-                            case $listing->fields['products_quantity'] > 0 && abs($date_diff_days) < $bookx_new_products_look_back_number_of_days: // product in stock and publishing date within range of "new" products
+                            case $listing->fields['products_quantity'] > 0 && abs($date_diff_days) < self::NEW_BOOK_LOOK_BACK: // product in stock and publishing date within range of "new" products
                                 $button_link = true;
                                 $button = zen_image_button(BUTTON_IMAGE_BOOKX_NEW, BUTTON_IMAGE_BOOKX_NEW_ALT, 'class="new_product"');
                                 if($this->flag_group['by_availability'] == true) {
@@ -1222,8 +1225,7 @@ class productTypeFilterObserver extends base
             $extra_join = '';
             $group_by = '';
 
-            $bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
-            if (!empty($bookx_new_products_look_back_number_of_days)) {
+            if (!empty(self::NEW_BOOK_LOOK_BACK)) {
                 $additional_bookx_fields .= ',p.products_quantity, be.publishing_date,p.products_date_available,
     		                                 DATEDIFF("' . date('Y-m-d') . '",
 													  CONCAT_WS("-",
@@ -1239,12 +1241,12 @@ class productTypeFilterObserver extends base
                   IF(SUBSTRING(be.publishing_date, 9,2 )  = "00", "01", SUBSTRING(be.publishing_date, 9,2 ))
                   )
                   )
-                  BETWEEN 0 AND ' . intval($bookx_new_products_look_back_number_of_days) . ') '; */
+                  BETWEEN 0 AND ' . intval(self::NEW_BOOK_LOOK_BACK) . ') '; */
                 //$extra_having .= ' AND (be.publishing_date IS NOT NULL) AND p.products_quantity > 0 ';
                 $extra_having = ' HAVING (be.publishing_date IS NOT NULL)  /* we have a BookX publishing date enterd */
     		                      AND (   		                            
     		                             /* pub date is less than "number of days to look BACK" into the past (i.e. a "new" product) and stock is more than zero or date expected is set */
-    		                             (( pubdate_diff_today BETWEEN 0 AND ' . intval($bookx_new_products_look_back_number_of_days) . ') AND (p.products_quantity > 0 OR (p.products_date_available IS NOT NULL AND p.products_date_available >= "' . date('Y-m-d') . '")))
+    		                             (( pubdate_diff_today BETWEEN 0 AND ' . intval(self::NEW_BOOK_LOOK_BACK) . ') AND (p.products_quantity > 0 OR (p.products_date_available IS NOT NULL AND p.products_date_available >= "' . date('Y-m-d') . '")))
     		                          )';
             }
 
@@ -1384,20 +1386,18 @@ class productTypeFilterObserver extends base
             $extra_having = '';
             $extra_where_condition = '';
             $group_by = '';
-            $bookx_upcoming_products_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
-            $bookx_new_products_look_back_number_of_days = BOOKX_NEW_PRODUCTS_LOOK_BACK_NUMBER_OF_DAYS;
-
-            if (!empty($bookx_upcoming_products_look_ahead_number_of_days)) {
+            
+            if (!empty(self::UPCOMING_BOOK_LOOK_AHEAD)) {
                 //*** WHERE condition: publishing_date is set and with maximum days into the future and past as set by Admin values "look ahead" and "look back"
 
                 $additional_bookx_fields .= ',p.products_quantity,
-    		                                 DATEDIFF("' . date('Y-m-d') . '",
-													  CONCAT_WS("-",
-														        SUBSTRING(be.publishing_date, 1,4 ),
-														        IF(SUBSTRING(be.publishing_date, 6,2 ) = "00", "01", SUBSTRING(be.publishing_date, 6,2 ) ),
-														        IF(SUBSTRING(be.publishing_date, 9,2 )  = "00", "01", SUBSTRING(be.publishing_date, 9,2 ))
-                                                               )
-                                                      ) AS pubdate_diff_today';
+    		                                DATEDIFF("' . date('Y-m-d') . '",
+											CONCAT_WS("-",
+											SUBSTRING(be.publishing_date, 1,4 ),
+											IF(SUBSTRING(be.publishing_date, 6,2 ) = "00", "01", SUBSTRING(be.publishing_date, 6,2 ) ),
+											IF(SUBSTRING(be.publishing_date, 9,2 )  = "00", "01", SUBSTRING(be.publishing_date, 9,2 ))
+                                            )
+                                            ) AS pubdate_diff_today';
                 /* $extra_where_condition = ' OR ((be.publishing_date IS NOT NULL) AND ((DATEDIFF("' . date('Y-m-d') . '",
                   CONCAT_WS("-",
                   SUBSTRING(be.publishing_date, 1,4 ),
@@ -1405,35 +1405,35 @@ class productTypeFilterObserver extends base
                   IF(SUBSTRING(be.publishing_date, 9,2 )  = "00", "01", SUBSTRING(be.publishing_date, 9,2 ))
                   )
                   )
-                  BETWEEN -' . intval($bookx_upcoming_products_look_ahead_number_of_days) . ' AND ' . '0' . // replaced by '0' : intval($bookx_new_products_look_back_number_of_days)
+                  BETWEEN -' . intval(self::UPCOMING_BOOK_LOOK_AHEAD) . ' AND ' . '0' . // replaced by '0' : intval(self::NEW_BOOK_LOOK_BACK)
                   ')
                   )
                   )) '; */
 
                 //$extra_having = ' AND p.products_quantity < 1';
                 $extra_having = ' HAVING (be.publishing_date IS NOT NULL)  /* we have a BookX publishing date entered */
-    		                      AND (
-    		                              /* pub date is less than "number of days to look AHEAD" into the future */
-    		                             (pubdate_diff_today BETWEEN -' . intval($bookx_upcoming_products_look_ahead_number_of_days) . ' AND 0)
-    		                           OR
-    		                             /* pub date is less than "number of days to look BACK" into the past (i.e. a "new" product) but stock is still zero and no date expected is set or in the past*/
-    		                             (( pubdate_diff_today BETWEEN 0 AND ' . intval($bookx_new_products_look_back_number_of_days) . ') AND p.products_quantity < 1 AND (date_expected IS NULL OR date_expected < "' . date('Y-m-d') . '"))
+    		                    AND (
+    		                    /* pub date is less than "number of days to look AHEAD" into the future */
+    		                    (pubdate_diff_today BETWEEN -' . intval(self::UPCOMING_BOOK_LOOK_AHEAD) . ' AND 0)
+    		                    OR
+    		                    /* pub date is less than "number of days to look BACK" into the past (i.e. a "new" product) but stock is still zero and no date expected is set or in the past*/
+    		                    (( pubdate_diff_today BETWEEN 0 AND ' . intval(self::NEW_BOOK_LOOK_BACK) . ') AND p.products_quantity < 1 AND (date_expected IS NULL OR date_expected < "' . date('Y-m-d') . '"))
     		                          )';
             }
 
             $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON be.products_id = pd.products_id
-    						 LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . ' bed ON bed.products_id = pd.products_id AND bed.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
+    						 LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . ' bed ON bed.products_id = pd.products_id AND bed.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
 
             $name_replacement_field = ' be.publishing_date, pd.products_description, p.products_image,
-    									 CONCAT_WS(""
-    											  ,pd.products_name
-    											  ,IF(NULLIF(be.volume, "") IS NOT NULL, CONCAT_WS("", " <span class=\'bookxProdVolume\'>", REPLACE("' . LABEL_BOOKX_VOLUME . '", "%s", be.volume), "</span>"), "")
-    											  ,IF(NULLIF(bed.products_subtitle, "") IS NOT NULL, CONCAT_WS("", " &ndash; <span class=\'bookxProdSubtitle\'>", bed.products_subtitle, "</span>"), "")
-    											  ) AS products_name,
-    									CASE WHEN DAYOFMONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '")
-    										  WHEN MONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")
-    										  ELSE YEAR(be.publishing_date)
-    									 END AS formatted_publishing_date';
+                CONCAT_WS(""
+                ,pd.products_name
+                ,IF(NULLIF(be.volume, "") IS NOT NULL, CONCAT_WS("", " <span class=\'bookxProdVolume\'>", REPLACE("' . LABEL_BOOKX_VOLUME . '", "%s", be.volume), "</span>"), "")
+                ,IF(NULLIF(bed.products_subtitle, "") IS NOT NULL, CONCAT_WS("", " &ndash; <span class=\'bookxProdSubtitle\'>", bed.products_subtitle, "</span>"), "")
+                ) AS products_name,
+                CASE WHEN DAYOFMONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '")
+                WHEN MONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")
+                ELSE YEAR(be.publishing_date)
+                END AS formatted_publishing_date';
             /* $date_replacement_field = ' IF((p.products_date_available IS NULL) OR (p.products_date_available = "0000-00-00 00:00:00"), be.publishing_date, p.products_date_available) AS date_expected,
               CASE WHEN DAYOFMONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_SHORT . '")
               WHEN MONTH(be.publishing_date) THEN DATE_FORMAT(be.publishing_date, "' . DATE_FORMAT_MONTH_AND_YEAR . '")
@@ -1443,7 +1443,7 @@ class productTypeFilterObserver extends base
             if ($this->flag_show['authors']) {
                 //$new_product_text = '<h2 class="bookxAuthors">' . $expectedItems[$i]['authors'] . '</h2>';
             }
-            if ($this->flag_show['pages'])  {
+            if ($this->flag_show['pages']) {
                 $additional_bookx_fields .= ', be.pages ';
             }
             if ($this->flag_show['size']) {
@@ -1454,17 +1454,17 @@ class productTypeFilterObserver extends base
             }
             if ($this->flag_show['printing']) {
                 $additional_bookx_fields .= ', printd.printing_description ';
-                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' printd ON printd.bookx_printing_id = be.bookx_printing_id AND printd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
+                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION . ' printd ON printd.bookx_printing_id = be.bookx_printing_id AND printd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
             }
 
             if ($this->flag_show['binding']) {
                 $additional_bookx_fields .= ', bd.binding_description ';
-                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bd ON bd.bookx_binding_id = be.bookx_binding_id AND bd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
+                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION . ' bd ON bd.bookx_binding_id = be.bookx_binding_id AND bd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
             }
 
             if ($this->flag_show['condition']) {
                 $additional_bookx_fields .= ', cd.condition_description ';
-                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' cd ON cd.bookx_condition_id = be.bookx_condition_id AND cd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
+                $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION . ' cd ON cd.bookx_condition_id = be.bookx_condition_id AND cd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
             }
 
             if ($this->flag_show['model']) {
@@ -1481,7 +1481,7 @@ class productTypeFilterObserver extends base
                 $extra_join .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' batp ON batp.products_id = be.products_id
     							 LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba ON batp.bookx_author_id = ba.bookx_author_id
     							 LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES . ' bat ON bat.bookx_author_type_id = batp.bookx_author_type_id ' . $additional_author_join_condition .
-                    ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION . ' batd ON batd.bookx_author_type_id = batp.bookx_author_type_id AND batd.languages_id = "' . (int) $_SESSION['languages_id'] . '"';
+                    ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION . ' batd ON batd.bookx_author_type_id = batp.bookx_author_type_id AND batd.languages_id = "' . (int)$_SESSION['languages_id'] . '"';
 
                 //	LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION . ' bad ON bad.bookx_author_id = ba.bookx_author_id AND bad.languages_id = "' . (int)$_SESSION['languages_id'] . '"
 
