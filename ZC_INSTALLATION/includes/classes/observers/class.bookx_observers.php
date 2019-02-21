@@ -110,7 +110,6 @@ class productTypeFilterObserver extends base
     {
         global $zco_notifier;
         
-        //$this->upcoming_look_ahead_number_of_days = BOOKX_UPCOMING_PRODUCTS_LOOK_AHEAD_NUMBER_OF_DAYS;
         $zco_notifier->attach($this, array(
             'NOTIFY_HEADER_INDEX_MAIN_TEMPLATE_VARS_RELEASE_PRODUCT_TYPE_VARS'
             , 'NOTIFY_MODULE_PRODUCT_LISTING_RESULTCOUNT'
@@ -1447,7 +1446,7 @@ class productTypeFilterObserver extends base
                 $additional_bookx_fields .= ', be.size ';
             }
             if ($this->flag_show['isbn']) {
-                $additional_bookx_fields .= ', CONCAT_WS("-", SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1)) AS isbn_display ';
+                $additional_bookx_fields .= ', be.isbn AS isbn_display ';
             }
             if ($this->flag_show['printing']) {
                 $additional_bookx_fields .= ', printd.printing_description ';
@@ -1484,7 +1483,7 @@ class productTypeFilterObserver extends base
 
 
                 if ($this->flag_show['author_type']) {
-                    $additional_bookx_fields .= ', GROUP_CONCAT(DISTINCT CONCAT_WS("", IF("" = IFNULL(batd.type_description,""), "", CONCAT_WS("", "<span class=\"bookxLabel\">", batd.type_description , ": </span>")), ba.author_name) ORDER BY bat.type_sort_order ASC SEPARATOR " &middot; ") AS authors';
+                    $additional_bookx_fields .= ', GROUP_CONCAT(DISTINCT CONCAT_WS("", IF("" = IFNULL(batd.type_description,""), "", CONCAT_WS("", "<span class=\"bookxLabel\">", batd.type_description , ": </span>")), ba.author_name) ORDER BY bat.type_sort_order ASC SEPARATOR \' &middot; \') AS authors';
                 } else {
                     $additional_bookx_fields .= ', GROUP_CONCAT(ba.author_name ORDER BY ba.author_name ASC SEPARATOR " &middot; ") AS authors';
                 }
@@ -1502,7 +1501,8 @@ class productTypeFilterObserver extends base
               } */
             //$expected_query = str_replace('products_date_available as date_expected', $date_replacement_field, $expected_query);
             //$expected_query = $extra_having;
-            $expected_query = str_replace(' order by date_expected ', $extra_where_condition . $group_by . $extra_having . ' ORDER BY date_expected, be.publishing_date, p.products_date_available ', $expected_query);
+            $expected_query = str_replace(' ORDER BY date_expected ', $extra_where_condition . $group_by . $extra_having . ' ORDER BY date_expected, be.publishing_date, p.products_date_available ', $expected_query);
+            //pr($expected_query);
         }
     }
 
