@@ -40,6 +40,9 @@ define('BOOKX_BOOKINFO_RELATED_AUTHOR_BOOKS_LIMIT', 3);
 
 define('BOOKX_NOFOLLOW_LINK', ' rel="nofollow"'); 
 
+/*
+ * This probably will go latter to admin config...
+ */
 define('BOOKX_FILTER_ALL_DISPLAY_OPTIONS', [
     'author_image' => true,
     'genre_image' => true,
@@ -49,7 +52,9 @@ define('BOOKX_FILTER_ALL_DISPLAY_OPTIONS', [
     'alpha_index' => true,
     'alpha_index_counter' => true,
 ]);
-
+/*
+ * Deafault images
+ */
 define('BOOKX_DEFAULT_IMAGE_FOR', [
     'author' => 'autores/author_noimage.jpg',
     'genre' => '',
@@ -57,8 +62,52 @@ define('BOOKX_DEFAULT_IMAGE_FOR', [
     'imprint' => '',
     'serie' => '',
 ]);
+/*
+ * Metatags config
+ * 
+ * This aims for something like this: 
+ * <meta name="description" content="Book Synopsis The Vikings in Portugal and Galicia, book by Hélio Pires, price: 17,91 & euro ;, Free Shipping with 10% discount, get 10% in Customer Card, Publisher: Zéfiro, in the Your Bookstore, The first book in portugal to develop the subject of vikings in the iberian">
+ * 
+ * This overwrite only occurs if there is no metatags is defined for that book.
+ * It's place using the oberver NOTIFY_MODULE_BOOKX_PRODUCT_META_TAGS_OVERRIDE, that must be placed at includes/modules/your_template/metatags.php
+ * I've done this as much optional as possible.
+ */
+define(BOOKX_METATAGS_DESC_DISPLAY, [
+    'products_name' => true,
+    'authors' => true,
+    'isbn' => true,
+    'publisher_name' => true,
+    'rewards_points_percentage' => true,
+    'rewards_points' => false,
+    'discount_percentage' => true,
+    'free_shipping_over' => true,
+    'price' => true,
+    'synopsis' => true
+]);
+
+define(BOOKX_METATAGS_TITLE_DISPLAY, [
+    'authors' => true,
+    'isbn' => true,
+    'price' => true,
+    'tagline' => true,
+    'site_name' => true,
+    ]);
+
+/*
+ * @ todo Metatags languages
+ */
+define('BOOKX_TEXT_METATAGS_DESC_PREFIX', 'Synopsis ');
+define('BOOKX_TEXT_METATAGS_DESC_AUTHORS_PREFIX', 'Book by %s');
+define('BOOKX_TEXT_METATAGS_DESC_PUBLISHER_PREFIX', 'Publisher %s');
+define('BOOKX_TEXT_METATAGS_DESC_REWARDS_PERCENTAGE', 'Get %s in Rewards');
+define('BOOKX_TEXT_METATAGS_DESC_REWARDS_POINTS', 'Get %s Rewards Points');
+define('BOOKX_TEXT_METATAGS_DESC_DISCOUNT', 'with %s Discount');
+define('BOOKX_TEXT_METATAGS_DESC_FREESHIPPING_OVER', 'Free Shipping');
+
+define('BOOKX_TEXT_METATAGS_TITLE_AUTHORS_PREFIX', BOOKX_TEXT_METATAGS_DESC_AUTHORS_PREFIX);
 
 /**
- * @todo stuff to be removed. Just placing it here to move along
+ * @todo stuff to be removed. Just placing it here to move along.
+ * This is dependent on CEON update for zc156.
  */
 define('BOOKX_USES_CEON_URI_MODULE', false);

@@ -77,23 +77,23 @@ $sql = 'SELECT ba.bookx_author_id, ba.author_name, ba.author_image, ba.author_ur
 $bookx_authors_listing_split = new splitPageResults($sql, MAX_DISPLAY_BOOKX_AUTHOR_LISTING, 'ba.bookx_author_id', 'page');
 $bookx_authors_listing = $db->Execute($bookx_authors_listing_split->sql_query);
 
-/*
- * @todo this should go somewhere more global, but where ? a init ? observer ?
- */
-$authors_default_image = DIR_WS_IMAGES . BOOKX_AUTHOR_IMAGES_FOLDER . '/' . BOOKX_AUTHOR_DEFAULT_IMAGE;
+$display_image = BOOKX_FILTER_ALL_DISPLAY_OPTIONS['author_image'];
+$default_image = DIR_WS_IMAGES . BOOKX_DEFAULT_IMAGE_FOR['author'];
 
-$bookx_authors_listing_split_array = array();
+$bookx_authors_listing_split_array = [];
 
 while (!$bookx_authors_listing->EOF) {
-    $bookx_authors_listing_split_array [] = array('bookx_author_id' => $bookx_authors_listing->fields ['bookx_author_id']
-        , 'author_name' => $bookx_authors_listing->fields ['author_name']
-        , 'author_types' => (!empty($bookx_authors_listing->fields ['author_types']) ? '(' . $bookx_authors_listing->fields ['author_types'] . ')' : '')
-        , 'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : $authors_default_image)
-        , 'author_description' => $bookx_authors_listing->fields ['author_description']
-        , 'author_url' => $bookx_authors_listing->fields ['author_url']
+    $bookx_authors_listing_split_array [] = array(
+        'bookx_author_id' => $bookx_authors_listing->fields ['bookx_author_id']
+        ,'author_name' => $bookx_authors_listing->fields ['author_name']
+        ,'author_types' => (!empty($bookx_authors_listing->fields ['author_types']) ? '<span>(' . $bookx_authors_listing->fields ['author_types'] . ')</span>' : '')
+        ,'author_image' => (!empty($bookx_authors_listing->fields ['author_image']) ? DIR_WS_IMAGES . $bookx_authors_listing->fields ['author_image'] : $default_image)
+        ,'author_description' => $bookx_authors_listing->fields ['author_description']
+        ,'author_url' => $bookx_authors_listing->fields ['author_url']
     );
 
     $bookx_authors_listing->MoveNext();
 }
 
+unset($default_image);
 $bookx_alphafilter = tpl_bookx_alphafilter_all('author_name', TABLE_PRODUCT_BOOKX_AUTHORS, FILENAME_BOOKX_AUTHORS_LIST);
