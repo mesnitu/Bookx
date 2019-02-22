@@ -576,7 +576,8 @@ class productTypeFilterObserver extends base
             }
 
             if ($product_name_column) {
-                $listing->Move(0);
+                
+                $listing->rewind();
 
                 if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
                     
@@ -1220,7 +1221,7 @@ class productTypeFilterObserver extends base
             $additional_bookx_fields = '';
             $extra_join = '';
             $group_by = '';
-
+            
             if (!empty(self::NEW_BOOK_LOOK_BACK)) {
                 $additional_bookx_fields .= ',p.products_quantity, be.publishing_date,p.products_date_available,
     		                                 DATEDIFF("' . date('Y-m-d') . '",
@@ -1312,9 +1313,9 @@ class productTypeFilterObserver extends base
 
                 if (isset($new_products_category_id) && $new_products_category_id != 0) {
                     $category_title = zen_get_categories_name((int) $new_products_category_id);
-                    $title = '<h3 class="bookxNewProduct"><label>' . sprintf(TABLE_HEADING_NEW_PRODUCTS, strftime('%B')) . ($category_title != '' ? ' - ' . $category_title : '' ) . '</label></h3>';
+                    $title = '<h2 class="bookxNewProduct centerBoxHeading"><label>' . sprintf(TABLE_HEADING_NEW_PRODUCTS, strftime('%B')) . ($category_title != '' ? ' - ' . $category_title : '' ) . '</label></h2>';
                 } else {
-                    $title = '<h3 class="bookxNewProduct"><label>' . sprintf(TABLE_HEADING_NEW_PRODUCTS, strftime('%B')) . '</label></h3>';
+                    $title = '<h2 class="bookxNewProduct centerBoxHeading"><label>' . sprintf(TABLE_HEADING_NEW_PRODUCTS, strftime('%B')) . '</label></h2>';
                 }
 
                 if ($num_products_count < SHOW_PRODUCT_INFO_COLUMNS_NEW_PRODUCTS || SHOW_PRODUCT_INFO_COLUMNS_NEW_PRODUCTS == 0) {
@@ -1324,20 +1325,20 @@ class productTypeFilterObserver extends base
                 }
 
 
-                $new_products->Move(0);
+                $new_products->rewind();
 
                 // This seemed to be necessary in ZC Versions up to 1.5.3, but not anymore in 1.5.5
                 if (1 <= intval(PROJECT_VERSION_MAJOR) && '5.5' > floatval(PROJECT_VERSION_MINOR)) {
-
                     // don't understand why this is necessary, but without it shows the first entry twice ?!
                     $new_products->cursor = 0;
                     $new_products->MoveNext();
                     // eof ?!!?
                 }
-
+                
                 $row = 0;
                 $col = 0;
                 while (!$new_products->EOF) {
+                                        
                     $products_price = zen_get_products_display_price($new_products->fields['products_id']); //zen_get_products_actual_price($products_id)
                     if (!isset($productsInCategory[$new_products->fields['products_id']]))
                         $productsInCategory[$new_products->fields['products_id']] = zen_get_generated_category_path_rev($new_products->fields['master_categories_id']);
@@ -1345,11 +1346,11 @@ class productTypeFilterObserver extends base
                     $product_detail_url = zen_href_link(zen_get_info_page($new_products->fields['products_id']), 'cPath=' . $productsInCategory[$new_products->fields['products_id']] . '&products_id=' . $new_products->fields['products_id'] . '&typefilter=bookx&bookx_publishing_status=new');
 
                     $list_box_contents[$row][$col] = array('params' => 'class="centerBoxContentsNew centeredContent "' . ' ' . 'style="float: left; width:' . $col_width . '%;"',
-                        'text' => (($new_products->fields['products_image'] == '' and PRODUCTS_IMAGE_NO_IMAGE_STATUS == 0) ? '' : '<a href="' . $product_detail_url . '" class="bookxProductImage">' . zen_image(DIR_WS_IMAGES . $new_products->fields['products_image'], $new_products->fields['products_name'], IMAGE_PRODUCT_NEW_WIDTH, IMAGE_PRODUCT_NEW_HEIGHT) . '</a><br />')
-                        . '<a href="' . $product_detail_url . '" class="bookxProductName">' . $new_products->fields['products_name'] . '</a><br />'
-                        . '<h2 class="bookxAuthors">' . $new_products->fields['authors'] . '</h2>'
+                        'text' => (($new_products->fields['products_image'] == '' and PRODUCTS_IMAGE_NO_IMAGE_STATUS == 0) ? '' : '<a href="' . $product_detail_url . '" class="bookxProductImage">' . zen_image(DIR_WS_IMAGES . $new_products->fields['products_image'], $new_products->fields['products_name'], IMAGE_PRODUCT_NEW_WIDTH, IMAGE_PRODUCT_NEW_HEIGHT) . '</a>')
+                        . '<a href="' . $product_detail_url . '" class="bookxProductName">' . $new_products->fields['products_name'] . '</a>'
+                        . '<h6 class="bookxAuthors">' . $new_products->fields['authors'] . '</h6>'
                         . ('-1' == BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS || '0' < BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS ?
-                        '    <div class="newDescriptionCell">' . ( '-1' == BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS ? $new_products->fields['products_description'] : bookx_truncate_paragraph($new_products->fields['products_description'], BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS)) . ' <a href="' . $product_detail_url . '">' . TEXT_BOOKX_MORE_PRODUCT_INFO . '</a></div>' : '' )
+                        '<div class="newDescriptionCell">' . ( '-1' == BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS ? $new_products->fields['products_description'] : bookx_truncate_paragraph($new_products->fields['products_description'], BOOKX_NEW_PRODUCTS_SHOW_PRODUCT_DESCRIPTION_NUMOFCHARS)) . ' <a href="' . $product_detail_url . '">' . TEXT_BOOKX_MORE_PRODUCT_INFO . '</a></div>' : '' )
                         . $products_price);
 
                     $col ++;
@@ -1358,10 +1359,11 @@ class productTypeFilterObserver extends base
                         $row ++;
                     }
 
-                    $new_products->MoveNext();
+                    $new_products->MoveNextRandom();
                 }
             }
         }
+        
     }
 
     /**
