@@ -10,7 +10,7 @@
  * @version $Id: Scott C Wilson Wed Oct 10 07:03:50 2018 -0400 Modified in v1.5.6 $
  */
 if (!defined('IS_ADMIN_FLAG')) {
-  die('Illegal Access');
+    die('Illegal Access');
 }
 $breadcrumb->add(HEADER_TITLE_CATALOG, zen_href_link(FILENAME_DEFAULT));
 
@@ -43,7 +43,7 @@ if (isset($_GET['typefilter'])) {
                 case 'TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION':
                 case 'TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION':
                     $sql .= ' AND languages_id = "' . $_SESSION['languages_id'] . '"';
-                    break;               
+                    break;
             }
             
             $get_term_breadcrumb = $db->execute($sql);
@@ -51,7 +51,6 @@ if (isset($_GET['typefilter'])) {
             $bookx_filter_description = '';
             
             if ($get_term_breadcrumb->RecordCount() > 0) {
-                
                 if ('bookx' == substr($get_terms->fields['get_term_name'], 0, 5)) {
                     $bookx_filter_description = '<span class="bookxFilterBreadcrumbLabel">' . constant('FILTER_LABEL_'.strtoupper($get_terms->fields['get_term_name'])) . '</span>';
                 }
@@ -60,8 +59,7 @@ if (isset($_GET['typefilter'])) {
         }
         $get_terms->movenext();
     }
-    
-} 
+}
 
 //***** check if we are on product info page and add product name and possibly fill in crumb path if not already filled by filters above
 
@@ -76,6 +74,7 @@ if (isset($_GET['products_id'])) {
                           LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ON be.products_id = p.products_id 
                           LEFT JOIN ' . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . ' bed ON bed.products_id = p.products_id AND bed.languages_id = "' . $_SESSION['languages_id'] . '"
                           WHERE p.products_id = "' . (int)$_GET['products_id'] . '"';
+
     
     $productname = $db->Execute($productname_query);
     
@@ -115,24 +114,24 @@ if (isset($_GET['products_id'])) {
             $bookx_breadcrumb_path_items[BOOKX_BREAD_ADD_AUTHOR] = 'author';
             $bookx_breadcrumb_info_select .= ' ba.author_name, ba.bookx_author_id, ';
             $bookx_breadcrumb_info_joins .= ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . ' batp ON batp.products_id = be.products_id '
-                                          . ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba ON ba.bookx_author_id = batp.bookx_author_id ';       
+                                          . ' LEFT JOIN ' . TABLE_PRODUCT_BOOKX_AUTHORS . ' ba ON ba.bookx_author_id = batp.bookx_author_id ';
             $bookx_breadcrumb_info_group_by = ' GROUP BY be.products_id';
         }
         
         
         if (!empty($bookx_breadcrumb_info_select)) {
             $bookx_breadcrumb_info_query = 'SELECT ' . $bookx_breadcrumb_info_select . ' be.products_id '
-                                        . ' FROM ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be ' 
-                                         . $bookx_breadcrumb_info_joins 
+                                        . ' FROM ' . TABLE_PRODUCT_BOOKX_EXTRA . ' be '
+                                         . $bookx_breadcrumb_info_joins
                                         . ' WHERE be.products_id = "' . (int)$_GET['products_id'] . '" '
-                                        . $bookx_breadcrumb_info_group_by;          
+                                        . $bookx_breadcrumb_info_group_by;
         }
         
         $bookx_breadcrumb_info = $db->Execute($bookx_breadcrumb_info_query);
         
         ksort($bookx_breadcrumb_path_items);
         
-        foreach ($bookx_breadcrumb_path_items as $sort_order => $path_item ) {
+        foreach ($bookx_breadcrumb_path_items as $sort_order => $path_item) {
             switch (true) {
                 case 'publisher' == $path_item && !empty($bookx_breadcrumb_info->fields['bookx_publisher_id']):
                     if ('bookx' == substr($get_terms->fields['get_term_name'], 0, 5)) {
@@ -159,68 +158,70 @@ if (isset($_GET['products_id'])) {
             }
         }
     }
-    } elseif(!isset($_GET['typefilter']) || 
-            (isset($_GET['typefilter']) && empty($_GET['typefilter']) )
+} elseif (!isset($_GET['typefilter']) ||
+            (isset($_GET['typefilter']) && empty($_GET['typefilter']))
             ) {
-// EOF BookX addition 1 of 2
+    // EOF BookX addition 1 of 2
 
 
-	/**
-	 * add category names or the manufacturer name to the breadcrumb trail
-	 */
-	if (!isset($robotsNoIndex)) $robotsNoIndex = false;
-// might need isset($_GET['cPath']) later ... right now need $cPath or breaks breadcrumb from sidebox etc.
-	if (isset($cPath_array) && isset($cPath)) {
-  for ($i=0, $n=sizeof($cPath_array); $i<$n; $i++) {
-    $categories_query = "select categories_name
+    /**
+     * add category names or the manufacturer name to the breadcrumb trail
+     */
+    if (!isset($robotsNoIndex)) {
+        $robotsNoIndex = false;
+    }
+    // might need isset($_GET['cPath']) later ... right now need $cPath or breaks breadcrumb from sidebox etc.
+    if (isset($cPath_array) && isset($cPath)) {
+        for ($i=0, $n=sizeof($cPath_array); $i<$n; $i++) {
+            $categories_query = "select categories_name
                            from " . TABLE_CATEGORIES_DESCRIPTION . "
                            where categories_id = '" . (int)$cPath_array[$i] . "'
                            and language_id = '" . (int)$_SESSION['languages_id'] . "'";
 
-			$categories = $db->Execute($categories_query);
-//echo 'I SEE ' . (int)$cPath_array[$i] . '<br>';
-			if ($categories->RecordCount() > 0) {
-      $breadcrumb->add($categories->fields['categories_name'], zen_href_link(FILENAME_DEFAULT, 'cPath=' . implode('_', array_slice($cPath_array, 0, ($i+1)))));
-    } elseif(SHOW_CATEGORIES_ALWAYS == 0) {
-				// if invalid, set the robots noindex/nofollow for this page
-				$robotsNoIndex = true;
-				break;
-			}
-		}
-	}
-	/**
-	 * add get terms (e.g manufacturer, music genre, record company or other user defined selector) to breadcrumb
-	 */
-$sql = "select *
+            $categories = $db->Execute($categories_query);
+            //echo 'I SEE ' . (int)$cPath_array[$i] . '<br>';
+            if ($categories->RecordCount() > 0) {
+                $breadcrumb->add($categories->fields['categories_name'], zen_href_link(FILENAME_DEFAULT, 'cPath=' . implode('_', array_slice($cPath_array, 0, ($i+1)))));
+            } elseif (SHOW_CATEGORIES_ALWAYS == 0) {
+                // if invalid, set the robots noindex/nofollow for this page
+                $robotsNoIndex = true;
+                break;
+            }
+        }
+    }
+    /**
+     * add get terms (e.g manufacturer, music genre, record company or other user defined selector) to breadcrumb
+     */
+    $sql = "select *
         from " . TABLE_GET_TERMS_TO_FILTER;
-	$get_terms = $db->execute($sql);
-	while (!$get_terms->EOF) {
-		if (isset($_GET[$get_terms->fields['get_term_name']])) {
-		$sql = "select " . $get_terms->fields['get_term_name_field'] . "
+    $get_terms = $db->execute($sql);
+    while (!$get_terms->EOF) {
+        if (isset($_GET[$get_terms->fields['get_term_name']])) {
+            $sql = "select " . $get_terms->fields['get_term_name_field'] . "
 		        from " . constant($get_terms->fields['get_term_table']) . "
 		        where " . $get_terms->fields['get_term_name'] . " =  " . (int)$_GET[$get_terms->fields['get_term_name']];
-			$get_term_breadcrumb = $db->execute($sql);
-			if ($get_term_breadcrumb->RecordCount() > 0) {
-				$breadcrumb->add($get_term_breadcrumb->fields[$get_terms->fields['get_term_name_field']], zen_href_link(FILENAME_DEFAULT, $get_terms->fields['get_term_name'] . "=" . $_GET[$get_terms->fields['get_term_name']]));
-			}
-		}
-		$get_terms->movenext();
-	}
-	/**
-	 * add the products model to the breadcrumb trail
-	 */
-	if (isset($_GET['products_id'])) {
-  $productname_query = "select products_name
+            $get_term_breadcrumb = $db->execute($sql);
+            if ($get_term_breadcrumb->RecordCount() > 0) {
+                $breadcrumb->add($get_term_breadcrumb->fields[$get_terms->fields['get_term_name_field']], zen_href_link(FILENAME_DEFAULT, $get_terms->fields['get_term_name'] . "=" . $_GET[$get_terms->fields['get_term_name']]));
+            }
+        }
+        $get_terms->movenext();
+    }
+    /**
+     * add the products model to the breadcrumb trail
+     */
+    if (isset($_GET['products_id'])) {
+        $productname_query = "select products_name
                    from " . TABLE_PRODUCTS_DESCRIPTION . "
                    where products_id = '" . (int)$_GET['products_id'] . "'
              and language_id = '" . $_SESSION['languages_id'] . "'";
 
-		$productname = $db->Execute($productname_query);
+        $productname = $db->Execute($productname_query);
 
-		if ($productname->RecordCount() > 0) {
-			$breadcrumb->add($productname->fields['products_name'], zen_href_link(zen_get_info_page($_GET['products_id']), 'cPath=' . $cPath . '&products_id=' . $_GET['products_id']));
-		}
-	}
-// BOF BookX addition 2 of 2
+        if ($productname->RecordCount() > 0) {
+            $breadcrumb->add($productname->fields['products_name'], zen_href_link(zen_get_info_page($_GET['products_id']), 'cPath=' . $cPath . '&products_id=' . $_GET['products_id']));
+        }
+    }
+    // BOF BookX addition 2 of 2
 }
 // EOF BookX addition 2 of 2

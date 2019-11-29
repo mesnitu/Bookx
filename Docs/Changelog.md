@@ -9,7 +9,7 @@
 ## v1.0.0 DEV
 
 > Version 1.0.0 is a complete review for BookX to work with Zencart v156 with php v7.3.
-> Due to the zencart update nature, maybe it's not compatible with olders versions. (until futher notice)
+> Due to the zencart update nature, maybe it's not compatible with olders versions.
 
 ### Admin Changes
 
