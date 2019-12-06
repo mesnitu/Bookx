@@ -5,6 +5,8 @@ sql_update.txt
 devtools.php
 Thumbs.db
 clover.xml
+.directory
+dev_bookx_files.json
 
 ### Windows ###
 .vscode

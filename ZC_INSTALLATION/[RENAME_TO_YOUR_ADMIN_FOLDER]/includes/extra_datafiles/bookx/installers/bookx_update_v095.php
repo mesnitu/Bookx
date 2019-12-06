@@ -342,7 +342,7 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, 
             last_modified, date_added, use_function, set_function)
             VALUES (
-            'BookX Version', 'BOOKX_VERSION_CHECK', '" . $bookx_version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL
+            'BookX Version', 'BOOKX_VERSION_CHECK', '" . $bookx_module_version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL
              );");
 
     $db->Execute("ANALYZE TABLE " . $analyze . "");
@@ -355,7 +355,7 @@ if (('update' == $bookx_install) && (!empty($_POST))) {
             TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS => TABLE_PRODUCTS
             ), 'products_id',false);
 
-    $update_095_msg .= $list_msg("Bookx Updated to version " . $bookx_version);
+    $update_095_msg .= $list_msg("Bookx Updated to version " . $bookx_module_version);
 
     zen_register_admin_page('bookxFamilies', 'BOX_CATALOG_PRODUCT_BOOKX_FAMILIES', 'FILENAME_BOOKX_FAMILIES', '', 'extras', 'Y', 91);
     

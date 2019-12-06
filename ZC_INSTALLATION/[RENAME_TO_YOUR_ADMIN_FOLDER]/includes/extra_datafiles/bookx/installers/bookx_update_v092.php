@@ -5,11 +5,11 @@ if (!defined('IS_ADMIN_FLAG')) {
 }
 
 
-if (!empty($bookx_pType_id)) {
+if (!empty($bookx_ptypeID)) {
     $sql = <<<EOT
 			    		REPLACE INTO {$const['TABLE_PRODUCT_TYPE_LAYOUT']} (configuration_title, configuration_key, configuration_value, configuration_description, product_type_id, sort_order, last_modified, date_added, use_function, set_function )
 	                              VALUES
-                             ('Product Listing: Group Products by availability', 'GROUP_PRODUCT_BOOKX_LISTING_BY_AVAILABILITY', '1', 'Group products in any product listing according to availability. Order: <br />1) Upcoming products <br />2) New products <br />3) Published / available products 4) Out of print <br /><br />Criteria for "new" and "upcoming" books are set in Admin -> Configuration -> BookX Configuration.', {$bookx_pType_id}, '150', now(), now(), NULL, "zen_cfg_select_drop_down(array(array('id'=>'1', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_ENABLED')), array('id'=>'0', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_DISABLED'))),")
+                             ('Product Listing: Group Products by availability', 'GROUP_PRODUCT_BOOKX_LISTING_BY_AVAILABILITY', '1', 'Group products in any product listing according to availability. Order: <br />1) Upcoming products <br />2) New products <br />3) Published / available products 4) Out of print <br /><br />Criteria for "new" and "upcoming" books are set in Admin -> Configuration -> BookX Configuration.', {$bookx_ptypeID}, '150', now(), now(), NULL, "zen_cfg_select_drop_down(array(array('id'=>'1', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_ENABLED')), array('id'=>'0', 'text'=>constant('BOOKX_LAYOUT_SETTINGS_DISABLED'))),")
                              ;
 EOT;
     $db->Execute($sql);

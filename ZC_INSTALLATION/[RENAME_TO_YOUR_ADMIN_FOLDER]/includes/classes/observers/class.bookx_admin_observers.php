@@ -98,13 +98,13 @@ class bookxAdminObserver extends base {
                                   FROM " . TABLE_PRODUCT_TYPES . "
                                   WHERE type_handler = 'product_bookx'");
 
-    $bookx_ptype_id = (0 < $product_type->RecordCount() ? $product_type->fields['type_id'] : null);
-    if ($bookx_ptype_id) {
-      $product_name_query = " IF(p.products_type = " . (int)$bookx_ptype_id . ",
+    $bookx_ptypeID = (0 < $product_type->RecordCount() ? $product_type->fields['type_id'] : null);
+    if ($bookx_ptypeID) {
+      $product_name_query = " IF(p.products_type = " . (int)$bookx_ptypeID . ",
                               CONCAT_WS(' - ', CONCAT_WS(' ', pd.products_name, be.volume), NULLIF(bed.products_subtitle, '') ),
                               pd.products_name) AS products_name";
 
-      $product_model_query = " IF(p.products_type = " . (int)$bookx_ptype_id . ",
+      $product_model_query = " IF(p.products_type = " . (int)$bookx_ptypeID . ",
                                CONCAT_WS(' ', p.products_model,
                                CONCAT_WS('', ' / " . LABEL_BOOKX_ISBN . "',
                                CONCAT_WS('-', SUBSTRING(be.isbn,1,3), SUBSTRING(be.isbn,4,1), SUBSTRING(be.isbn,5,6), SUBSTRING(be.isbn,11,2), SUBSTRING(be.isbn,13,1))) ),

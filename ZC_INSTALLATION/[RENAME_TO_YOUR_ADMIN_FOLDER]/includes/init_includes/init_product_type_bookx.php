@@ -26,7 +26,7 @@ if (!defined('IS_ADMIN_FLAG')) {
  */
 define('PROJECT_BOOKX_VERSION', '1.0.0');
 // set version
-$bookx_version = PROJECT_BOOKX_VERSION;
+$bookx_module_version = PROJECT_BOOKX_VERSION;
 
 $login_page = false;
 if (strpos($_SERVER['PHP_SELF'], 'login.php')) {
@@ -35,27 +35,40 @@ if (strpos($_SERVER['PHP_SELF'], 'login.php')) {
 
 // Test for existing installation
 if (!$login_page) {
-    
+    // uninstall bookx
     if (isset($_GET['action']) && ('bookx_remove' == $_GET['action'])) {
         require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_install_v1.php';
+        // @todo and exit
     }
-    //Going for PROJECT_BOOKX_VERSION
-    $sql = "SELECT configuration_value AS version FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'BOOKX_VERSION';";
-    $res = $db->Execute($sql);
-    $installed_version = $res->fields['version'];
-    
-    // we can stop here if it's using current project version, else:
-    if ($installed_version !== PROJECT_BOOKX_VERSION) {
 
-        $installed_version = $res->fields['version'];
+    $sql = "SELECT type_id FROM " . TABLE_PRODUCT_TYPES . " WHERE type_handler = 'product_bookx'";
+    $res = $db->Execute($sql);
+    $bookx_ptypeID = $res->fields['type_id'] ?? false;
+
+    $bookx_installed_version = false;
+    if ($bookx_ptypeID) {
+        //Get for PROJECT_BOOKX_VERSION
+        $sql = "SELECT configuration_value AS version FROM " . TABLE_CONFIGURATION . " 
+        WHERE configuration_key = 'BOOKX_VERSION';";
+        $res = $db->Execute($sql);
+        $bookx_installed_version = $res->fields['version'];
+    }
+
+    // we can stop here if it's using current project version, else:
+    if ($bookx_installed_version !== PROJECT_BOOKX_VERSION) {
         // found a version. Will update
         if ((!strpos($_SERVER['PHP_SELF'], FILENAME_BOOKX_TOOLS))) {
-            $msg = "<div style=\"display:inline-block;margin-left:1rem;line-heigth:2;\">Welcome to Bookx v1.0.0 installation tool for Zencart 1.5.6<br />";
-         
-            //$msg .= 'Proceed to <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a> to Update Bookx ' . $installed_version . ' to v' . $bookx_version . '</div>';
-            $msg .= 'Proceed to <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a> to Update Bookx</div>';
+            $msg = '<div style="display:inline-block;margin-left:1rem;line-heigth:2;">
+            Welcome to Bookx v1.0.0 installation tool for Zencart 1.5.6<br />';
+
+            //$msg .= 'Proceed to <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a> to Update Bookx ' . $bookx_installed_version . ' to v' . $bookx_module_version . '</div>';
+            $msg .= 'Proceed to <a href="' . zen_href_link(
+                FILENAME_BOOKX_TOOLS,
+                'action=bookx_install_options'
+            ) . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a> to Update Bookx</div>';
             $messageStack->add($msg, 'info');
         }
+    } else {
+        $bookx_already_installed = true;
     }
 }
-

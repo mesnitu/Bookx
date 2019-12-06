@@ -23,23 +23,23 @@ if (!defined('IS_ADMIN_FLAG')) {
 }
 
 $autoLoadConfig[10][] = array('autoType'=>'class',
-		'loadFile'=> 'observers/class.bookx_admin_observers.php',
-		'classPath'=>DIR_WS_CLASSES);
+        'loadFile'=> 'observers/class.bookx_admin_observers.php',
+        'classPath'=>DIR_WS_CLASSES);
 
 $autoLoadConfig[30][] = array('autoType'=>'classInstantiate',
-		'className'=>'bookxAdminObserver',
-		'objectName'=>'bookxAdminObserver');
+        'className'=>'bookxAdminObserver',
+        'objectName'=>'bookxAdminObserver');
 
 $autoLoadConfig[199][] = array('autoType' => 'init_script',
-			'loadFile' => 'init_product_type_bookx.php');
+            'loadFile' => 'init_product_type_bookx.php');
 
 /**
  * @since v1.0.0
  */
 $autoLoadConfig[199][] = array('autoType'=>'class',
-		'loadFile'=> 'bookx/BookxFamilies.php',
-		'classPath'=>DIR_WS_CLASSES);
+        'loadFile'=> 'bookx/BookxFamilies.php',
+        'classPath'=>DIR_WS_CLASSES);
 
 $autoLoadConfig[100][] = array('autoType'=>'class',
-		'loadFile'=> 'bookx/BookxExceptions.php',
-		'classPath'=>DIR_WS_CLASSES);
+        'loadFile'=> 'bookx/BookxExceptions.php',
+        'classPath'=>DIR_WS_CLASSES);

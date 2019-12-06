@@ -1,31 +1,48 @@
+#!/usr/bin/python3.7
 import os
 from shutil import copy2 as copyfile
 from pathlib import Path
 import json
+from datetime import datetime
 
-##########EDIT PATHS HERE ###################
 
-zencart_path = "/home/daniel/Public/testLinks"
-zencart_admin_folder = "zenadmin"
-zencart_template_folder = "responsive_classic"
+def script_path():
+    return Path(__file__).parent.absolute()
 
-#############################################
+
+def _color(s, c):
+    '''add some colors [source, color]'''
+    if c == 'yellow':
+        s = (f"\033[93m{s}\033[00m")
+    if c == 'red':
+        s = (f"\033[91m {s}\033[00m")
+    if c == 'green':
+        s = (f"\033[92m{s}\033[00m")
+    if c == 'cyan':
+        s = (f"\033[96m{s}\033[00m")
+    return s
 
 
 class DevInstallBookx:
 
     '''
-    destination directory, Admin Folder name, tpl name
+    Links, copy, removes and list project files to the zencart folder\n
+    destination directory, admin folder name, tpl name
     '''
+
     PROJECT = 'Bookx'
 
     VERSION = '1.0.1'
 
-    PROJ_EXCLUDE_DIR = ('.git', 'test')
+    PROJ_EXCLUDE_DIR = ('.git', 'test', '.directory')
 
     PROJ_INSTALLATION_FOLDER = 'ZC_INSTALLATION'
 
     PROJ_ADMIN_FOLDER = '[RENAME_TO_YOUR_ADMIN_FOLDER]'
+
+    PROJ_FILES_LIST_NAME = 'bookx_files.json'
+
+    PROJ_FILES_LIST_DEST = 'includes/extra_datafiles/bookx'
 
     adminFiles = []
 
@@ -33,20 +50,20 @@ class DevInstallBookx:
 
     def __init__(self, destDir, adminDirName, tplDirName):
 
-        self.projPathRoot = self.script_path()
-        # project files
-        self.projPathInstallFolder = self.script_path().joinpath(
+        self.projPath = script_path()
+        # project files path
+        self.projPathInstallFolder = self.projPath.joinpath(
             self.PROJ_INSTALLATION_FOLDER)
         self.projPathAdminFiles = self.projPathInstallFolder.joinpath(
             self.PROJ_ADMIN_FOLDER)
 
         # zc dest path
         self.zcPath = Path(destDir)
-        # zc dest admin path + folder name
-        self.zcAdminFolder = adminDirName
+        # zc admin folder name + [dest path]
+        self.zcAdminFolderName = adminDirName
         self.zcAdminPath = self.zcPath.joinpath(adminDirName)
-        # zc tpl path + folder name
-        self.zcTplFolder = tplDirName
+        # zc tpl folderpath + folder name
+        self.zcTplFolderName = tplDirName
         self.zcTplPath = self.zcPath.joinpath(
             'includes', 'templates', tplDirName)
 
@@ -54,8 +71,17 @@ class DevInstallBookx:
         self.allFiles = self.listAllFiles(self.projPathInstallFolder)
 
     @staticmethod
-    def script_path():
-        return Path(__file__).parent.absolute()
+    def createDirs(destFiles):
+
+        for e, f in enumerate(destFiles):
+            fn = f.split(os.sep)[-1]
+            file_name = f[1:].split(os.sep)
+            file_name.pop()
+            try:
+                os.makedirs(os.sep + os.sep.join(file_name),
+                            0o755, exist_ok=True)
+            except:
+                raise ValueError
 
     def listAllFiles(self, dirName):
 
@@ -72,67 +98,81 @@ class DevInstallBookx:
                     allFiles.append(fullPath)
         return allFiles
 
-    def exportProjectFiles(self):
-        fn = 'project_files'
+    def createListObj(self, filespath):
+
+        # Creates a obj with all the prject files. If online True, the paths are different
         obj = {"version": self.VERSION}
 
-        paths = [f.split(str(self.projPathInstallFolder) + os.sep)[1]
-                 for f in self.listAllFiles(self.projPathInstallFolder)]
-        adminFile = []
-        catalogFiles = []
+        if self.mode == 'dev':
+            obj['admin_files'] = [
+                f for f in filespath if self.PROJ_ADMIN_FOLDER in f and not '[EDIT_MANUALLY]' in f]
+            obj['catalog_files'] = [
+                f for f in filespath if self.PROJ_ADMIN_FOLDER not in f and not '[EDIT_MANUALLY]' in f]
+        else:
+            obj['admin_files'] = [
+                f.split(str(self.zcPath))[1].replace(self.zcAdminFolderName, 'admin') for f in filespath if
+                self.zcAdminFolderName in f and not '[EDIT_MANUALLY]' in f]
+            obj['catalog_files'] = [
+                f.split(str(self.zcPath))[1] for f in filespath if self.zcAdminFolderName not in f and not '[EDIT_MANUALLY]' in f]
 
-        for f in paths:
-            if self.PROJ_ADMIN_FOLDER in f and not '[EDIT_MANUALLY]' in f:
-                adminFile.append(f)
-            else:
-                catalogFiles.append(f)
+        # add override files
+        overrideFiles = self.listOverrideFiles()
+        obj['edit_manually'] = [
+            f.replace(str(self.projPathInstallFolder), '') for f in overrideFiles]
+        obj["updated"] = datetime.today().strftime("%m-%d-%Y-%H:%M:%S")
+        return obj
 
-        obj['admin'] = adminFile
-        obj['catalog'] = catalogFiles
+    def exportProjectFiles(self, filespath=None, mode=None):
+        ''' filespath: default None , mode: [default=None, dev]\n
+        filespath None to generate dev files'''
 
-        with open(self.script_path().joinpath(fn + '.json'), 'w', encoding='utf-8') as fp:
-            json.dump(obj, fp, ensure_ascii=False, indent=4)
-        print(
-            f"-> Project files in {str(self.script_path().joinpath(fn + '.json'))}")
+        if mode == 'dev':
+            self.mode = 'dev'
+            filespath = [f.split(str(self.projPathInstallFolder) + os.sep)[1]
+                         for f in self.listAllFiles(self.projPathInstallFolder)]
+            obj = self.createListObj(filespath)
+            project_file = str(script_path().joinpath(
+                'dev_' + self.PROJ_FILES_LIST_NAME))
+
+        else:
+            obj = self.createListObj(filespath)
+            project_file = self.projPathAdminFiles.joinpath(
+                'includes', 'extra_datafiles', 'bookx', self.PROJ_FILES_LIST_NAME)
+
+        self.saveFileList(obj, project_file)
+        print(_color("Project files in " + str(project_file), 'green'))
+
+    @staticmethod
+    def saveFileList(files, destfile):
+
+        with open(destfile, 'w', encoding='utf-8') as fp:
+            json.dump(files, fp, ensure_ascii=False, indent=4)
 
     def listAdminFiles(self):
 
         s = "{}{}[RENAME_TO_YOUR_ADMIN_FOLDER]".format(
             self.PROJ_INSTALLATION_FOLDER, os.sep)
-
         self.adminFiles = [
             f for f in self.allFiles if s in f]
-
         return self.adminFiles
 
     def listCatalogFiles(self):
 
         self.catalogFiles = [
             f for f in self.allFiles if self.PROJ_INSTALLATION_FOLDER + '/includes' in f]
-
         return self.catalogFiles
 
-    @staticmethod
-    def get_filename(path):
-        return path.split(os.sep)[-1]
+    def listOverrideFiles(self):
 
-    @staticmethod
-    def createDirs(destFiles, mode):
+        self.overrideFiles = [
+            f for f in self.allFiles if '[EDIT_MANUALLY]' in f]
+        return self.overrideFiles
 
-        for e, f in enumerate(destFiles):
-            fn = f.split(os.sep)[-1]
-            file_name = f[1:].split(os.sep)
-            file_name.pop()
-
-            try:
-                os.makedirs(os.sep + os.sep.join(file_name),
-                            0o755, exist_ok=True)
-            except:
-                raise ValueError
-
-    def linkFiles(self, mode):
+    def processFiles(self, mode, online=None):
+        ''' mode: [link, copy, remove] '''
 
         files = self.listAdminFiles()
+        self.mode = mode
         # add admin files to destination files
         destFiles = [r.replace(str(self.projPathAdminFiles), str(self.zcAdminPath))
                      for r in files]
@@ -141,34 +181,39 @@ class DevInstallBookx:
 
         s = str(self.PROJ_INSTALLATION_FOLDER)
         # add catalog files to destination files
-        for cf in catalogFiles:
-            files.append(cf)
-            cf = str(self.zcPath) + cf.split(s)[1]
-            if '[YOUR-TEMPLATE]' not in cf:
-                destFiles.append(cf)
+        for f in catalogFiles:
+            files.append(f)
+            f = str(self.zcPath) + f.split(s)[1]
+            if '[YOUR-TEMPLATE]' not in f:
+                destFiles.append(f)
             else:
-                destFiles.append(cf.replace(
-                    '[YOUR-TEMPLATE]', self.zcTplFolder))
+                destFiles.append(f.replace(
+                    '[YOUR-TEMPLATE]', self.zcTplFolderName))
+
+        # Call export files in link or copy mode
+        if mode == 'link' or mode == 'copy':
+            self.exportProjectFiles(destFiles)
 
         # Create Directories
-        self.createDirs(destFiles, 'link')
-
+        self.createDirs(destFiles)
+        # (s)ource, (d)est
         for s, d in zip(files, destFiles):
             if mode == 'link':
-                c = Path(d)
+
                 try:
-                    if c.is_file():
+                    if Path(d).is_file():
                         os.remove(Path(d))
                         print("- " + d)
                     os.symlink(s, d)
-                    print("@ " + d)
+                    print(_color("@ ", 'green') + d)
                 except Exception as e:
                     print(e)
                     raise FileNotFoundError
+
             if mode == 'remove':
                 try:
                     os.remove(Path(d))
-                    print("- " + d)
+                    print(_color("- ", 'red') + d)
                 except Exception as e:
                     print(e)
 
@@ -176,42 +221,84 @@ class DevInstallBookx:
                 try:
                     if Path(d).is_file():
                         os.remove(Path(d))
-                        print("- " + d)
                     copyfile(s, d)
+                    print(_color("+ ", 'yellow') + d)
                 except Exception as e:
                     print(e)
 
 
-bookx = DevInstallBookx(
-    zencart_path,
-    zencart_admin_folder,
-    zencart_template_folder)
+def main():
 
-head = f"\nProject: {bookx.PROJECT} - v{bookx.VERSION}\n"
-sep = ("*" * len(head))
-msg = sep + head + sep +\
-    '\nOptions:\n[1] - symlink\n[2] - copy\n[3] - remove\n[4] - export project files\n' + \
-    '[5] - print admin files\n'
+    def cls():
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-options = ''
-# 1 - link
-# 2 - copy
-# 3 - remove
-# 4 - export project files
-# 5 - print admin files
-# 6 - print catalog files
+    cls()
 
-while not options:
-    print(msg)
-    options = int(input('Option:>'))
+   # check if set-destination file as values and if the directories exists
 
-if options == 1:
-    bookx.linkFiles('link')
-if options == 2:
-    bookx.linkFiles('copy')
-if options == 3:
-    bookx.linkFiles('remove')
-if options == 4:
-    bookx.exportProjectFiles()
-# if options == 5:
-#    t = bookx.listAdminFiles()
+    try:
+        with open(script_path().joinpath('edit_destination.json'), 'r', encoding="utf-8") as fp:
+            rf = json.load(fp)
+
+        if rf['dest'] == '' or rf['admin_folder_name'] == '' or rf['template_folder_name'] == '':
+            raise ImportError
+
+        t = Path(rf['dest']).joinpath(rf['admin_folder_name'])
+        if not t.is_dir():
+            raise FileNotFoundError
+
+        t = Path(rf['dest']).joinpath('includes', 'templates',
+                                      rf['template_folder_name'])
+        if not t.is_dir():
+            raise FileNotFoundError
+
+    except FileNotFoundError as err:
+        print(_color(
+            f"\n\n!!! Check your admin destination folder: {t.name} not Found !!!\n\n", 'red'))
+        exit()
+    except ImportError:
+        print(_color("\n\nNo destinations found in set_destination.json.\n\n", 'red'))
+        exit()
+
+    # intiate instance
+    bookx = DevInstallBookx(
+        rf['dest'],
+        rf['admin_folder_name'],
+        rf['template_folder_name'])
+
+    head = _color(f"\nProject: {bookx.PROJECT} - v{bookx.VERSION}\n", 'cyan')
+    sep = ("*" * len(head)*2)
+    head = "\n" + sep + head + sep
+    msgf = "\n" + _color("Destination Files:", 'green') + "\n"
+    msgf += "\n".join(["- {}: {}".format(_color(k, 'yellow'), _color(v, 'cyan'))
+                       for k, v in rf.items()])
+    msgf += '\n\n'+_color("Options:", 'green') + \
+        '\n[1] - symlink\n[2] - copy\n[3] - remove\n[4] - export project files\n[0] - Quit\n'
+
+    options = ''
+    # 1 - link
+    # 2 - copy
+    # 3 - remove
+    # 4 - export project files
+    # 5 - print admin files
+    # 6 - print catalog files
+
+    while not options:
+        print(head)
+        print(msgf)
+        options = input('Option:>')
+
+    if options == '0':
+        exit()
+    if options == '1':
+        bookx.processFiles('link')
+    if options == '2':
+        bookx.processFiles('copy')
+    if options == '3':
+        bookx.processFiles('remove')
+    if options == '4':
+        bookx.exportProjectFiles(None, 'dev')
+
+
+if __name__ == "__main__":
+    main()
