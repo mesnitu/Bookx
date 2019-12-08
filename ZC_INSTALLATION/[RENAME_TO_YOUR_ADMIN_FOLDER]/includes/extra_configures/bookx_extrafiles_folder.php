@@ -15,6 +15,8 @@
  */
 
 define('BOOKX_EXTRA_DATAFILES_FOLDER', DIR_FS_ADMIN . 'includes/extra_datafiles/bookx/');
+
+define('BOOKX_MODULE_FILES', BOOKX_EXTRA_DATAFILES_FOLDER . 'bookx_files.json');
 /**
  * @todo temp constants that later will go to configuration... or not
  */

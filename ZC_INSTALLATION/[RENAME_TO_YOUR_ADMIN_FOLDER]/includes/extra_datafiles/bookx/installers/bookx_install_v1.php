@@ -3,7 +3,7 @@
 /**
  * This file is part of the ZenCart add-on Book X which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5.6a
+ * shop system. Tested for compatibility on ZC v. 1.5.6c
  *
  * @package admin
  * @author  Philou
@@ -12,7 +12,7 @@
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
  *
- * @version BookX V 1.0.0
+ * @version BookX V 1.0.1
  * @version $Id: [admin]includes/extra_datafiles/bookx/installers/bookx_install_v1.php 2019-01-10 mesnitu $
  */
 
@@ -95,8 +95,35 @@ $admin_page_keys = array(
  * @todo May this array could in another file so it can be used for other purposes
  */
 
-$string = file_get_contents(DIR_FS_ADMIN.'includes/extra_datafiles/bookx/bookx_files.json');
-$bookx_files = json_decode($string, true);
+$bookx_files = json_decode(file_get_contents(BOOKX_MODULE_FILES));
+//Anonymous function
+$bookx_check_files = function ($files, $scope) {
+    //check that all files are where they should be
+    foreach ($files as $f) {
+        switch ($scope) {
+            case 'admin':
+                $f = str_replace("/admin/", DIR_FS_ADMIN, $f);
+                break;
+            case 'catalog':
+                $a = $f;
+                $f = DIR_FS_CATALOG . substr($f, 1);
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        if (!is_readable($f)) {
+            $messageStack->add(BOOKX_MS_SOME_REQUIRED_FILES_MISSING . ' '.$f, 'warning');
+        }
+    }
+};
+
+$bookx_template_default_overridden_files = $bookx_files->edit_manually;
+
+$bookx_check_admin_files = $bookx_check_files($bookx_files->admin_files, 'admin');
+$bookx_check_catalog_files = $bookx_check_files($bookx_files->catalog_files, 'catalog');
+$bookx_template_default_overridden_files = $bookx_check_files($bookx_files->$bookx_files->edit_manually, '');
 
 $required_files = array(
         DIR_FS_CATALOG . 'includes/auto_loaders/config.bookx.php',

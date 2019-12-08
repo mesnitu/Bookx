@@ -1,0 +1,129 @@
+body {
+  position: relative;
+}
+
+.affix {
+  top: 20px;
+  z-index: 9999 !important;
+}
+
+.container .nav-pills > li > a {
+  font-weight: 700;
+  background: #f5f5f5;
+  color: black;
+}
+
+div.col-sm-9 div.panel {
+  min-height: 200px;
+}
+
+.panel-title {
+  font-weight: bold;
+}
+
+div.panel ul li {
+  line-height: 1.5;
+}
+
+div.panel li span {
+  display: inline;
+  padding-right: 1rem;
+}
+
+.btn-sm {
+  font-size: 1rem;
+}
+
+.wlabel {
+  display: inline-table;
+  border-radius: 0.25em;
+  background: #757575;
+  /* font-size: inherit; */
+  padding: 0 0 0 0.2em;
+  color: white;
+  font-weight: bold;
+  margin-right: 0.5em;
+}
+
+.wlabel span {
+  padding: 0.2em 0.5em;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.wlabel a {
+  display: table-cell;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wlabel span:nth-child(2) {
+  padding: 0 0.5em;
+  display: table-cell;
+  font-size: inherit;
+}
+
+.container {
+  line-height: 1.6;
+}
+
+.docs {
+  height: 90vh;
+  overflow: scroll;
+  font-size: 12px;
+  background-color: white;
+  line-height: 1.45;
+  color: #333;
+}
+
+.docs blockquote {
+  font-size: 1.25em;
+  background: #f5f5f5;
+}
+
+.docs p {
+  margin-bottom: 1.25em;
+}
+
+.docs h1,
+.docs h2,
+.docs h3,
+.docs h4,
+.docs h5 {
+  margin: 2.75rem 0 1rem;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.docs h1,
+#bookxtools h1 {
+  margin-top: 0;
+  font-size: 3.052em;
+}
+
+.docs h2 {
+  font-size: 2.441em;
+}
+
+.docs h3 {
+  font-size: 1.953em;
+}
+
+.docs h4 {
+  font-size: 1.563em;
+}
+
+.docs h5 {
+  font-size: 1.25em;
+}
+
+@media screen and (max-width: 810px) {
+  #section1,
+  #section2,
+  #section3,
+  #section41,
+  #section42 {
+    margin-left: 150px;
+  }
+}

@@ -1,4 +1,13 @@
 #!/usr/bin/python3.7
+
+''' 
+by @mesnitu
+This file os for development purposes. Test it first in some path. 
+Edit the edit_destination.json and run this file. 
+It creates symlinks, removes or copies files. 
+It also generates a list of all project files that are use on install checks.
+'''
+
 import os
 from shutil import copy2 as copyfile
 from pathlib import Path
@@ -100,7 +109,7 @@ class DevInstallBookx:
 
     def createListObj(self, filespath):
 
-        # Creates a obj with all the prject files. If online True, the paths are different
+        # Creates a obj with all the project files. If online True, the paths are different
         obj = {"version": self.VERSION}
 
         if self.mode == 'dev':
@@ -109,6 +118,8 @@ class DevInstallBookx:
             obj['catalog_files'] = [
                 f for f in filespath if self.PROJ_ADMIN_FOLDER not in f and not '[EDIT_MANUALLY]' in f]
         else:
+            pass
+            # not in use, see comments bellow
             obj['admin_files'] = [
                 f.split(str(self.zcPath))[1].replace(self.zcAdminFolderName, 'admin') for f in filespath if
                 self.zcAdminFolderName in f and not '[EDIT_MANUALLY]' in f]
@@ -119,7 +130,7 @@ class DevInstallBookx:
         overrideFiles = self.listOverrideFiles()
         obj['edit_manually'] = [
             f.replace(str(self.projPathInstallFolder), '') for f in overrideFiles]
-        obj["updated"] = datetime.today().strftime("%m-%d-%Y-%H:%M:%S")
+        obj["updated"] = datetime.today().strftime("%Y-%m-%d-%H:%M:%S")
         return obj
 
     def exportProjectFiles(self, filespath=None, mode=None):
@@ -133,13 +144,22 @@ class DevInstallBookx:
             obj = self.createListObj(filespath)
             project_file = str(script_path().joinpath(
                 'dev_' + self.PROJ_FILES_LIST_NAME))
-
-        else:
-            obj = self.createListObj(filespath)
+            self.saveFileList(obj, project_file)
+            # saving the file again, check comment bellow
             project_file = self.projPathAdminFiles.joinpath(
                 'includes', 'extra_datafiles', 'bookx', self.PROJ_FILES_LIST_NAME)
+            self.saveFileList(obj, project_file)
 
-        self.saveFileList(obj, project_file)
+        else:
+            ''' this is not doing nothing for now, since if a user doesn't use this python file
+             it doesn't make sense to have the template_name replaced in the generated file. 
+             Leaving it here, because on a vps this file could actually install all this stuff.'''
+            # obj = self.createListObj(filespath)
+            # project_file = self.projPathAdminFiles.joinpath(
+            #    'includes', 'extra_datafiles', 'bookx', self.PROJ_FILES_LIST_NAME)
+            pass
+        #self.saveFileList(obj, project_file)
+
         print(_color("Project files in " + str(project_file), 'green'))
 
     @staticmethod
@@ -191,8 +211,9 @@ class DevInstallBookx:
                     '[YOUR-TEMPLATE]', self.zcTplFolderName))
 
         # Call export files in link or copy mode
+        # For now it's only exporting in dev mode, no path replacement
         if mode == 'link' or mode == 'copy':
-            self.exportProjectFiles(destFiles)
+            self.exportProjectFiles(None, "dev")
 
         # Create Directories
         self.createDirs(destFiles)
@@ -268,11 +289,11 @@ def main():
 
     head = _color(f"\nProject: {bookx.PROJECT} - v{bookx.VERSION}\n", 'cyan')
     sep = ("*" * len(head)*2)
-    head = "\n" + sep + head + sep
-    msgf = "\n" + _color("Destination Files:", 'green') + "\n"
-    msgf += "\n".join(["- {}: {}".format(_color(k, 'yellow'), _color(v, 'cyan'))
-                       for k, v in rf.items()])
-    msgf += '\n\n'+_color("Options:", 'green') + \
+    msg = "\n" + sep + head + sep
+    msg += "\n" + _color("Destination Files:", 'green') + "\n"
+    msg += "\n".join(["- {}: {}".format(_color(k, 'yellow'), _color(v, 'cyan'))
+                      for k, v in rf.items()])
+    msg += '\n\n'+_color("Options:", 'green') + \
         '\n[1] - symlink\n[2] - copy\n[3] - remove\n[4] - export project files\n[0] - Quit\n'
 
     options = ''
@@ -284,8 +305,7 @@ def main():
     # 6 - print catalog files
 
     while not options:
-        print(head)
-        print(msgf)
+        print(msg)
         options = input('Option:>')
 
     if options == '0':

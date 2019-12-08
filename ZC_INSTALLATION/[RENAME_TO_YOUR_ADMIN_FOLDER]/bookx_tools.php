@@ -1,22 +1,29 @@
 <?php
 /**
- * This file is part of the ZenCart add-on Book X which
+ * This file is part of the ZenCart add-on BookX which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5
+ * shop system. Tested for compatibility on ZC v.1.56
  *
  * For latest version and support visit:
- * https://sourceforge.net/p/zencartbookx
+ * https://github.com/philoupin/bookx
  *
+ * Project BookX v1.0.1
  * @package admin
  * @author  Philou
  * @copyright Copyright 2013
- * @copyright Portions Copyright 2003-2011 Zen Cart Development Team
+ * @copyright Copyright 2003-2019 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
- * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
+ * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  *
- * @version BookX V 1.0.0
- * @version $Id: [ZC INSTALLATION]/[ADMIN]/bookx_tools.php 2019-01-05 mesnitu $
- */
+ * File bookx_tools.php
+ * Project Path /[RENAME_TO_YOUR_ADMIN_FOLDER]/bookx_tools.php
+ *
+ * @version $Id: mesnitu  2019 Dec 08 in BookX v1.0.1 for Zen Cart 1.5.6c $
+ * -----
+ * HISTORY:
+ * Date      	By   	Comments
+ * ----------	-----	--------------------------------------------------
+*/
 
 require_once 'includes/application_top.php';
 
@@ -27,39 +34,54 @@ $action = (isset($_GET['action']) ? $_GET['action'] : '');
  * 1 - Fresh install - Detects no pType, no Version, no DataBases.
  * 2 - update - Detects No version and ptype (v09) OR Version and pType found.
  * 3 - update - Detects DataBases and no pType, no Version.
- *
  */
-
 
 if ($action == 'bookx_install_options') {
     // if zc version < 56 display files warning
     if (str_replace('.', '', EXPECTED_DATABASE_VERSION_MINOR) < "56") {
-        $msg = "Zencart 156 not found. This Bookx Version as not been fully tested with 
+        $msg = "Zen Cart 156 not found. This Bookx Version as not been tested with 
             v" . PROJECT_VERSION_MINOR . ". While it can update database tables, some files and features were added. 
-            You have to compare files. Test first in a dev enviroment";
+            You have to compare files. Test first in a dev environment";
         $messageStack->add($msg, 'caution');
     }
+    // No installed version, no databases found, no ptypeID: Install:
+    if (empty($bookx_installed_version) && empty($bookx_already_installed) && empty($bookx_ptypeID)) {
+        // bookx process install
+    } else {
+        //bookx update
+        if (isset($_GET['confirm_v09']) == true) {
+            //if is confirmed insert version
+            $messageStack->add('Bookx v090 confirmed', 'success');
+            $bookx_installed_version = '0.9'; // some first BETA files had no version info
+            $sql = 'REPLACE INTO ' . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
+            VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
 
+            //$db->Execute($sql);
+        }
+    }
+    
+    
+    
     // find version
     if (empty($bookx_installed_version)) {
         // Assuming that v09 is installed. Display a warning message with a confirm action
         if (isset($_GET['confirm_v09']) == true) {
-            // if is confirmed insert version
-            $messageStack->add('v090 confirmed', 'success');
+            //if is confirmed insert version
+            $messageStack->add('Bookx v090 confirmed', 'success');
             $bookx_installed_version = '0.9'; // some first BETA files had no version info
             $sql = 'REPLACE INTO ' . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
-	    	VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
+            VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
 
         //$db->Execute($sql);
         } else {
             //Bookx v095 tables could exist, but no configuration was imported or was lost.
             //Can't determinate if already install.
-            $msg = "<p>A product type for BookX was found but <strong class=\"text-danger\">Could not determinate if Bookx is properly installed</strong> since no version was found (Assuming installed version 090)<br>. This message could be due to missing bookx configuration fields, such as Bookx Version identifier.<br>An Update and reset.</p>";
-            $msg .= '<p>Please confirm that you have BookX v09 installed: <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_v09=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
+            $msg = "<p><strong class=\"text-danger\">Could not determinate if Bookx is properly installed</strong> since no version was found (Assuming installed version is 090)<br>. This message could be due to missing bookx configuration fields, such as Bookx Version identifier.<br>An Update and reset from 090 will be perform.</p>";
+            $msg .= '<p>Please confirm that you have BookX v09 installed: <a id="choose" href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_v09=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
             $messageStack->add($msg, 'info');
         }
     } else {
-        // we have a verion. compare versions
+        // we have a version. compare versions
             /*
             $messageStack->add('info', 'info');
             if ($bookx_installed_version < $bookx_module_version && (!strpos($_SERVER['PHP_SELF'], FILENAME_BOOKX_TOOLS))) {
@@ -69,6 +91,7 @@ if ($action == 'bookx_install_options') {
              */
     }
 } else {
+
     // check if any bookx table is present. If only bookx tables were imported, it's a update
     if (isset($_GET['confirm_update']) == true) {
         $_SESSION['bookx_install'] = 'do_reset';
@@ -84,48 +107,8 @@ if ($action == 'bookx_install_options') {
 
         zen_redirect(FILENAME_BOOKX_TOOLS . '.php?action=bookx_install_options');
     } else {
-        $bookx_already_installed = false;
-        $bookx_db_tables = [
-            TABLE_PRODUCT_BOOKX_AUTHORS,
-            TABLE_PRODUCT_BOOKX_AUTHORS_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS,
-            TABLE_PRODUCT_BOOKX_AUTHOR_TYPES,
-            TABLE_PRODUCT_BOOKX_AUTHOR_TYPES_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_BINDING,
-            TABLE_PRODUCT_BOOKX_BINDING_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_CONDITIONS,
-            TABLE_PRODUCT_BOOKX_CONDITIONS_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_EXTRA,
-            TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_GENRES,
-            TABLE_PRODUCT_BOOKX_GENRES_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS,
-            TABLE_PRODUCT_BOOKX_IMPRINTS,
-            TABLE_PRODUCT_BOOKX_IMPRINTS_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_PRINTING,
-            TABLE_PRODUCT_BOOKX_PRINTING_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_PUBLISHERS,
-            TABLE_PRODUCT_BOOKX_PUBLISHERS_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_SERIES,
-            TABLE_PRODUCT_BOOKX_SERIES_DESCRIPTION,
-            TABLE_PRODUCT_BOOKX_FAMILIES,
-            TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS,
-            TABLE_PRODUCT_BOOKX_SEARCH
-        ];
-
-        $bookx_error = false;
-        foreach ($bookx_db_tables as $value) {
-            $sql = "SHOW TABLES LIKE '" . $value . "'";
-            $res = $db->Execute($sql);
-
-            if (!$res->EOF) {
-                $bookx_error = true;
-                break;
-            }
-        }
-
-        if ($bookx_error) {
-            $msg .= '<p>Found BookX tables in data base but no defined BookX Product Type Id. If your intent is to update, but haven\'t import BookX zencart configuration table, we can try to update. However probably you will have also to update your product table to the new product type ID. First, confirm BookX that this is a update : <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_update=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
+        if ($bookx_already_installed && !$bookx_installed_version) {
+            $msg .= '<p>Found BookX tables in data base but no defined BookX Product Type Id. If your intent is to update, but haven\'t import BookX Zen Cart configuration table, we can try to update. However probably you will have also to update your product table to the new product type ID. First, confirm BookX that this is a update : <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_update=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
             $messageStack->add($msg, 'alert');
             $install = false;
         } else {
@@ -141,14 +124,14 @@ if (isset($_GET['action']) &&
     ('bookx_reset_to_defaults' == $_GET['action']) ||
     ('bookx_install_options' == $_GET['action'])
 ) {
-    require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_install_v1.php';
+    require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'installers/bookx_install_v1.php';
 }
 
 if (BOOKX_DISPLAY_GIT_RELEASES == true) {
     /**
      * Get git releases info from json file
      */
-    $jsonStr = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER . 'plugin_check.json');
+    $jsonStr = file_get_contents(BOOKX_EXTRA_DATA_FILES_FOLDER . 'plugin_check.json');
     $objGit = json_decode($jsonStr);
 
     if (isset($_GET) && 'check_git_releases' == $_GET['action']) {
@@ -157,14 +140,13 @@ if (BOOKX_DISPLAY_GIT_RELEASES == true) {
         zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
     }
 
-    //define('EP4BOOKX_VERSION', '0.9.9');
     $ep4bookx_exists = false;
     //pr(bookx_update_plugin_release());
     if ($action == 'update_git_repositories') {
         /**
          * Maybe the file was corrupted or no installed version is available.
          * Check installed versions and update
-         * Note: Until now, EP4 doesn't widely annouce is version.
+         * Note: Until now, EP4 doesn't widely announce is version.
          */
         if ($ep4bookx_exists) {
             $objGit->ep4bookx->installed = '';
@@ -175,7 +157,7 @@ if (BOOKX_DISPLAY_GIT_RELEASES == true) {
             $objGit->ep4->url = $_POST['ep4'];
         }
         $json = json_encode($objGit, JSON_PRETTY_PRINT);
-        file_put_contents(BOOKX_EXTRA_DATAFILES . '/plugin_check.json', $json);
+        file_put_contents(BOOKX_EXTRA_DATA_FILES . '/plugin_check.json', $json);
         //EP4BOOKX_VERSION
         $messageStack->add_session(bookx_update_plugin_release(), 'info');
         zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
@@ -210,144 +192,12 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
     </title>
     <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
     <link rel="stylesheet" type="text/css" href="includes/extra_datafiles/bookx/libs/prism.css">
+    <link rel="stylesheet" type="text/css" href="includes/css/bookx_admin_stylesheet.css">
     <link rel="stylesheet" type="text/css" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
-    <style>
-        body {
-            position: relative;
-        }
-
-        .affix {
-            top: 20px;
-            z-index: 9999 !important;
-        }
-
-        .container .nav-pills>li>a {
-            font-weight: 700;
-            background: #f5f5f5;
-            color: black;
-        }
-
-        div.col-sm-9 div.panel {
-            min-height: 200px;
-        }
-
-        .panel-title {
-            font-weight: bold;
-        }
-
-        div.panel ul li {
-            line-height: 1.5;
-        }
-
-        div.panel li span {
-            display: inline;
-            padding-right: 1rem;
-        }
-
-        .btn-sm {
-            font-size: 1rem;
-        }
-
-        .wlabel {
-            display: inline-table;
-            border-radius: .25em;
-            background: #757575;
-            /* font-size: inherit; */
-            padding: 0 0 0 .2em;
-            color: white;
-            font-weight: bold;
-            margin-right: .5em;
-        }
-
-        .wlabel span {
-            padding: .2em .5em;
-            display: table-cell;
-            vertical-align: middle;
-        }
-
-        .wlabel a {
-            display: table-cell;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .wlabel span:nth-child(2) {
-            padding: 0 .5em;
-            display: table-cell;
-            font-size: inherit;
-        }
-
-        .container {
-            line-height: 1.6;
-        }
-
-        .docs {
-            height: 90vh;
-            overflow: scroll;
-            font-size: 12px;
-            background-color: white;
-            line-height: 1.45;
-            color: #333;
-
-        }
-
-        .docs blockquote {
-            font-size: 1.25em;
-            background: #f5f5f5;
-        }
-
-        .docs p {
-            margin-bottom: 1.25em;
-        }
-
-        .docs h1,
-        .docs h2,
-        .docs h3,
-        .docs h4,
-        .docs h5 {
-            margin: 2.75rem 0 1rem;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 400;
-            line-height: 1.15;
-        }
-
-        .docs h1 {
-            margin-top: 0;
-            font-size: 3.052em;
-        }
-
-        .docs h2 {
-            font-size: 2.441em;
-        }
-
-        .docs h3 {
-            font-size: 1.953em;
-        }
-
-        .docs h4 {
-            font-size: 1.563em;
-        }
-
-        .docs h5 {
-            font-size: 1.25em;
-        }
-
-        @media screen and (max-width: 810px) {
-
-            #section1,
-            #section2,
-            #section3,
-            #section41,
-            #section42 {
-                /*     margin-left: 150px;*/
-            }
-        }
-    </style>
     <script src="includes/general.js"></script>
-
 </head>
 
-<body id="bookxtolls" data-spy="scroll" data-target="#myScrollspy" data-offset="20">
+<body id="bookxTools" data-spy="scroll" data-target="#myScrollspy" data-offset="20">
 
     <!-- header //-->
     <?php require DIR_WS_INCLUDES . 'header.php'; ?>
@@ -363,22 +213,14 @@ if ($action == 'bookx_install_options') {
 
     // call file
     $update_msg = '';
-    /**
-     * Install options:
-     * - CEON SUPPORT
-     * - Dinamic Metags ( IF CEON is enable, otherwise, other code is needed
-     * - Database collation to mbutf8
-     */
 
-    /**
-     * Loads a html block for install options
-     */
+    // Loads a html block for install options
     if (isset($_GET['action']) && ('bookx_install_options' == $_GET['action']) &&
         ($bookx_already_installed !== false)) {
-        require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_install_options.php';
+        require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'installers/bookx_install_include_options.php';
     }
-} else {
-    ?>
+    //Ends the html block for install options
+} else { ?>
         <div class="row">
             <nav class="col-sm-3" id="myScrollspy">
                 <ul class="nav nav-pills nav-stacked" data-spy="affix" data-offset-top="220" data-offset-bottom="100">
@@ -474,9 +316,9 @@ if ($action == 'bookx_install_options') {
                             </label>
                         </div>
                         <?php echo BOOKX_CONFIRM_REMOVE . '&nbsp;'; ?>
-                        <button type="submit" class="btn btn-danger btn-sm float-rigth">Submit</button>
+                        <button type="submit" class="btn btn-danger btn-sm float-right">Submit</button>
                         <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS); ?>"
-                            class="btn btn-default btn-sm float-rigth">Cancel</a>
+                            class="btn btn-default btn-sm float-right">Cancel</a>
                         </form>
                     </div>
                     <?php
@@ -603,7 +445,7 @@ if ($action == 'bookx_install_options') {
 
         echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_from', '1', ($choose_products_to_convert_from ? '1' : '0')) . '&nbsp;' . BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT . '</label></div>';
         echo('' != $select_string_from ? $select_string_from : '');
-        echo '<button type="submit" class="btn btn-primary btn-sm float-rigth">Submit</button>';
+        echo '<button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>';
         echo '</form></div><!-- eof form migration_to_bookx -->';
         /**
          *
@@ -621,9 +463,9 @@ if ($action == 'bookx_install_options') {
         echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_to', '0', ($choose_products_to_convert_to ? '0' : '1')) . '&nbsp;' . BOOKX_OPTION_CONVERT_ALL_PRODUCTS . '</label></div>';
         echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_to', '1', ($choose_products_to_convert_to ? '1' : '0')) . '&nbsp;' . BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT . '</label></div>';
         echo('' != $select_string_to ? $select_string_to : '');
-        echo '<button type="submit" class="btn btn-primary btn-sm float-rigth">Submit</button>';
+        echo '<button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>';
         echo '</form></div><!-- eof form migration_to_bookx -->';
-        echo '<a href="' . zen_href_link(FILENAME_BOOKX_TOOLS) . '" class="btn btn-default btn-sm float-rigth">Cancel</a>';
+        echo '<a href="' . zen_href_link(FILENAME_BOOKX_TOOLS) . '" class="btn btn-default btn-sm float-right">Cancel</a>';
     } elseif ('bookx_confirm_product_migration' == $action) {
         switch (true) {
                                     case ($choose_products_to_convert_from && $product_selection_submitted && null != $bookx_ptypeID): // convert some selected products from another article type to bookx
@@ -681,10 +523,10 @@ if ($action == 'bookx_install_options') {
 
                 <!-- Close Second Panel -->
 
-                <?php tpl_panel('open', 'sectionGitReleases', 'Git Relases Check'); ?>
+                <?php tpl_panel('open', 'sectionGitReleases', 'Git Releases Check'); ?>
                 <p>Info: <?php echo $objGit->ep4->installed; ?> You
                     can trace your git fork updates. To do so, update git api url.
-                    <br />Note that this is not mandatory. You can just use the zencart download section.</p>
+                    <br />Note that this is not mandatory. You can just use the Zen Cart download section.</p>
                 <?php if ($action == 'update_git_repo_url') {
         ?>
                 <?php
@@ -706,7 +548,7 @@ if ($action == 'bookx_install_options') {
                                 echo zen_draw_label('Url for git EP4Bookx', 'ep4bookx');
         echo zen_draw_input_field('ep4bookx', '', 'class="form-control" placeholder="' . $objGit->ep4bookx->url . '"', true, 'url'); ?>
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm float-rigth">Submit</button>
+                <button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>
                 <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS); ?>"
                     class="btn btn-default btn-sm">Cancel</a>
                 </form>
@@ -735,13 +577,13 @@ if ($action == 'bookx_install_options') {
                 <p>Try to scroll this section and look at the navigation list while scrolling!</p>
                 <?php tpl_panel('close'); ?>
 
-                <?php tpl_panel('open', 'sectionDocs', 'Documetation'); ?>
+                <?php tpl_panel('open', 'sectionDocs', 'Documentation'); ?>
 
                 <?php if ($action == 'loadDocumentation') {
         echo '<div class="docs">';
-        require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'libs/Parsedown.php';
+        require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'libs/Parsedown.php';
         $parsedown = new Parsedown();
-        $text = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER . 'Documentation.md');
+        $text = file_get_contents(BOOKX_EXTRA_DATA_FILES_FOLDER . 'Documentation.md');
         echo Parsedown::instance()
                                 ->setUrlsLinked(true)
                                 ->text($text);
@@ -749,7 +591,7 @@ if ($action == 'bookx_install_options') {
     } else {
         ?>
                 <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS, 'action=loadDocumentation#sectionDocs'); ?>"
-                    class="btn btn-default btn-sm">Load DOcumetation</a>
+                    class="btn btn-default btn-sm">Load Documentation</a>
                 <?php
     } ?>
 

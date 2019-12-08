@@ -1,0 +1,69 @@
+{
+  "psi-header.lang-config": [
+    {
+      "language": "php",
+      "begin": "/**",
+      "end": "*/",
+      "prefix": " * "
+    },
+    {
+      "language": "python",
+      "begin": "'''",
+      "end": "'''",
+      "prefix": ""
+    }
+  ],
+  "psi-header.variables": [
+    ["author", "mesnitu"],
+    ["copyrightHolder", "Philou"],
+    ["bookxVersion", "1.0.1"],
+    ["projectName", "BookX"],
+    ["zencartVersion", "1.5.6c"]
+  ],
+  "psi-header.changes-tracking": {
+    "isActive": true,
+    "modAuthor": "Modified By: ",
+    "modDate": "Last Modified: ",
+    "modDateFormat": "date",
+    "include": [],
+    "exclude": ["json"],
+    "excludeGlob": [".git/**", "src/**/*.xyz"],
+    "autoHeader": "manualSave"
+  },
+  "psi-header.templates": [
+    {
+      "language": "*",
+      "template": [
+        "This file is part of the ZenCart add-on <<projectName>> which",
+        "introduces a new product type for books to the Zen Cart",
+        "shop system. Tested for compatibility on ZC v.1.56",
+        "",
+        "For latest version and support visit:",
+        "https://github.com/philoupin/bookx",
+        "",
+        "Project <<projectName>> v<<bookxVersion>>",
+        "@package admin",
+        "@author  <<copyrightHolder>>",
+        "@copyright Copyright 2013",
+        "@copyright Copyright 2003-2019 Zen Cart Development Team",
+        "@copyright Portions Copyright 2003 osCommerce",
+        "@license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0",
+        "",
+        "File <<filename>>",
+        "Project Path <<filerelativepath>>",
+        "@version $Id: <<author>> <<dateformat(' YYYY MMM DD')>> in <<projectName>> v<<bookxVersion>> for Zen Cart <<zencartVersion>> $",
+        "-----",
+        "HISTORY:",
+        "Date      \tBy   \tComments",
+        "----------\t-----\t--------------------------------------------------"
+      ],
+      "changeLogCaption": "HISTORY:",
+      "changeLogHeaderLineCount": 1,
+      "changeLogEntryTemplate": [
+        "",
+        "<<dateformat('YYYY MMM DD')>>\t[<<author>>]\t->"
+      ]
+    }
+  ]
+}
+
