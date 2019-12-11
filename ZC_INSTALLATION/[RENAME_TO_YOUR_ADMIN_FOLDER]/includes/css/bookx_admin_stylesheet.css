@@ -1,7 +1,9 @@
 body {
   position: relative;
 }
-
+.strong {
+  font-weight: bold;
+}
 .affix {
   top: 20px;
   z-index: 9999 !important;

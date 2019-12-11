@@ -2,8 +2,11 @@
 sql_update.txt
 dev_bookx_files.json
 test.json
-vendor
+vendors/
 commits.md
+etc/*
+*.lock
+package.json
 ### vscode ###
 .vscode
 

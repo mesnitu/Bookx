@@ -1,11 +1,0 @@
-{
-  "name": "bookx",
-  "version": "1.0.1",
-  "description": "This file is part of the ZenCart add-on Book X which introduces a new product type for books to the Zen Cart shop system.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "mesnitu",
-  "license": "SEE LICENSE IN <filename>"
-}

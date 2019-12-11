@@ -23,7 +23,7 @@
  * HISTORY:
  * Date      	By   	Comments
  * ----------	-----	--------------------------------------------------
-*/
+ */
 
 require_once 'includes/application_top.php';
 
@@ -31,16 +31,16 @@ $action = (isset($_GET['action']) ? $_GET['action'] : '');
 
 /**
  * Checks Install.
- * 1 - Fresh install - Detects no pType, no Version, no DataBases.
- * 2 - update - Detects No version and ptype (v09) OR Version and pType found.
- * 3 - update - Detects DataBases and no pType, no Version.
+ * 1 - Fresh install - Detects NO pType, NO Version and NO dataBases tables.
+ * 2 - update - Detects NO version but a ptype and database tables(v09) 
+ * 3 - update - Detects dataBases tables, pType, and Version.
  */
 
 if ($action == 'bookx_install_options') {
     // if zc version < 56 display files warning
     if (str_replace('.', '', EXPECTED_DATABASE_VERSION_MINOR) < "56") {
         $msg = "Zen Cart 156 not found. This Bookx Version as not been tested with 
-            v" . PROJECT_VERSION_MINOR . ". While it can update database tables, some files and features were added. 
+            v".PROJECT_VERSION_MINOR.". While it can update database tables, some files and features were added. 
             You have to compare files. Test first in a dev environment";
         $messageStack->add($msg, 'caution');
     }
@@ -48,28 +48,18 @@ if ($action == 'bookx_install_options') {
     if (empty($bookx_installed_version) && empty($bookx_already_installed) && empty($bookx_ptypeID)) {
         // bookx process install
     } else {
-        //bookx update
-        if (isset($_GET['confirm_v09']) == true) {
-            //if is confirmed insert version
-            $messageStack->add('Bookx v090 confirmed', 'success');
-            $bookx_installed_version = '0.9'; // some first BETA files had no version info
-            $sql = 'REPLACE INTO ' . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
-            VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
-
-            //$db->Execute($sql);
-        }
     }
     
     
     
     // find version
-    if (empty($bookx_installed_version)) {
+    if (empty($bookx_installed_version && $bookx_already_installed == true)) {
         // Assuming that v09 is installed. Display a warning message with a confirm action
         if (isset($_GET['confirm_v09']) == true) {
             //if is confirmed insert version
             $messageStack->add('Bookx v090 confirmed', 'success');
             $bookx_installed_version = '0.9'; // some first BETA files had no version info
-            $sql = 'REPLACE INTO ' . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
+            $sql = 'REPLACE INTO '.TABLE_CONFIGURATION." (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
             VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
 
         //$db->Execute($sql);
@@ -77,7 +67,7 @@ if ($action == 'bookx_install_options') {
             //Bookx v095 tables could exist, but no configuration was imported or was lost.
             //Can't determinate if already install.
             $msg = "<p><strong class=\"text-danger\">Could not determinate if Bookx is properly installed</strong> since no version was found (Assuming installed version is 090)<br>. This message could be due to missing bookx configuration fields, such as Bookx Version identifier.<br>An Update and reset from 090 will be perform.</p>";
-            $msg .= '<p>Please confirm that you have BookX v09 installed: <a id="choose" href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_v09=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
+            $msg .= '<p>Please confirm that you have BookX v09 installed: <a id="choose" href="'.zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_v09=1').' "class="btn btn-primary btn-xs">'.FILENAME_BOOKX_TOOLS.'</a></p>';
             $messageStack->add($msg, 'info');
         }
     } else {
@@ -97,18 +87,18 @@ if ($action == 'bookx_install_options') {
         $_SESSION['bookx_install'] = 'do_reset';
         $bookx_already_installed = true;
         $bookx_installed_version = '0.9'; // some first BETA files had no version info
-        $sql = 'REPLACE INTO ' . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
+        $sql = 'REPLACE INTO '.TABLE_CONFIGURATION." (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
 	    	VALUES ('BookX Version', 'BOOKX_VERSION', '0.9', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL)";
         $db->Execute($sql);
 
-        $sql = "REPLACE INTO " . TABLE_PRODUCT_TYPES . " (type_name, type_handler, type_master_type, allow_add_to_cart, date_added, last_modified)
+        $sql = "REPLACE INTO ".TABLE_PRODUCT_TYPES." (type_name, type_handler, type_master_type, allow_add_to_cart, date_added, last_modified)
 	                      VALUES ( 'Products - Bookx', 'product_bookx', 1,  'Y', now(), now())";
         $db->Execute($sql);
 
-        zen_redirect(FILENAME_BOOKX_TOOLS . '.php?action=bookx_install_options');
+        zen_redirect(FILENAME_BOOKX_TOOLS.'.php?action=bookx_install_options');
     } else {
         if ($bookx_already_installed && !$bookx_installed_version) {
-            $msg .= '<p>Found BookX tables in data base but no defined BookX Product Type Id. If your intent is to update, but haven\'t import BookX Zen Cart configuration table, we can try to update. However probably you will have also to update your product table to the new product type ID. First, confirm BookX that this is a update : <a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_update=1') . ' "class="btn btn-primary btn-xs">' . FILENAME_BOOKX_TOOLS . '</a></p>';
+            $msg .= '<p>Found BookX tables in data base but no defined BookX Product Type Id. If your intent is to update, but haven\'t import BookX Zen Cart configuration table, we can try to update. However probably you will have also to update your product table to the new product type ID. First, confirm BookX that this is a update : <a href="'.zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options&confirm_update=1').' "class="btn btn-primary btn-xs">'.FILENAME_BOOKX_TOOLS.'</a></p>';
             $messageStack->add($msg, 'alert');
             $install = false;
         } else {
@@ -124,20 +114,20 @@ if (isset($_GET['action']) &&
     ('bookx_reset_to_defaults' == $_GET['action']) ||
     ('bookx_install_options' == $_GET['action'])
 ) {
-    require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'installers/bookx_install_v1.php';
+    require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_install_v1.php';
 }
 
 if (BOOKX_DISPLAY_GIT_RELEASES == true) {
     /**
      * Get git releases info from json file
      */
-    $jsonStr = file_get_contents(BOOKX_EXTRA_DATA_FILES_FOLDER . 'plugin_check.json');
+    $jsonStr = file_get_contents(BOOKX_EXTRA_DATAFILES_FOLDER.'plugin_check.json');
     $objGit = json_decode($jsonStr);
 
     if (isset($_GET) && 'check_git_releases' == $_GET['action']) {
         $messageStack->add_session(bookx_update_plugin_release(), 'success');
         $_SESSION['bookx']['checked_date'] = true;
-        zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+        zen_redirect(FILENAME_BOOKX_TOOLS.'.php');
     }
 
     $ep4bookx_exists = false;
@@ -157,10 +147,10 @@ if (BOOKX_DISPLAY_GIT_RELEASES == true) {
             $objGit->ep4->url = $_POST['ep4'];
         }
         $json = json_encode($objGit, JSON_PRETTY_PRINT);
-        file_put_contents(BOOKX_EXTRA_DATA_FILES . '/plugin_check.json', $json);
+        file_put_contents(BOOKX_EXTRA_DATA_FILES.'/plugin_check.json', $json);
         //EP4BOOKX_VERSION
         $messageStack->add_session(bookx_update_plugin_release(), 'info');
-        zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+        zen_redirect(FILENAME_BOOKX_TOOLS.'.php');
     }
 }
 
@@ -178,7 +168,7 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
         true
     ), 'success');
 
-    zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+    zen_redirect(FILENAME_BOOKX_TOOLS.'.php');
 }
 
 ?>
@@ -200,7 +190,7 @@ if (isset($_GET) && 'bookx_check_missing_product_relations' == $_GET['action']) 
 <body id="bookxTools" data-spy="scroll" data-target="#myScrollspy" data-offset="20">
 
     <!-- header //-->
-    <?php require DIR_WS_INCLUDES . 'header.php'; ?>
+    <?php require DIR_WS_INCLUDES.'header.php'; ?>
     <!-- header_eof //-->
 
     <!-- body //-->
@@ -217,7 +207,7 @@ if ($action == 'bookx_install_options') {
     // Loads a html block for install options
     if (isset($_GET['action']) && ('bookx_install_options' == $_GET['action']) &&
         ($bookx_already_installed !== false)) {
-        require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'installers/bookx_install_include_options.php';
+        require_once BOOKX_EXTRA_DATA_FILES_FOLDER.'installers/bookx_install_include_options.php';
     }
     //Ends the html block for install options
 } else { ?>
@@ -252,9 +242,9 @@ if ($action == 'bookx_install_options') {
                             if (($objGit->{$key}->installed !== $objGit->{$key}->last_release)) {
                                 $color = "warning";
                                 $check .= '(New release)';
-                                echo '<div class="wlabel"><a href="' . $objGit->{$key}->html_url . '"><span>' . $key . '</span><span class="label label-' . $color . '">' . $check . '</span></div></a>';
+                                echo '<div class="wlabel"><a href="'.$objGit->{$key}->html_url.'"><span>'.$key.'</span><span class="label label-'.$color.'">'.$check.'</span></div></a>';
                             } else {
-                                echo '<div class="wlabel"><span>' . $key . '</span><span class="label label-' . $color . '">' . $check . '</span></div>';
+                                echo '<div class="wlabel"><span>'.$key.'</span><span class="label label-'.$color.'">'.$check.'</span></div>';
                             }
                         }
                     }
@@ -274,9 +264,9 @@ if ($action == 'bookx_install_options') {
                 <?php
 
                 if ($bookx_already_installed == true) {
-                    echo '<p>' . TEXT_BOOKX_STATUS_INSTALLED . '<span class="label label-success"> v' . $bookx_installed_version . '</span></p>';
+                    echo '<p>'.TEXT_BOOKX_STATUS_INSTALLED.'<span class="label label-success"> v'.$bookx_installed_version.'</span></p>';
                 } else {
-                    echo TEXT_BOOKX_STATUS_NOT_INSTALLED . '<br />';
+                    echo TEXT_BOOKX_STATUS_NOT_INSTALLED.'<br />';
                 } ?>
                 <ul class="list-group">
                     <li class="list-group-item">
@@ -289,10 +279,10 @@ if ($action == 'bookx_install_options') {
                     </li>
                     <?php
                 if (!$bookx_already_installed) {
-                    echo '<li class="list-group-item"><a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install') . '">' . BOOKX_LINK_INSTALL . '</a></li>';
+                    echo '<li class="list-group-item"><a href="'.zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install').'">'.BOOKX_LINK_INSTALL.'</a></li>';
                 }
     if ($bookx_installed_version < $bookx_module_version) {
-        echo '<li class="list-group-item"><a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options') . '">' . BOOKX_LINK_UPDATE . '</a></li>';
+        echo '<li class="list-group-item"><a href="'.zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_install_options').'">'.BOOKX_LINK_UPDATE.'</a></li>';
     }
     /*
      * Remove / COnfirm Remove
@@ -307,15 +297,15 @@ if ($action == 'bookx_install_options') {
         echo zen_draw_hidden_field('action', 'bookx_remove'); ?>
                         <div class="radio">
                             <label>
-                                <?php echo zen_draw_radio_field('convert_bookx_products', '1', '1') . '&nbsp;' . TEXT_CONVERT_BOOKX_PRODUCTS; ?>
+                                <?php echo zen_draw_radio_field('convert_bookx_products', '1', '1').'&nbsp;'.TEXT_CONVERT_BOOKX_PRODUCTS; ?>
                             </label>
                         </div>
                         <div class="radio">
                             <label>
-                                <?php echo zen_draw_radio_field('convert_bookx_products', '0', '0') . '&nbsp;' . TEXT_DELETE_BOOKX_PRODUCTS; ?>
+                                <?php echo zen_draw_radio_field('convert_bookx_products', '0', '0').'&nbsp;'.TEXT_DELETE_BOOKX_PRODUCTS; ?>
                             </label>
                         </div>
-                        <?php echo BOOKX_CONFIRM_REMOVE . '&nbsp;'; ?>
+                        <?php echo BOOKX_CONFIRM_REMOVE.'&nbsp;'; ?>
                         <button type="submit" class="btn btn-danger btn-sm float-right">Submit</button>
                         <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS); ?>"
                             class="btn btn-default btn-sm float-right">Cancel</a>
@@ -370,7 +360,7 @@ if ($action == 'bookx_install_options') {
                                 !$product_selection_submitted)) {
         global $currencies;
 
-        $sql = "SELECT type_id, type_name FROM " . TABLE_PRODUCT_TYPES;
+        $sql = "SELECT type_id, type_name FROM ".TABLE_PRODUCT_TYPES;
         $product_types = $db->Execute($sql);
         while (!$product_types->EOF) {
             $type_array[] = ['id' => $product_types->fields['type_id'], 'text' => $product_types->fields['type_name']];
@@ -385,18 +375,18 @@ if ($action == 'bookx_install_options') {
             $select_string_from = '<br /><select name="products_to_convert_from[]" size="10" multiple="multiple" class="form-control">';
 
             $products = $db->Execute("SELECT p.products_id, products_name, p.products_price, p.products_model
-				                                FROM " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd
+				                                FROM ".TABLE_PRODUCTS." p, ".TABLE_PRODUCTS_DESCRIPTION." pd
 				                                where p.products_id = pd.products_id
-				                                AND pd.language_id = '" . (int) $_SESSION['languages_id'] . "'
-				                                AND p.products_type = '" . (int) $_POST['convert_from_type'] . "'
+				                                AND pd.language_id = '".(int) $_SESSION['languages_id']."'
+				                                AND p.products_type = '".(int) $_POST['convert_from_type']."'
 				                                ORDER BY products_name");
 
             $product_array = [];
 
             while (!$products->EOF) {
                 $display_price = $products->fields['products_price']; // zen_get_products_display_price($product['products_id']);
-                $select_string_from .= '<option value="' . $products->fields['products_id'] . '">';
-                $select_string_from .= $products->fields['products_name'] . ' [' . $products->fields['products_model'] . '] (' . $display_price . ') - ID# ' . $products->fields['products_id'] . '</option>';
+                $select_string_from .= '<option value="'.$products->fields['products_id'].'">';
+                $select_string_from .= $products->fields['products_name'].' ['.$products->fields['products_model'].'] ('.$display_price.') - ID# '.$products->fields['products_id'].'</option>';
 
                 $products->MoveNext();
             }
@@ -410,18 +400,18 @@ if ($action == 'bookx_install_options') {
             $select_string_to = '<br /><br /><select name="products_to_convert_to[]" size="10" multiple="multiple">';
 
             $products = $db->Execute("SELECT p.products_id, products_name, p.products_price, p.products_model
-				                                FROM " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd
+				                                FROM ".TABLE_PRODUCTS." p, ".TABLE_PRODUCTS_DESCRIPTION." pd
 				                                where p.products_id = pd.products_id
-				                                AND pd.language_id = '" . (int) $_SESSION['languages_id'] . "'
-				                                AND p.products_type = '" . (int) $bookx_ptypeID . "'
+				                                AND pd.language_id = '".(int) $_SESSION['languages_id']."'
+				                                AND p.products_type = '".(int) $bookx_ptypeID."'
 				                                ORDER BY products_name");
 
             $product_array = [];
 
             while (!$products->EOF) {
                 $display_price = $products->fields['products_price']; // zen_get_products_display_price($product['products_id']);
-                $select_string_to .= '<option value="' . $products->fields['products_id'] . '">';
-                $select_string_to .= $products->fields['products_name'] . ' [' . $products->fields['products_model'] . '] (' . $display_price . ') - ID# ' . $products->fields['products_id'] . '</option>';
+                $select_string_to .= '<option value="'.$products->fields['products_id'].'">';
+                $select_string_to .= $products->fields['products_name'].' ['.$products->fields['products_model'].'] ('.$display_price.') - ID# '.$products->fields['products_id'].'</option>';
 
                 $products->MoveNext();
             }
@@ -431,19 +421,19 @@ if ($action == 'bookx_install_options') {
         $form_action = (!$_POST['choose_products_to_convert_from']) ? '#sectionConvertProduct' : '';
 
         echo '<div class="form-group well">';
-        echo zen_draw_form('migration_to_bookx', FILENAME_BOOKX_TOOLS, 'action=bookx_confirm_product_migration' . $form_action
-                                    . '', 'post', 'enctype="multipart/form-data"');
-        echo '<p>' . BOOKX_OPTION_IMPORT . '</p>';
+        echo zen_draw_form('migration_to_bookx', FILENAME_BOOKX_TOOLS, 'action=bookx_confirm_product_migration'.$form_action
+                                    .'', 'post', 'enctype="multipart/form-data"');
+        echo '<p>'.BOOKX_OPTION_IMPORT.'</p>';
         echo zen_draw_label(BOOKX_SELECT_PRODUCT_TYPE_SOURCE_FOR_MIGRATION, 'convert_from_type');
         if (isset($_POST['convert_from_type']) && '' != $_POST['convert_from_type']) {
-            echo '<strong>' . $type_names[(int) $_POST['convert_from_type']] . '</strong>';
+            echo '<strong>'.$type_names[(int) $_POST['convert_from_type']].'</strong>';
             echo zen_draw_hidden_field('convert_from_type', (int) $_POST['convert_from_type']);
         } else {
             echo zen_draw_pull_down_menu('convert_from_type', $type_array, '', 'class="form-control"');
         }
-        echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_from', '0', ($choose_products_to_convert_from ? '0' : '1')) . '&nbsp;' . BOOKX_OPTION_CONVERT_ALL_PRODUCTS . '</label></div>';
+        echo '<div class="radio"><label>'.zen_draw_radio_field('choose_products_to_convert_from', '0', ($choose_products_to_convert_from ? '0' : '1')).'&nbsp;'.BOOKX_OPTION_CONVERT_ALL_PRODUCTS.'</label></div>';
 
-        echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_from', '1', ($choose_products_to_convert_from ? '1' : '0')) . '&nbsp;' . BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT . '</label></div>';
+        echo '<div class="radio"><label>'.zen_draw_radio_field('choose_products_to_convert_from', '1', ($choose_products_to_convert_from ? '1' : '0')).'&nbsp;'.BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT.'</label></div>';
         echo('' != $select_string_from ? $select_string_from : '');
         echo '<button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>';
         echo '</form></div><!-- eof form migration_to_bookx -->';
@@ -452,25 +442,25 @@ if ($action == 'bookx_install_options') {
          */
         echo '<div class="form-group well">';
         echo zen_draw_form('migration_from_bookx', FILENAME_BOOKX_TOOLS, 'action=bookx_confirm_product_migration', 'post', 'enctype="multipart/form-data"');
-        echo '<p>' . BOOKX_OPTION_EXPORT . '</p>';
+        echo '<p>'.BOOKX_OPTION_EXPORT.'</p>';
         echo zen_draw_label(BOOKX_SELECT_PRODUCT_TYPE_DESTINATION_FOR_MIGRATION, 'convert_to_type');
         if (isset($_POST['convert_to_type']) && '' != $_POST['convert_to_type']) {
-            echo '<strong>' . $type_names[(int) $_POST['convert_to_type']] . '</strong>';
+            echo '<strong>'.$type_names[(int) $_POST['convert_to_type']].'</strong>';
             echo zen_draw_hidden_field('convert_to_type', (int) $_POST['convert_to_type']);
         } else {
             echo zen_draw_pull_down_menu('convert_to_type', $type_array, '', 'class="form-control"');
         }
-        echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_to', '0', ($choose_products_to_convert_to ? '0' : '1')) . '&nbsp;' . BOOKX_OPTION_CONVERT_ALL_PRODUCTS . '</label></div>';
-        echo '<div class="radio"><label>' . zen_draw_radio_field('choose_products_to_convert_to', '1', ($choose_products_to_convert_to ? '1' : '0')) . '&nbsp;' . BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT . '</label></div>';
+        echo '<div class="radio"><label>'.zen_draw_radio_field('choose_products_to_convert_to', '0', ($choose_products_to_convert_to ? '0' : '1')).'&nbsp;'.BOOKX_OPTION_CONVERT_ALL_PRODUCTS.'</label></div>';
+        echo '<div class="radio"><label>'.zen_draw_radio_field('choose_products_to_convert_to', '1', ($choose_products_to_convert_to ? '1' : '0')).'&nbsp;'.BOOKX_OPTION_SELECT_PRODUCTS_TO_CONVERT.'</label></div>';
         echo('' != $select_string_to ? $select_string_to : '');
         echo '<button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>';
         echo '</form></div><!-- eof form migration_to_bookx -->';
-        echo '<a href="' . zen_href_link(FILENAME_BOOKX_TOOLS) . '" class="btn btn-default btn-sm float-right">Cancel</a>';
+        echo '<a href="'.zen_href_link(FILENAME_BOOKX_TOOLS).'" class="btn btn-default btn-sm float-right">Cancel</a>';
     } elseif ('bookx_confirm_product_migration' == $action) {
         switch (true) {
                                     case ($choose_products_to_convert_from && $product_selection_submitted && null != $bookx_ptypeID): // convert some selected products from another article type to bookx
                                         $selected_products = implode(',', $_POST['products_to_convert_from']);
-                                        $products_to_convert = $db->Execute('SELECT products_id FROM ' . TABLE_PRODUCTS . ' WHERE products_id IN (' . $selected_products . ') AND products_type = "' . (int) $_POST['convert_from_type'] . '"');
+                                        $products_to_convert = $db->Execute('SELECT products_id FROM '.TABLE_PRODUCTS.' WHERE products_id IN ('.$selected_products.') AND products_type = "'.(int) $_POST['convert_from_type'].'"');
                                         while (!$products_to_convert->EOF) {
                                             bookx_convert_product_to_bookx_type($products_to_convert->fields['products_id']);
 
@@ -482,39 +472,39 @@ if ($action == 'bookx_install_options') {
 
                                     case ($choose_products_to_convert_to && $product_selection_submitted && isset($_POST['convert_to_type']) && '' != $_POST['convert_to_type'] && null != $bookx_ptypeID): // convert some selected products from bookx to another article type
                                         $selected_products = implode(',', $_POST['products_to_convert_to']);
-                                        $products_to_convert = $db->Execute('SELECT products_id FROM ' . TABLE_PRODUCTS . ' WHERE products_id IN (' . $selected_products . ') AND products_type = "' . (int) $bookx_ptypeID . '"');
+                                        $products_to_convert = $db->Execute('SELECT products_id FROM '.TABLE_PRODUCTS.' WHERE products_id IN ('.$selected_products.') AND products_type = "'.(int) $bookx_ptypeID.'"');
                                         while (!$products_to_convert->EOF) {
                                             bookx_convert_product_from_bookx_to_type($products_to_convert->fields['products_id'], (int) $_POST['convert_to_type']);
                                             $products_to_convert->MoveNext();
                                         }
-                                        $messageStack->add('Converted ' . $products_to_convert->Count() . 'products', 'success');
+                                        $messageStack->add('Converted '.$products_to_convert->Count().'products', 'success');
                                         unset($_POST);
                                         break;
 
                                     case (!$choose_products_to_convert_from && isset($_POST['convert_from_type']) && '' != $_POST['convert_from_type'] && null != $bookx_ptypeID): // convert all products from another article type to bookx
-                                        $products_to_convert = $db->Execute('SELECT products_id FROM ' . TABLE_PRODUCTS . ' WHERE products_type = "' . (int) $_POST['convert_from_type'] . '"');
+                                        $products_to_convert = $db->Execute('SELECT products_id FROM '.TABLE_PRODUCTS.' WHERE products_type = "'.(int) $_POST['convert_from_type'].'"');
                                         while (!$products_to_convert->EOF) {
                                             bookx_convert_product_to_bookx_type($products_to_convert->fields['products_id']);
                                             $products_to_convert->MoveNext();
                                         }
-                                        $messageStack->add('Converted ' . $products_to_convert->Count() . 'products', 'success');
+                                        $messageStack->add('Converted '.$products_to_convert->Count().'products', 'success');
                                         unset($_POST);
                                         break;
 
                                     case (!$choose_products_to_convert_to && isset($_POST['convert_to_type']) && '' != $_POST['convert_to_type'] && null != $bookx_ptypeID): // convert some products from another article type to bookx
-                                        $products_to_convert = $db->Execute('SELECT products_id FROM ' . TABLE_PRODUCTS . ' WHERE products_type = "' . (int) $bookx_ptypeID . '"');
+                                        $products_to_convert = $db->Execute('SELECT products_id FROM '.TABLE_PRODUCTS.' WHERE products_type = "'.(int) $bookx_ptypeID.'"');
                                         while (!$products_to_convert->EOF) {
                                             bookx_convert_product_from_bookx_to_type($products_to_convert->fields['products_id'], (int) $_POST['convert_to_type']);
                                             $products_to_convert->MoveNext();
                                         }
-                                        $messageStack->add('Converted ' . $products_to_convert->Count() . 'products', 'success');
-                                        zen_redirect(FILENAME_BOOKX_TOOLS . '.php');
+                                        $messageStack->add('Converted '.$products_to_convert->Count().'products', 'success');
+                                        zen_redirect(FILENAME_BOOKX_TOOLS.'.php');
                                         unset($_POST);
                                         break;
                                 }
     } else {
         if ($bookx_already_installed) {
-            echo '<p>' . BOOKX_LINK_MANAGE_PRODUCT_MIGRATION_DESC . '</p><a href="' . zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_manage_product_migration#sectionConvertProduct') . '" class="btn btn-primary btn-sm">' . BOOKX_LINK_MANAGE_PRODUCT_MIGRATION . '</a>';
+            echo '<p>'.BOOKX_LINK_MANAGE_PRODUCT_MIGRATION_DESC.'</p><a href="'.zen_href_link(FILENAME_BOOKX_TOOLS, 'action=bookx_manage_product_migration#sectionConvertProduct').'" class="btn btn-primary btn-sm">'.BOOKX_LINK_MANAGE_PRODUCT_MIGRATION.'</a>';
         } else {
             echo TEXT_BOOKX_STATUS_NOT_INSTALLED;
         }
@@ -535,18 +525,18 @@ if ($action == 'bookx_install_options') {
                 <div class="form-group">
                     <?php
                             echo zen_draw_label('Url for git Bookx', 'bookx');
-        echo zen_draw_input_field('bookx', $objGit->bookx->url, 'class="form-control" placeholder="' . $objGit->bookx->url . '" required', true, 'url'); ?>
+        echo zen_draw_input_field('bookx', $objGit->bookx->url, 'class="form-control" placeholder="'.$objGit->bookx->url.'" required', true, 'url'); ?>
                 </div>
                 <div class="form-group">
                     <?php
                             //zen_draw_input_field($name, $value = '~*~*#', $parameters = '', $required = false, $type = 'text', $reinsert_value = true) {
                             echo zen_draw_label('Url for git EP4', 'ep4');
-        echo zen_draw_input_field('ep4', '', 'class="form-control" placeholder="' . $objGit->ep4->url . '"', true, 'url'); ?>
+        echo zen_draw_input_field('ep4', '', 'class="form-control" placeholder="'.$objGit->ep4->url.'"', true, 'url'); ?>
                 </div>
                 <div class="form-group">
                     <?php
                                 echo zen_draw_label('Url for git EP4Bookx', 'ep4bookx');
-        echo zen_draw_input_field('ep4bookx', '', 'class="form-control" placeholder="' . $objGit->ep4bookx->url . '"', true, 'url'); ?>
+        echo zen_draw_input_field('ep4bookx', '', 'class="form-control" placeholder="'.$objGit->ep4bookx->url.'"', true, 'url'); ?>
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>
                 <a href="<?php echo zen_href_link(FILENAME_BOOKX_TOOLS); ?>"
@@ -581,9 +571,9 @@ if ($action == 'bookx_install_options') {
 
                 <?php if ($action == 'loadDocumentation') {
         echo '<div class="docs">';
-        require_once BOOKX_EXTRA_DATA_FILES_FOLDER . 'libs/Parsedown.php';
+        require_once BOOKX_EXTRA_DATA_FILES_FOLDER.'libs/Parsedown.php';
         $parsedown = new Parsedown();
-        $text = file_get_contents(BOOKX_EXTRA_DATA_FILES_FOLDER . 'Documentation.md');
+        $text = file_get_contents(BOOKX_EXTRA_DATA_FILES_FOLDER.'Documentation.md');
         echo Parsedown::instance()
                                 ->setUrlsLinked(true)
                                 ->text($text);
@@ -603,7 +593,7 @@ if ($action == 'bookx_install_options') {
     </div><!-- container_eof //-->
 
     <!-- footer //-->
-    <?php require DIR_WS_INCLUDES . 'footer.php'; ?>
+    <?php require DIR_WS_INCLUDES.'footer.php'; ?>
     <!-- footer_eof //-->
     <script src="includes/extra_datafiles/bookx/libs/prism.js"></script>
     <script>
@@ -647,19 +637,19 @@ function tpl_panel($param, $section_id = null, $title = null)
 {
     $title = ($title) ? $title : 'Bookx Panel';
     if ($param == 'open' && $section_id !== '') {
-        $param = '<!-- open panel ' . $section_id . ' //-->
-            <div id="' . $section_id . '" class="panel panel-default">
+        $param = '<!-- open panel '.$section_id.' //-->
+            <div id="'.$section_id.'" class="panel panel-default">
             <div class="panel-heading">
-            <h3 class="panel-title">' . $title . '</h3>
+            <h3 class="panel-title">'.$title.'</h3>
             </div>
             <div class="panel-body">';
         echo $param;
     } elseif ($param == 'close') {
         $param = '</div>
-            </div><!-- close panel ' . $section_id . ' //-->';
+            </div><!-- close panel '.$section_id.' //-->';
         echo $param;
     }
     return;
 }
 
-require DIR_WS_INCLUDES . 'application_bottom.php';
+require DIR_WS_INCLUDES.'application_bottom.php';

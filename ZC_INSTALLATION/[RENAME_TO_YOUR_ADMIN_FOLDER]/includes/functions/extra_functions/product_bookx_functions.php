@@ -23,7 +23,7 @@
  * @since v1.0.0 Most of the functions that were as admin functions are also useful for tpl display and quick access.
  * A common functions file was created to share those functions.
  */
-require DIR_FS_CATALOG . 'includes/functions/extra_functions/functions_product_type_bookx_common.php';
+require DIR_FS_CATALOG.'includes/functions/extra_functions/functions_product_type_bookx_common.php';
 
 function bookx_delete_product($product_id = null, $delete_linked = true)
 {
@@ -39,17 +39,17 @@ function bookx_delete_bookx_specific_product_entries($product_id = null, $delete
 {
     global $db;
     if (null != $product_id) {
-        $db->Execute("DELETE FROM " . TABLE_PRODUCT_BOOKX_EXTRA . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("DELETE FROM ".TABLE_PRODUCT_BOOKX_EXTRA."
+                  WHERE products_id = ".(int)$product_id);
 
-        $db->Execute("DELETE FROM " . TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("DELETE FROM ".TABLE_PRODUCT_BOOKX_EXTRA_DESCRIPTION."
+                  WHERE products_id = ".(int)$product_id);
 
-        $db->Execute("DELETE FROM " . TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("DELETE FROM ".TABLE_PRODUCT_BOOKX_GENRES_TO_PRODUCTS."
+                  WHERE products_id = ".(int)$product_id);
 
-        $db->Execute("DELETE FROM " . TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("DELETE FROM ".TABLE_PRODUCT_BOOKX_AUTHORS_TO_PRODUCTS."
+                  WHERE products_id = ".(int)$product_id);
     }
 }
 
@@ -58,7 +58,7 @@ function bookx_convert_product_to_bookx_type($product_id = null)
     global $db;
 
     $sql = "SELECT *
-          FROM " . TABLE_PRODUCT_TYPES . "
+          FROM ".TABLE_PRODUCT_TYPES."
           WHERE type_handler = 'product_bookx'";
 
     $results = $db->Execute($sql); /* @var $result queryFactoryResult */
@@ -67,12 +67,12 @@ function bookx_convert_product_to_bookx_type($product_id = null)
     }
 
     if (null != $product_id) {
-        $db->Execute("UPDATE " . TABLE_PRODUCTS . "
-                  SET products_type = " . (int)$bookx_type_id . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("UPDATE ".TABLE_PRODUCTS."
+                  SET products_type = ".(int)$bookx_type_id."
+                  WHERE products_id = ".(int)$product_id);
 
-        $db->Execute("REPLACE INTO " . TABLE_PRODUCT_BOOKX_EXTRA . " (products_id)
-                  VALUES (" . (int)$product_id . ")");
+        $db->Execute("REPLACE INTO ".TABLE_PRODUCT_BOOKX_EXTRA." (products_id)
+                  VALUES (".(int)$product_id.")");
     }
 }
 
@@ -82,9 +82,9 @@ function bookx_convert_product_from_bookx_to_type($product_id = null, $destinati
 
     if (null != $product_id && null != $destination_type) {
         bookx_delete_bookx_specific_product_entries($product_id);
-        $db->Execute("UPDATE " . TABLE_PRODUCTS . "
-                  SET products_type = " . (int)$destination_type . "
-                  WHERE products_id = " . (int)$product_id);
+        $db->Execute("UPDATE ".TABLE_PRODUCTS."
+                  SET products_type = ".(int)$destination_type."
+                  WHERE products_id = ".(int)$product_id);
     }
 }
 
@@ -105,10 +105,10 @@ function bookx_image($src, $alt = '', $width = '', $height = '', $parameters = '
 
     // alt is added to the img tag even if it is null to prevent browsers from outputting
     // the image filename as default
-    $image = '<img src="' . zen_output_string($src) . '" alt="' . zen_output_string($alt) . '"';
+    $image = '<img src="'.zen_output_string($src).'" alt="'.zen_output_string($alt).'"';
 
     if (zen_not_null($alt)) {
-        $image .= ' title=" ' . zen_output_string($alt) . ' "';
+        $image .= ' title=" '.zen_output_string($alt).' "';
     }
 
     if ((CONFIG_CALCULATE_IMAGE_SIZE == 'true') && (empty($width) || empty($height))) {
@@ -140,21 +140,21 @@ function bookx_image($src, $alt = '', $width = '', $height = '', $parameters = '
         }
         // only use proportional image when image is larger than proportional size
         if ($image_size[0] < $width and $image_size[1] < $height) {
-            $image .= ' width="' . $image_size[0] . '" height="' . intval($image_size[1]) . '"';
+            $image .= ' width="'.$image_size[0].'" height="'.intval($image_size[1]).'"';
         } else {
-            $image .= ' width="' . round($width) . '" height="' . round($height) . '"';
+            $image .= ' width="'.round($width).'" height="'.round($height).'"';
         }
     } else {
         // override on missing image to allow for proportional and required/not required
         if (IMAGE_REQUIRED == 'false') {
             return false;
         } elseif (substr($src, 0, 4) != 'http') {
-            $image .= ' width="' . intval(SMALL_IMAGE_WIDTH) . '" height="' . intval(SMALL_IMAGE_HEIGHT) . '"';
+            $image .= ' width="'.intval(SMALL_IMAGE_WIDTH).'" height="'.intval(SMALL_IMAGE_HEIGHT).'"';
         }
     }
 
     if (zen_not_null($parameters)) {
-        $image .= ' ' . $parameters;
+        $image .= ' '.$parameters;
     }
 
     $image .= ' />';
@@ -194,17 +194,17 @@ function bookx_check_missing_product_relations($bx_tables, $field_id, $delete = 
     $msg = '';
     if (is_array($bx_tables)) {
         foreach ($bx_tables as $table => $table2) {
-            $check = $db->Execute("SELECT " . $field_id . "
-                             FROM " . $table . "
-                             WHERE " . $field_id . "
-                             NOT IN (SELECT " . $field_id . " FROM " . $table2 . ");");
+            $check = $db->Execute("SELECT ".$field_id."
+                             FROM ".$table."
+                             WHERE ".$field_id."
+                             NOT IN (SELECT ".$field_id." FROM ".$table2.");");
 
-            $msg .= ($check->Count() > 0) ? "Found " . $check->Count() . " missing relations in table[" . $table . "]<br />" : $table . " all Good!<br />";
+            $msg .= ($check->Count() > 0) ? "Found ".$check->Count()." missing relations in table[".$table."]<br />" : $table." all Good!<br />";
             if ($delete == true && $check->Count() > 0) {
-                $msg .= ($check->Count() > 0) ? "Deleted " . $check->Count() . " in " . $table . "<br />" : "All Goodfff!";
-                $db->Execute("DELETE FROM " . $table . "
-                      WHERE " . $field_id . "
-                      NOT IN (SELECT " . $field_id . " FROM " . $table2 . ");");
+                $msg .= ($check->Count() > 0) ? "Deleted ".$check->Count()." in ".$table."<br />" : "All Goodfff!";
+                $db->Execute("DELETE FROM ".$table."
+                      WHERE ".$field_id."
+                      NOT IN (SELECT ".$field_id." FROM ".$table2.");");
             }
         }
     }
@@ -234,20 +234,20 @@ function check_git_release_for($url, $compare = false, $install = null)
     if ($response == "200") {
         $result = json_decode($output, true);
     } else {
-        $info = "No info found " . $response;
+        $info = "No info found ".$response;
     }
 
     if ($compare == false) {
-        $info = "Latest Release: " . $result[0]['name'] . " <br />Download: <a href=" . $result[0]['zipball_url'] . " rel=\"no-follow\" >" . $result[0]['name'] . "</a> <br />published: " . $result[0]['published_at'] . "\n";
+        $info = "Latest Release: ".$result[0]['name']." <br />Download: <a href=".$result[0]['zipball_url']." rel=\"no-follow\" >".$result[0]['name']."</a> <br />published: ".$result[0]['published_at']."\n";
     } else {
-        $info = array(
-      'tag_name' => $result[0]['tag_name'],
-      'html_url' => $result[0]['html_url'],
-      'zipball_url' => $result[0]['zipball_url'],
-      'published_at' => $result[0]['published_at'],
-      'body' => $result[0]['body'],
-      'author' => $result[0]['author']['login']
-    );
+        $info = [
+            'tag_name' => $result[0]['tag_name'],
+            'html_url' => $result[0]['html_url'],
+            'zipball_url' => $result[0]['zipball_url'],
+            'published_at' => $result[0]['published_at'],
+            'body' => $result[0]['body'],
+            'author' => $result[0]['author']['login']
+        ];
     }
 
     curl_close($cInit);
@@ -274,10 +274,10 @@ function download_img_from_url($url, $imageName)
 
 function cleanImageName($post_name, $type = null)
 {
-    $r = array(' ', '-', '.');
+    $r = [' ', '-', '.'];
 
     if (class_exists('CeonURIMappingAdmin')) {
-        require_once(DIR_FS_CATALOG . DIR_WS_CLASSES . 'class.CeonURIMappingAdmin.php');
+        require_once(DIR_FS_CATALOG.DIR_WS_CLASSES.'class.CeonURIMappingAdmin.php');
         $handleUri = new CeonURIMappingAdmin();
 
         $lang_code = $_SESSION['languages_code'];
@@ -306,7 +306,7 @@ function bookx_update_plugin_release($now = true, $days = null)
 {
     global $objGit;
 
-    $file = DIR_FS_ADMIN . 'includes/exra_datafiles/bookx/plugin_check.json';
+    $file = DIR_FS_ADMIN.'includes/exra_datafiles/bookx/plugin_check.json';
     $msg = '';
     $date = new DateTime(); //this returns the current date time
     $today = $date->format('Y-m-d');
@@ -319,7 +319,7 @@ function bookx_update_plugin_release($now = true, $days = null)
     if ($now) {
         foreach ($objGit as $key => $plugin) {
             if ($key !== 'last_check_date') {
-                $msg .= (empty($plugin->url)) ? '<span class="text-danger">No url found for ' . $key . '</span><br />' : '<span>Updated Info for ' . $key . '</span><br />';
+                $msg .= (empty($plugin->url)) ? '<span class="text-danger">No url found for '.$key.'</span><br />' : '<span>Updated Info for '.$key.'</span><br />';
                 $check = check_git_release_for($plugin->url, true);
                 if ($tag_name !== $plugin->installed) {
                     $objGit->{$key}->last_release = $check['tag_name'];
@@ -365,25 +365,38 @@ function bookx_get_config($like)
         $temp[$res->fields['configuration_key']] = $res->fields['configuration_value'];
         $res->MoveNext();
     }
-    pr($temp);
 }
 /**
  * Checks if all bookx tables are present
  */
-function bookx_db($tables= [])
+function bookx_check_db_tables($tables= [])
 {
     global $db;
     $total = count($tables);
     $err = 0;
     foreach ($tables as $value) {
-        $sql = "SHOW TABLES LIKE '" . $value . "'";
+        $sql = "SHOW TABLES LIKE '".$value."'";
         $res = $db->Execute($sql);
 
         if ($res->RecordCount() == 0) {
             $err ++;
         }
     }
-    if ($err == $total) {
-        return 'install';
+    return ($err == $total ? 'install' : 'update');
+}
+/**
+ * for development purposes
+ */
+function bookx_backup_db_tables($tables= [])
+{
+    global $db;
+    foreach ($tables as $table) {
+        $sql = "SHOW TABLES FROM ".DB_DATABASE." LIKE '".$table."' ";
+        $res = $db->Execute($sql);
+        if ($res->RecordCount() > 0) {
+            $dir = DIR_FS_ADMIN.'backups/bookx/'.DB_DATABASE.'_'.$table.'.sql';
+            echo "<pre> --result-file={$dir}</pre>";
+            exec("mysqldump --user=".DB_SERVER_USERNAME." --password=".DB_SERVER_PASSWORD." --host=".DB_SERVER." ".DB_DATABASE." ".$table." --result-file={$dir} 2>&1", $output);
+        }
     }
 }

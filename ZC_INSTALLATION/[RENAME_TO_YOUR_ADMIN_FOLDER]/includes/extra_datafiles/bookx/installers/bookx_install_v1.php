@@ -1,20 +1,27 @@
 <?php
 
 /**
- * This file is part of the ZenCart add-on Book X which
+ * This file is part of the ZenCart add-on BookX which
  * introduces a new product type for books to the Zen Cart
- * shop system. Tested for compatibility on ZC v. 1.5.6c
- *
+ * shop system. Tested for compatibility on ZC v.1.56
+ * 
+ * For latest version and support visit:
+ * https://github.com/philoupin/bookx
+ * 
+ * Project BookX v1.0.1
  * @package admin
  * @author  Philou
+ * @author  mesnitu
  * @copyright Copyright 2013
  * @copyright Copyright 2003-2019 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
- * @license http://www.gnu.org/licenses/gpl.txt GNU General Public License V2.0
- *
- * @version BookX V 1.0.1
- * @version $Id: [admin]includes/extra_datafiles/bookx/installers/bookx_install_v1.php 2019-01-10 mesnitu $
+ * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+ * 
+ * File bookx_install_v1.php
+ * Project Path /[RENAME_TO_YOUR_ADMIN_FOLDER]/includes/extra_datafiles/bookx/installers/bookx_install_v1.php
+ * @version $Id: mesnitu  2019 Dec 10 in BookX v1.0.1 for Zen Cart 1.5.6c $
  */
+
 
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
@@ -65,17 +72,26 @@ $install_incomplete = false;
 $no_template = false;
 
 // find current template
-$sql = "SELECT template_dir FROM ".TABLE_TEMPLATE_SELECT." LIMIT 1";
-$obj = $db->Execute($sql);
-$current_template = $obj->fields['template_dir'];
-
-if ($current_template == '') {
+try {
+    if(!$template_dir) {
+        throw new Exception(BOOKX_MS_TEMPLATE_NOTFOUND, 1);
+    }
+} catch (Exception $e) {
+    $messageStack->add($e, 'warning');
+} finally {
+    $current_template = $template_dir;
     $install_incomplete = true;
     $no_template = true;
-    $messageStack->add(BOOKX_MS_TEMPLATE_NOTFOUND, 'warning');
 }
+/****
+ * I guess this is not necessary, because $template_dir has the template name
+ * 
+$sql = "SELECT template_dir FROM ".TABLE_TEMPLATE_SELECT." LIMIT 1";
+$obj = $db->Execute($sql);
+$current_template = $obj->fields['template_dir'] ?? null;
+*/
 
-$admin_page_keys = array(
+$admin_page_keys = [
     'configBookXTools',
     'configProdTypeBookX',
     'bookxAuthors',
@@ -87,162 +103,107 @@ $admin_page_keys = array(
     'bookxPrinting',
     'bookxPublishers',
     'bookxSeries',
-    'bookxFamilies');
+    'bookxFamilies'];
 
 
+ob_start();
 // necessary BookX files
-/**
- * @todo May this array could in another file so it can be used for other purposes
- */
+$bookx_files_array = new ArrayObject(json_decode(file_get_contents(BOOKX_MODULE_FILES), true));
+$it = $bookx_files_array->getIterator();
 
-$bookx_files = json_decode(file_get_contents(BOOKX_MODULE_FILES));
-//Anonymous function
-$bookx_check_files = function ($files, $scope) {
-    //check that all files are where they should be
-    foreach ($files as $f) {
-        switch ($scope) {
-            case 'admin':
-                $f = str_replace("/admin/", DIR_FS_ADMIN, $f);
-                break;
-            case 'catalog':
-                $a = $f;
-                $f = DIR_FS_CATALOG . substr($f, 1);
-                break;
-            
-            default:
-                # code...
-                break;
+$msg = '';
+$files = 0;
+$files_issue = 0;
+// Init arrays for lang verification. They are extracted from the bookx_files.json
+$bookx_language_admin_files = [];
+$bookx_language_catalog_files = [];
+
+while ($it->valid()) {
+    
+    if ($it->key()=='admin_files' || $it->key()=='catalog_files' || 
+    $it->key()=='edit_manually'){
+        
+        $temp= [];
+        $bmsg = '<p class="text-success strong">'.$it->key().': OK.</p>';
+        foreach ($it->current() as $f) {
+            $files++;
+            $f = str_replace("[YOUR-TEMPLATE]", $template_dir, $f);
+            switch ($it->key()) {
+                case 'edit_manually':
+                    $f = str_replace("[RENAME_TO_YOUR_ADMIN_FOLDER]/", DIR_FS_ADMIN, $f);
+                    $f = DIR_FS_CATALOG.str_replace("[EDIT_MANUALLY]/", '', $f);
+                    break;
+                case 'catalog_files':
+                    $f = DIR_FS_CATALOG.$f;
+                    //extract catalog languages files for later verification
+                    if (strpos($f, '/languages/english/')!==false) {
+                        $lf = explode('english/', $f)[1];
+                        $bookx_language_catalog_files[] = $lf;
+                    }
+                    break;
+                case 'admin_files':
+                    $f = str_replace("[RENAME_TO_YOUR_ADMIN_FOLDER]/", DIR_FS_ADMIN, $f);
+                    //extract admin languages files for later verification
+                    if (strpos($f, '/languages/english/')!==false) {
+                        $lf = explode('english/', $f)[1];
+                        $bookx_language_admin_files[] = $lf;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (!is_readable($f)) {
+                $temp[]= '<p class="text-warning">'.$f.'</p>';
+                $files_issue ++;
+            }
         }
-        if (!is_readable($f)) {
-            $messageStack->add(BOOKX_MS_SOME_REQUIRED_FILES_MISSING . ' '.$f, 'warning');
+        if ($files_issue > 0) {
+            $bmsg = '<p class="text-danger strong">'.$it->key().': Files Issues</p>';
         }
+        $msg .= $bmsg.implode($temp, '');
     }
-};
+    $it->next();
+}
+/**
+ * @since v1.0.1 
+ * Bookx modules uses some vendor packages, They are not installed by default ( for now )
+ * Check here if they are present
+ */
+try {
+    if (!is_dir(BOOKX_VENDORS_FOLDER)) {
+        //@todo add more explanation
+        throw new Exception("No Vendors folder found", 1); 
+    }
+} catch (\Throwable $th) {
+    throw $th;
+}
 
-$bookx_template_default_overridden_files = $bookx_files->edit_manually;
+$bookx_msg_required_files = <<<HEREDOC
+<p>Number of Files: $files</p>
+<p>Number of Files Issues: $files_issue</p>
+<p>$msg</p>
+HEREDOC;
+$messageStack->add(BOOKX_MS_SOME_REQUIRED_FILES_MISSING.' '.$bookx_msg_required_files, 'warning');
+ob_end_flush();
 
-$bookx_check_admin_files = $bookx_check_files($bookx_files->admin_files, 'admin');
-$bookx_check_catalog_files = $bookx_check_files($bookx_files->catalog_files, 'catalog');
-$bookx_template_default_overridden_files = $bookx_check_files($bookx_files->$bookx_files->edit_manually, '');
 
-$required_files = array(
-        DIR_FS_CATALOG . 'includes/auto_loaders/config.bookx.php',
-        DIR_FS_CATALOG . 'includes/classes/observers/class.bookx_observers.php',
-        DIR_FS_CATALOG . 'includes/extra_configures/bookx_defines_and_configures.php',
-        DIR_FS_CATALOG . 'includes/extra_datafiles/bookx_type_database_names.php',
-        DIR_FS_CATALOG . 'includes/functions/extra_functions/functions_product_type_bookx.php',
-        DIR_FS_CATALOG . 'includes/index_filters/bookx_filter.php',
-        DIR_FS_CATALOG_MODULES . 'product_bookx_prev_next.php',
-        DIR_FS_CATALOG_MODULES . 'pages/product_bookx_info/header_php.php',
-        DIR_FS_CATALOG_MODULES . 'pages/product_bookx_info/jscript_main.php',
-        DIR_FS_CATALOG_MODULES . 'pages/product_bookx_info/jscript_textarea_counter.js',
-        DIR_FS_CATALOG_MODULES . 'pages/product_bookx_info/main_template_vars_product_type.php',
-        DIR_FS_CATALOG_MODULES . 'pages/product_bookx_info/main_template_vars.php',
-        DIR_FS_CATALOG_MODULES . 'sideboxes/bookx_filters.php',
-        DIR_FS_CATALOG_MODULES . 'pages/bookx_authors_list/header_php.php',
-        DIR_FS_CATALOG_MODULES . 'pages/bookx_series_list/header_php.php',
-        DIR_FS_CATALOG_MODULES . 'pages/bookx_publishers_list/header_php.php',
-        DIR_FS_CATALOG_MODULES . 'pages/bookx_imprints_list/header_php.php',
-        DIR_FS_CATALOG_MODULES . 'pages/bookx_genres_list/header_php.php',
-        DIR_FS_CATALOG_MODULES . $current_template .'/new_products.php',
-        DIR_FS_CATALOG_MODULES . $current_template .'/product_listing_alpha_sorter.php',
-        DIR_FS_CATALOG_MODULES . $current_template .'/upcoming_products.php',
-        DIR_FS_CATALOG_TEMPLATES . $current_template . '/common/tpl_tabular_display.php',
-        DIR_FS_CATALOG_TEMPLATES . $current_template . '/css/stylesheet_bookx.css',
-        DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_index_product_list.php',
-        DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_modules_upcoming_products.php',
-       // DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_modules_whats_new.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/sideboxes/tpl_bookx_filters_select.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_authors_list_default.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_publishers_list_default.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_imprints_list_default.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_genres_list_default.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_series_list_default.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_product_bookx_info_display.php',
-        DIR_FS_CATALOG_TEMPLATES . 'template_default/templates/tpl_bookx_products_next_previous.php',
-        DIR_FS_ADMIN.'includes/languages/english/product_bookx.php',
-        DIR_FS_ADMIN.'bookx_author_types.php',
-        DIR_FS_ADMIN.'bookx_authors.php',
-        DIR_FS_ADMIN.'bookx_binding.php',
-        DIR_FS_ADMIN.'bookx_conditions.php',
-        DIR_FS_ADMIN.'bookx_genres.php',
-        DIR_FS_ADMIN.'bookx_imprints.php',
-        DIR_FS_ADMIN.'bookx_printing.php',
-        DIR_FS_ADMIN.'bookx_publishers.php',
-        DIR_FS_ADMIN.'bookx_series.php',
-        DIR_FS_ADMIN.'bookx_tools.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx_type_database_names.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx_type_filenames.php',
-        //@since v1.0.0.0
-        DIR_FS_ADMIN.'includes/extra_configures/bookx_extrafiles_folder.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx_sanitizer_fields.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/plugin_check.json',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_install_include_german.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_install_v1.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v09.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v091.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v092.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v093.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v094.php',
-        DIR_FS_ADMIN.'includes/extra_datafiles/bookx/installers/bookx_update_v095.php',
-        
-        DIR_FS_ADMIN.'includes/functions/extra_functions/product_bookx_functions.php',
-        /*DIR_FS_ADMIN.'includes/modules/product_bookx/collect_info_metatags.php',*/
-        DIR_FS_ADMIN.'includes/modules/product_bookx/collect_info.php',
-        DIR_FS_ADMIN.'includes/modules/product_bookx/copy_to_confirm.php',
-        DIR_FS_ADMIN.'includes/modules/product_bookx/delete_product_confirm.php',
-        /*DIR_FS_ADMIN.'includes/modules/product_bookx/move_product_confirm.php',*/
-        /*DIR_FS_ADMIN.'includes/modules/product_bookx/preview_info_meta_tags.php',*/
-        DIR_FS_ADMIN.'includes/modules/product_bookx/preview_info.php',
-        DIR_FS_ADMIN.'includes/modules/product_bookx/update_product.php',
-        DIR_FS_ADMIN.'product_bookx.php'
-        
-        );
+// possibly overriden BookX files
+$template_default_overriden_files = [
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/sideboxes/tpl_bookx_filters_select.php',
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/templates/tpl_bookx_authors_list_default.php',
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/templates/tpl_bookx_series_list_default.php',
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/templates/tpl_product_bookx_info_display.php'
+]; 
 
-        // possibly overriden BookX files
-        $template_default_overriden_files = array(
-            DIR_FS_CATALOG_TEMPLATES . $current_template . '/sideboxes/tpl_bookx_filters_select.php',
-            DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_bookx_authors_list_default.php',
-            DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_bookx_series_list_default.php',
-            DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_product_bookx_info_display.php'
-        );
+$overridden_files = [
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/common/tpl_tabular_display.php',
+    DIR_FS_CATALOG_TEMPLATES.$current_template.'/templates/tpl_index_product_list.php'
+];
 
-/*$overridden_files = array(
- DIR_FS_CATALOG_TEMPLATES . $current_template . '/common/tpl_tabular_display.php',
-        DIR_FS_CATALOG_TEMPLATES . $current_template . '/templates/tpl_index_product_list.php'
-);*/
 
-/*
- DIR_FS_CATALOG.'includes/languages/english/product_bookx_info.php',
-DIR_FS_CATALOG.'includes/languages/english/extra_definitions/product_bookx.php',
+$bookx_available_languages = ['english', 'german'];
+#$bookx_language_catalog_files = ['product_bookx_info.php','extra_definitions/product_bookx.php'];
 
-DIR_FS_ADMIN.'includes/languages/english/product_bookx.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_authors.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_author_types.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_binding.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_conditions.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_genres.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_imprints.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_printing.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_publishers.php',
-DIR_FS_ADMIN.'includes/languages/english/bookx_series.php',
-DIR_FS_ADMIN.'includes/languages/english/extra_definitions/product_bookx.php',*/
-
-$available_languages = array('english', 'german');
-$language_catalog_files = array('product_bookx_info.php','extra_definitions/product_bookx.php');
-
-$language_admin_files = array(
-        'product_bookx.php',
-        'bookx_authors.php',
-        'bookx_author_types.php',
-        'bookx_conditions.php',
-        'bookx_genres.php',
-        'bookx_imprints.php',
-        'bookx_printing.php',
-        'bookx_publishers.php',
-        'bookx_series.php',
-        'extra_definitions/product_bookx.php'
-);
 
 //=======================================
 // INSTALL CHECK
@@ -250,18 +211,19 @@ $language_admin_files = array(
 
 if ($login_page == false) {
     
-    //check that all files are where they should be
-    foreach ($required_files as $f) {
-        if (!is_readable($f)) {
-            $messageStack->add(BOOKX_MS_SOME_REQUIRED_FILES_MISSING . ' '.$f, 'warning');
-            //$install_incomplete = true;
-        }
-    }
-    
+    /** check that all files are where they should be
+     * foreach ($required_files as $f) {
+     * if (!is_readable($f)) {
+     * $messageStack->add(BOOKX_MS_SOME_REQUIRED_FILES_MISSING.' '.$f, 'warning');
+     * //$install_incomplete = true;
+     * }
+     * }
+     */
+
     //check for overrides to template default
     foreach ($template_default_overriden_files as $f) {
         if (is_readable($f)) {
-            $messageStack->add(BOOKX_MS_FILE_SHOULD_ONLY_BE_OVERRIDE . ' '.$f, 'warning');
+            $messageStack->add(BOOKX_MS_FILE_SHOULD_ONLY_BE_OVERRIDE.' '.$f, 'warning');
         }
     }
 
@@ -280,20 +242,20 @@ if ($login_page == false) {
         }
     }
   
-    foreach ($available_languages as $language) {
-        $files_missing = array();
+    foreach ($bookx_available_languages as $language) {
+        $files_missing = [];
         switch (true) {
             case 'english' == $language:
             case 'german' == $language && $german_installed:
-                foreach ($language_catalog_files as $f) {
-                    $f = DIR_FS_CATALOG_LANGUAGES . $language . '/' . $f;
+                foreach ($bookx_language_catalog_files as $f) {
+                    $f = DIR_FS_CATALOG_LANGUAGES.$language.'/'.$f;
                     if (!is_readable($f)) {
                         $files_missing[] = $f;
                     }
                 }
         
-                foreach ($language_admin_files as $f) {
-                    $f = DIR_FS_ADMIN . 'includes/languages/' . $language . '/' . $f;
+                foreach ($bookx_language_admin_files as $f) {
+                    $f = DIR_FS_ADMIN.'includes/languages/'.$language.'/'.$f;
                     if (!is_readable($f)) {
                         $files_missing[] = $f;
                     }
@@ -301,7 +263,7 @@ if ($login_page == false) {
                   break;
         }
         if (!empty($files_missing)) {
-            $messageStack->add('' . sprintf(BOOKX_MS_SOME_LANGUAGE_FILES_MISSING, $language) . '<br />'.implode(', ', $files_missing), 'caution');
+            $messageStack->add(''.sprintf(BOOKX_MS_SOME_LANGUAGE_FILES_MISSING, $language).'<br />'.implode(', ', $files_missing), 'caution');
         }
     }
 }
@@ -326,8 +288,8 @@ if (isset($_POST) && (!empty($_POST))) {
     // found this from Zencart Installation
     $default_db_encoding = zen_db_prepare_input($_POST['bookx_db_charaset']);
 
-    $table_character_set = "CHARACTER SET = " . $default_db_encoding . "";
-    $column_character_set = "CHARACTER SET '" . $default_db_encoding . "'";
+    $table_character_set = "CHARACTER SET = ".$default_db_encoding."";
+    $column_character_set = "CHARACTER SET '".$default_db_encoding."'";
     
     if (isset($_POST['bookx_ceon']) && ($_POST['bookx_ceon'] == 'enable_ceon')) {
         $bookx_uses_ceon = true;
@@ -367,31 +329,31 @@ switch (true) {
         
         switch ($installed_version) {
             case '0.9':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v09.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v09.php';
             // we don't break here
 
             // no break
             case '0.9.1':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v091.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v091.php';
             // we don't break here
 
             // no break
             case '0.9.2':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v092.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v092.php';
             // we don't break here
 
             // no break
             case '0.9.3':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v093.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v093.php';
             // we don't break here
 
             // no break
             case '0.9.4':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v094.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v094.php';
             // we don't break here
             // no break
             case '0.9.5':
-                require_once BOOKX_EXTRA_DATAFILES_FOLDER . 'installers/bookx_update_v095.php';
+                require_once BOOKX_EXTRA_DATAFILES_FOLDER.'installers/bookx_update_v095.php';
             break;
             
             case $bookx_module_version:
@@ -401,10 +363,10 @@ switch (true) {
         }
 
         if (!$install_incomplete) {
-            $sql = 'UPDATE ' . TABLE_CONFIGURATION . ' SET configuration_value = "' . $bookx_module_version . '", last_modified="' . date('Y-m-d H:i:s') . '" WHERE configuration_key = "BOOKX_VERSION";';
+            $sql = 'UPDATE '.TABLE_CONFIGURATION.' SET configuration_value = "'.$bookx_module_version.'", last_modified="'.date('Y-m-d H:i:s').'" WHERE configuration_key = "BOOKX_VERSION";';
             
             $db->Execute($sql);
-            $messageStack->add('' . BOOKX_MS_DB_UPDATE_SUCCESS . '', 'success');
+            $messageStack->add(''.BOOKX_MS_DB_UPDATE_SUCCESS.'', 'success');
         }
 
         break;
@@ -463,13 +425,13 @@ switch (true) {
             }
         }
 
-        $sql = $db->Execute("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key ='BOOKX_USES_CEON_URI_MODULE'");
+        $sql = $db->Execute("SELECT configuration_value FROM ".TABLE_CONFIGURATION." WHERE configuration_key ='BOOKX_USES_CEON_URI_MODULE'");
         
         if ($sql->RecordCount() > 0) {
             $bookx_uses_ceon = true;
         }
         
-        $sql = $db->Execute("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key ='BOOKX_USES_DINAMIC_METATAGS'");
+        $sql = $db->Execute("SELECT configuration_value FROM ".TABLE_CONFIGURATION." WHERE configuration_key ='BOOKX_USES_DINAMIC_METATAGS'");
         if ($sql->RecordCount() > 0) {
             $bookx_uses_dinamic_metatags = true;
         }
@@ -512,7 +474,7 @@ switch (true) {
         
         //if (defined('TABLE_ADMIN_PAGES')) zen_deregister_admin_pages($admin_page_keys);
         
-        $sql = 'SELECT configuration_value AS version FROM ' . TABLE_CONFIGURATION . ' WHERE configuration_key = "BOOKX_VERSION";';
+        $sql = 'SELECT configuration_value AS version FROM '.TABLE_CONFIGURATION.' WHERE configuration_key = "BOOKX_VERSION";';
         $result = $db->Execute($sql); /* @var $result queryFactoryResult */
         
         if (!$result->EOF) { // someone may reset their BookX installation BEFORE updating, so we don't want to accidentally update the BookX version in the DB
@@ -882,7 +844,7 @@ EOT;
         
 EOT;
         $db->Execute($sql);
-        $db->Execute("DROP TABLE IF EXISTS ". TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . ";");
+        $db->Execute("DROP TABLE IF EXISTS ".TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS.";");
         $sql = <<<EOT
          
          CREATE TABLE {$const['TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS']} (
@@ -899,9 +861,9 @@ EOT;
 EOT;
         $db->Execute($sql);
         
-        $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_SEARCH .";");
+        $db->Execute("DROP TABLE IF EXISTS ".TABLE_PRODUCT_BOOKX_SEARCH.";");
         
-        $sql = "CREATE TABLE ". TABLE_PRODUCT_BOOKX_SEARCH ." (
+        $sql = "CREATE TABLE ".TABLE_PRODUCT_BOOKX_SEARCH." (
             search_index int(11) NOT NULL AUTO_INCREMENT,
             language_id int(11) NOT NULL,
             product_id int(11) NOT NULL,
@@ -917,12 +879,12 @@ EOT;
             KEY idx_pbxs_publisher (publisher_name),
             KEY idx_pbxs_isbn (isbn),
             KEY idx_pbxs_series_name (series_name)
-            ) ENGINE=InnoDB DEFAULT CHARSET=" . $default_db_encoding .";";
+            ) ENGINE=InnoDB DEFAULT CHARSET=".$default_db_encoding.";";
         
         $db->Execute($sql);
 
         
-        $messageStack->add('' . BOOKX_MS_DB_TABLES_SUCCESS . '', 'success');
+        $messageStack->add(''.BOOKX_MS_DB_TABLES_SUCCESS.'', 'success');
     } // eof create DB tables
         
         
@@ -1120,10 +1082,10 @@ EOT;
 
         if ($german_installed) {
             $german_lng_layout = true;
-            require_once DIR_FS_ADMIN . 'includes/installers/bookx/bookx_install_include_german.php';
+            require_once DIR_FS_ADMIN.'includes/installers/bookx/bookx_install_include_german.php';
         }
     } else {
-        $messageStack->add_session('' . BOOKX_MS_PRODUCT_LAYOUT_CONFIGS_NOT_INSTALLED . '', 'error');
+        $messageStack->add_session(''.BOOKX_MS_PRODUCT_LAYOUT_CONFIGS_NOT_INSTALLED.'', 'error');
     }
 
     //*********** Menu item for Config menu ********//////////
@@ -1146,7 +1108,7 @@ EOT;
     if (!empty($cf_gid)) {
         ///*********  Register for Admin Access Control ********////
         zen_deregister_admin_pages('configProdTypeBookX');
-        zen_register_admin_page('configProdTypeBookX', 'CONFIG_MENU_PRODUCT_BOOKX', 'FILENAME_CONFIGURATION', 'gID='. $cf_gid, 'configuration', 'Y', $cf_gid);
+        zen_register_admin_page('configProdTypeBookX', 'CONFIG_MENU_PRODUCT_BOOKX', 'FILENAME_CONFIGURATION', 'gID='.$cf_gid, 'configuration', 'Y', $cf_gid);
 
         $sql = <<<EOT
 		    UPDATE {$const['TABLE_CONFIGURATION_GROUP']} SET sort_order = {$cf_gid} WHERE configuration_group_id = {$cf_gid};
@@ -1209,7 +1171,7 @@ EOT;
         ///********   Add values for German admin  ******/////////
         if ($german_installed) {
             $german_install_admin == true;
-            require_once DIR_FS_ADMIN . 'includes/installers/bookx/bookx_install_include_german.php';
+            require_once DIR_FS_ADMIN.'includes/installers/bookx/bookx_install_include_german.php';
         }
         
         /**
@@ -1218,7 +1180,7 @@ EOT;
          */
         
         if ($bookx_uses_ceon == true) {
-            $sql ="REPLACE INTO " . TABLE_CONFIGURATION . "
+            $sql ="REPLACE INTO ".TABLE_CONFIGURATION."
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function)
             VALUES (
             'Use CEON URI Module', 'BOOKX_USES_CEON_URI_MODULE', '1', 
@@ -1238,22 +1200,22 @@ EOT;
             $db->Execute($sql);
         }
     } else {
-        $messageStack->add_session('' . BOOKX_MS_ADMIN_CONFIG_MENU_NOT_INSTALLED . '', 'error');
+        $messageStack->add_session(''.BOOKX_MS_ADMIN_CONFIG_MENU_NOT_INSTALLED.'', 'error');
     }
 
 
     if ('reset' == $bookx_install) {
-        $messageStack->add_session('' . BOOKX_MS_RESET_SUCCESS . '', 'success');
+        $messageStack->add_session(''.BOOKX_MS_RESET_SUCCESS.'', 'success');
 //        if (isset($_SESSION['bookx_install']) && $_SESSION['bookx_install'] == 'do_reset') {
 //
 //        }
     } else {
-        $messageStack->add_session('' . BOOKX_MS_SUCCESS . '', 'success');
+        $messageStack->add_session(''.BOOKX_MS_SUCCESS.'', 'success');
     }
     $db->Execute("
             REPLACE INTO {$const['TABLE_CONFIGURATION']} 
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,last_modified, date_added, use_function, set_function) VALUES (
-            'BookX Version', 'BOOKX_VERSION', '" . $bookx_module_version . "', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL);");
+            'BookX Version', 'BOOKX_VERSION', '".$bookx_module_version."', 'BookX Version is stored but not editable', 0, 10000, NOW(), NOW(), NULL, NULL);");
     
              unset(
             $_SESSION['bookx_install'],
@@ -1317,9 +1279,9 @@ EOT;
                         $divider = '';
                     }
 
-                    $new_products_name = $bookx_products_extra_descriptions->fields['products_name'] . $divider . $bookx_products_extra_descriptions->fields['products_subtitle'];
+                    $new_products_name = $bookx_products_extra_descriptions->fields['products_name'].$divider.$bookx_products_extra_descriptions->fields['products_subtitle'];
 
-                    $sql = "UPDATE {$const['TABLE_PRODUCTS_DESCRIPTION']} SET products_name = '" . zen_db_input($new_products_name) . "'
+                    $sql = "UPDATE {$const['TABLE_PRODUCTS_DESCRIPTION']} SET products_name = '".zen_db_input($new_products_name)."'
    							WHERE products_id = {$bookx_products_extra_descriptions->fields['products_id']} AND language_id = {$bookx_products_extra_descriptions->fields['language_id']};";
                     $db->Execute($sql);
                     $bookx_products_extra_descriptions->MoveNext();
@@ -1482,9 +1444,9 @@ EOT;
       /**
        * @since v1.0.0
        */
-      $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS . ";");
-      $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_FAMILIES . ";");
-      $db->Execute("DROP TABLE IF EXISTS " . TABLE_PRODUCT_BOOKX_SEARCH . ";");
+      $db->Execute("DROP TABLE IF EXISTS ".TABLE_PRODUCT_BOOKX_FAMILIES_TO_PRODUCTS.";");
+      $db->Execute("DROP TABLE IF EXISTS ".TABLE_PRODUCT_BOOKX_FAMILIES.";");
+      $db->Execute("DROP TABLE IF EXISTS ".TABLE_PRODUCT_BOOKX_SEARCH.";");
       
 
       //@TODO delete the sample catagory BookX if emtpy
@@ -1568,10 +1530,10 @@ EOT;
     }*/
 
      if (isset($message_type) && $message_type=='session') {
-         $messageStack->add_session('' . BOOKX_MS_UNINSTALL_OK . '', 'success');
+         $messageStack->add_session(''.BOOKX_MS_UNINSTALL_OK.'', 'success');
      //$messageStack->add_session('' . BOOKX_MS_BACKUP_INFO . '', 'warning');
      } else {
-         $messageStack->add_session('' . BOOKX_MS_UNINSTALL_OK . '', 'success');
+         $messageStack->add_session(''.BOOKX_MS_UNINSTALL_OK.'', 'success');
          $_SESSION['bookx_uninstall'] = true;
          //$messageStack->add('' . BOOKX_MS_BACKUP_INFO . '', 'warning');
      }
@@ -1597,6 +1559,6 @@ EOT;
          * @todo change, add or remove this message
          */
         $update_message = "Remove files admin/product_bookx.php";
-        $messageStack->add('Bookx Updated to version ' . $bookx_module_version, 'success');
+        $messageStack->add('Bookx Updated to version '.$bookx_module_version, 'success');
         $messageStack->add($update_message, 'waning');
     }
